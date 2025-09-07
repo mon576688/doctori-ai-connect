@@ -15,7 +15,7 @@ const SearchResults = () => {
   useEffect(() => {
     if (!query) return;
 
-    // TODO: Replace with real API calls to fetch doctors, blogs, medicines
+    // Mock data, replace with API calls later
     const mockResults: ResultItem[] = [
       { type: "Doctor", name: "Dr. John Doe", link: "/doctor/1" },
       { type: "Blog", name: "10 Health Tips", link: "/blog/health-tips-bd" },
