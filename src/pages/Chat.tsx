@@ -32,6 +32,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (!loading) {
+      console.log('Initializing chat, isAuthenticated:', isAuthenticated);
       const welcomeMessage = t('chat.welcome');
       chat.initializeChat(welcomeMessage);
     }
@@ -41,24 +42,20 @@ const Chat = () => {
     const content = messageInput.trim();
     if (!content) return;
 
+    console.log('Sending message:', content);
+    
     // Check if the message is health-related
     if (!isHealthRelated(content)) {
-      // Add filter response as assistant message
-      const filterMessage = {
-        id: Date.now().toString(),
-        content: getHealthFilterResponse(),
-        role: 'assistant' as const,
-        timestamp: new Date()
-      };
-      
+      console.log('Message not health-related, showing filter response');
       // Just return early without adding the message, let user rephrase
-      return;
-      
       return;
     }
 
     setMessageInput("");
-    chat.sendMessage(content);
+    console.log('Calling chat.sendMessage with:', content);
+    chat.sendMessage(content).catch(error => {
+      console.error('Error sending message:', error);
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

@@ -45,9 +45,9 @@ export const SearchBar = () => {
   ];
 
   return (
-    <div className="w-full bg-gradient-to-r from-blue-50 to-purple-50 border-b">
-      <div className="container py-4">
-        <div className="max-w-4xl mx-auto space-y-4">
+    <div className="w-full bg-background border-b border-border/50">
+      <div className="container py-3">
+        <div className="max-w-4xl mx-auto space-y-3">
           {/* Main Search Bar */}
           <div className="flex space-x-2">
             <div className="flex-1 relative">
