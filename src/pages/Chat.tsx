@@ -69,11 +69,8 @@ const Chat = () => {
   };
 
   const handleViewSummary = () => {
-    if (!isAuthenticated) {
-      setShowAuthDialog(true);
-    } else {
-      navigate('/chat-summary');
-    }
+    // Always allow summary view, just navigate directly
+    navigate('/chat-summary');
   };
 
   const handleVoiceMessage = async (transcript: string) => {
@@ -191,7 +188,7 @@ const Chat = () => {
                 <div className="space-y-4">
                   <Button onClick={handleViewSummary} variant="default" size="lg" className="w-full text-sm md:text-base">
                     <Download className="h-4 w-4 mr-2" />
-                    {isAuthenticated ? 'View Your Health Summary & Recommended Doctors' : 'Get Your Health Summary (Login Required)'}
+                    View Your Health Summary & Recommended Doctors
                   </Button>
                   
                   {/* Emergency Call Button - Always Visible */}
@@ -282,32 +279,6 @@ const Chat = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Authentication Dialog */}
-      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
-              <Shield className="h-5 w-5" />
-              <span>{t('auth.loginRequired')}</span>
-            </DialogTitle>
-            <DialogDescription>
-              {t('auth.loginMessage')}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col space-y-3">
-            <Button onClick={() => navigate('/login')} className="w-full">
-              {t('auth.login')}
-            </Button>
-            <Button onClick={() => navigate('/login')} variant="outline" className="w-full">
-              {t('auth.signup')}
-            </Button>
-            <Button onClick={() => setShowAuthDialog(false)} variant="ghost" className="w-full">
-              {t('auth.guestContinue')}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
