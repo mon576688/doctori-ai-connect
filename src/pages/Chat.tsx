@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,121 +48,137 @@ const Chat = () => {
         id: Date.now().toString(),
         content: getHealthFilterResponse(),
         role: 'assistant' as const,
-        timestamp: new Date(),
-        isUrgent: false
+        timestamp: new Date()
       };
-
-      // Add the message to state (this is a simplified approach)
-      chat.sendMessage("__FILTER_RESPONSE__" + content);
-      setMessageInput('');
+      
+      // Just return early without adding the message, let user rephrase
+      return;
+      
       return;
     }
 
-    // Send message with language context
+    setMessageInput("");
     chat.sendMessage(content);
-    setMessageInput('');
-  };
-
-  const handleVoiceMessage = (message: string) => {
-    if (message.trim()) {
-      setMessageInput(message);
-      // Auto-send voice messages
-      setTimeout(() => {
-        handleSendMessage();
-      }, 500);
-    }
-  };
-
-  const handleSpeakText = async (text: string) => {
-    await speak(text, { voice: 'alloy' });
-  };
-  };
-
-  const handleViewSummary = () => {
-    if (isAuthenticated) {
-      navigate("/chat-summary");
-    } else {
-      setShowAuthDialog(true);
-    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-muted/20 py-8 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const getPlaceholder = () => {
-    if (chatLanguage === 'bn') {
-      return "আপনার স্বাস্থ্য সমস্যা বিস্তারিত বর্ণনা করুন...";
+  const handleViewSummary = () => {
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+    } else {
+      navigate('/chat-summary');
     }
-    return "Describe your health concerns in detail...";
   };
 
+  const handleVoiceMessage = async (transcript: string) => {
+    if (transcript.trim()) {
+      await chat.sendMessage(transcript);
+    }
+  };
+
+  const handleSpeakText = (text: string) => {
+    speak(text);
+  };
+
+  const getPlaceholder = () => {
+    return isAuthenticated 
+      ? t('chat.placeholder.authenticated')
+      : t('chat.placeholder.guest');
+  };
+
+  const formatMessage = (content: string) => {
+    return content.split('\n').map((line, index) => (
+      <span key={index}>
+        {line}
+        <br />
+      </span>
+    ));
+  };
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <MessageCircle className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>Loading chat...</p>
+      </div>
+    </div>;
+  }
+
   return (
-    <div className="min-h-screen bg-muted/20 py-4 md:py-8 px-4 md:px-0">
-      <div className="container max-w-4xl mx-auto">
-        <Card className="shadow-medical h-[calc(100vh-2rem)] md:h-auto">
-          <CardHeader className="bg-gradient-primary text-white p-4 md:p-6 px-[20px]">
-            <CardTitle className="flex items-center space-x-2 text-lg md:text-xl">
-              <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />
-              <span>Doctori AI Health Assistant</span>
-            </CardTitle>
-            <p className="text-white/90 text-sm md:text-base">Professional health guidance with compassionate care</p>
-            {!isAuthenticated && (
-              <div className="bg-white/10 rounded-lg p-3 mt-2">
-                <p className="text-white/90 text-xs md:text-sm">
-                  💡 You're chatting as a guest. Create an account to save your health summary and get personalized doctor recommendations.
-                </p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4 md:p-6">
+      <div className="max-w-4xl mx-auto">
+        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+          <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+            <CardTitle className="text-xl md:text-2xl font-bold flex items-center space-x-3">
+              <div className="bg-white/20 p-2 rounded-lg">
+                <Bot className="h-6 w-6" />
               </div>
-            )}
+              <span>Doctori AI Health Assistant</span>
+              {isAuthenticated && (
+                <Badge variant="secondary" className="bg-white/20 text-white">
+                  Premium
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
-          
-          <CardContent className="p-0 flex flex-col h-[calc(100vh-12rem)] md:h-auto">
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 min-h-[300px] md:h-96">
-              {chat.sessionState.messages.map(message => (
-                <div key={message.id} className={`flex items-start space-x-3 ${message.role === 'user' ? "flex-row-reverse space-x-reverse" : ""}`}>
-                  <div className={`p-2 rounded-full ${message.role === 'user' ? "bg-primary text-white" : "bg-muted"}`}>
-                    {message.role === 'user' ? <User className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
-                  </div>
-                  <div className={`p-4 rounded-lg max-w-md ${message.role === 'user' ? "bg-primary text-white rounded-br-none" : "bg-muted rounded-bl-none"} ${message.isUrgent ? "border-2 border-red-500" : ""}`}>
-                    {message.isUrgent && (
-                      <div className="flex items-center space-x-1 mb-2">
-                        <AlertTriangle className="h-4 w-4 text-red-500" />
-                        <Badge variant="destructive">URGENT</Badge>
-                      </div>
+
+          <CardContent className="p-0">
+            {/* Messages Area */}
+            <div className="h-[400px] md:h-[500px] overflow-y-auto p-4 md:p-6 space-y-4">
+              {chat.sessionState.messages.map((message, index) => (
+                <div
+                  key={`${message.id}-${index}`}
+                  className={`flex items-start space-x-3 ${
+                    message.role === 'user' ? 'flex-row-reverse space-x-reverse' : 'flex-row'
+                  }`}
+                >
+                  <div className={`p-2 rounded-lg ${
+                    message.role === 'user' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {message.role === 'user' ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
                     )}
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <span className="text-xs opacity-70 mt-2 block">
+                  </div>
+                  <div className={`flex-1 p-3 rounded-lg shadow-sm ${
+                    message.role === 'user' 
+                      ? 'bg-blue-600 text-white ml-12' 
+                      : 'bg-white border border-gray-200 mr-12'
+                  } ${message.isUrgent ? 'border-red-500 border-2' : ''}`}>
+                    <div className="text-sm md:text-base whitespace-pre-wrap">
+                      {formatMessage(message.content)}
+                    </div>
+                    <div className={`text-xs mt-2 ${
+                      message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                    }`}>
                       {message.timestamp.toLocaleTimeString()}
-                    </span>
+                    </div>
                   </div>
                 </div>
               ))}
-              
+
               {chat.sessionState.isLoading && (
-                <div className="flex items-center space-x-2">
-                  <div className="bg-muted p-2 rounded-full">
+                <div className="flex items-start space-x-3">
+                  <div className="p-2 rounded-lg bg-gray-100 text-gray-800">
                     <Bot className="h-4 w-4" />
                   </div>
-                  <div className="bg-muted p-4 rounded-lg">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200"></div>
+                  <div className="flex-1 p-3 rounded-lg bg-white border border-gray-200 mr-12">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                      <span className="text-sm text-gray-600">Doctor AI is thinking...</span>
                     </div>
                   </div>
                 </div>

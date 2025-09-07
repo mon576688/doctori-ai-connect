@@ -2,8 +2,11 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Heart, Stethoscope, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, MessageCircle, Smartphone, Download } from "lucide-react";
+import { Heart, Stethoscope, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, MessageCircle, Smartphone, Download, UserPlus } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 export const Footer = () => {
+  const { user } = useAuth();
+  
   return <footer className="bg-muted/30 border-t">
       <div className="container py-12">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
@@ -26,6 +29,14 @@ export const Footer = () => {
                 Start Chat Now
               </Button>
             </Link>
+            {!user && (
+              <Link to="/register/provider">
+                <Button variant="outline" size="sm" className="w-full mt-2">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Become a Provider
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Quick Links */}

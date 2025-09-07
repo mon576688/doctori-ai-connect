@@ -65,15 +65,6 @@ export const Navbar = () => {
             Search Medicine
           </Link>
           
-          {/* Become a Provider link for non-users */}
-          {!user && (
-            <Link to="/register/provider" className={`text-foreground hover:text-primary transition-colors ${isActive('/register/provider') ? 'text-primary' : ''}`}>
-              <div className="flex items-center space-x-1">
-                <UserPlus className="h-4 w-4" />
-                <span>Become a Provider</span>
-              </div>
-            </Link>
-          )}
           
           {/* Health Blog Dropdown */}
           <DropdownMenu>
@@ -134,15 +125,6 @@ export const Navbar = () => {
                 Search Medicine
               </Link>
               
-              {/* Become a Provider link for mobile */}
-              {!user && (
-                <Link to="/register/provider" className="block text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
-                  <div className="flex items-center space-x-2">
-                    <UserPlus className="h-4 w-4" />
-                    <span>Become a Provider</span>
-                  </div>
-                </Link>
-              )}
               
               {/* Mobile Health Blog Section */}
               <div className="py-2">
