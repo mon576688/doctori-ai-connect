@@ -28,8 +28,8 @@ import ProviderPendingPage from "./pages/dashboard/ProviderPendingPage";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
-// Search Page
-import SearchResults from "./pages/SearchResults"; // make default export
+// Search page
+import SearchResults from "./pages/SearchResults";
 
 // Lazy-loaded pages
 const HealthTipsBD = lazy(() => import("./pages/HealthTipsBD"));
@@ -37,91 +37,89 @@ const UserProfile = lazy(() => import("./pages/UserProfile"));
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Suspense fallback={<div>Loading...</div>}>
-                <Routes>
-                  {/* Main Layout */}
-                  <Route path="/" element={<Layout />}>
-                    <Route index element={<Index />} />
-                    <Route path="chat" element={<Chat />} />
-                    <Route path="chat-summary" element={<ChatSummary />} />
-                    <Route path="doctors" element={<Doctors />} />
-                    <Route path="doctor/:id" element={<DoctorProfile />} />
-                    <Route path="medicine" element={<Medicine />} />
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<div>Loading...</div>}>
+              <Routes>
+                {/* Main Layout */}
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<Index />} />
+                  <Route path="chat" element={<Chat />} />
+                  <Route path="chat-summary" element={<ChatSummary />} />
+                  <Route path="doctors" element={<Doctors />} />
+                  <Route path="doctor/:id" element={<DoctorProfile />} />
+                  <Route path="medicine" element={<Medicine />} />
 
-                    {/* Blog routes */}
-                    <Route path="blog" element={<Blog />}>
-                      <Route path="health-tips-bd" element={<HealthTipsBD />} />
-                    </Route>
-                    <Route path="blog/:slug" element={<BlogPost />} />
-
-                    {/* Universal Search Route */}
-                    <Route path="search" element={<SearchResults />} />
-
-                    {/* Static Pages */}
-                    <Route path="about" element={<About />} />
-                    <Route path="contact" element={<Contact />} />
-                    <Route path="profile" element={<UserProfile />} />
-
-                    {/* Authentication */}
-                    <Route path="register/user" element={<Register />} />
-                    <Route path="register/provider" element={<Register />} />
-                    <Route path="login" element={<Login />} />
-                    <Route path="login/admin" element={<Login />} />
-
-                    {/* Protected dashboards */}
-                    <Route
-                      path="dashboard/user"
-                      element={
-                        <ProtectedRoute requiredRole="user">
-                          <UserDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="dashboard/provider"
-                      element={
-                        <ProtectedRoute requiredRole="provider" requireApproval>
-                          <ProviderDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="dashboard/provider/pending"
-                      element={
-                        <ProtectedRoute requiredRole="provider">
-                          <ProviderPendingPage />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="dashboard/admin"
-                      element={
-                        <ProtectedRoute requiredRole="admin">
-                          <AdminDashboard />
-                        </ProtectedRoute>
-                      }
-                    />
+                  {/* Blog routes */}
+                  <Route path="blog" element={<Blog />}>
+                    <Route path="health-tips-bd" element={<HealthTipsBD />} />
                   </Route>
+                  <Route path="blog/:slug" element={<BlogPost />} />
 
-                  {/* 404 Not Found */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </QueryClientProvider>
-  );
-};
+                  {/* Universal Search Route */}
+                  <Route path="search" element={<SearchResults />} />
+
+                  {/* Static Pages */}
+                  <Route path="about" element={<About />} />
+                  <Route path="contact" element={<Contact />} />
+                  <Route path="profile" element={<UserProfile />} />
+
+                  {/* Authentication */}
+                  <Route path="register/user" element={<Register />} />
+                  <Route path="register/provider" element={<Register />} />
+                  <Route path="login" element={<Login />} />
+                  <Route path="login/admin" element={<Login />} />
+
+                  {/* Protected dashboards */}
+                  <Route
+                    path="dashboard/user"
+                    element={
+                      <ProtectedRoute requiredRole="user">
+                        <UserDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="dashboard/provider"
+                    element={
+                      <ProtectedRoute requiredRole="provider" requireApproval>
+                        <ProviderDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="dashboard/provider/pending"
+                    element={
+                      <ProtectedRoute requiredRole="provider">
+                        <ProviderPendingPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="dashboard/admin"
+                    element={
+                      <ProtectedRoute requiredRole="admin">
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                </Route>
+
+                {/* 404 Not Found */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
+);
 
 export default App;
