@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -8,8 +9,6 @@ import { AuthProvider } from "./hooks/useAuth";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-
-// Pages
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
 import ChatSummary from "./pages/ChatSummary";
@@ -28,14 +27,10 @@ import ProviderPendingPage from "./pages/dashboard/ProviderPendingPage";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
-// Search page
-import SearchResults from "./pages/SearchResults";
+const queryClient = new QueryClient();
 
-// Lazy-loaded pages
 const HealthTipsBD = lazy(() => import('./pages/HealthTipsBD'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
-
-const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -47,7 +42,6 @@ const App = () => (
           <BrowserRouter>
             <Suspense fallback={<div>Loading...</div>}>
               <Routes>
-                {/* Main Layout */}
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
                   <Route path="chat" element={<Chat />} />
@@ -55,63 +49,55 @@ const App = () => (
                   <Route path="doctors" element={<Doctors />} />
                   <Route path="doctor/:id" element={<DoctorProfile />} />
                   <Route path="medicine" element={<Medicine />} />
-
                   {/* Blog routes */}
                   <Route path="blog" element={<Blog />}>
                     <Route path="health-tips-bd" element={<HealthTipsBD />} />
                   </Route>
                   <Route path="blog/:slug" element={<BlogPost />} />
-
-                  {/* Search route */}
-                  <Route path="search" element={<SearchResults />} />
-
-                  {/* Static pages */}
                   <Route path="about" element={<About />} />
                   <Route path="contact" element={<Contact />} />
                   <Route path="profile" element={<UserProfile />} />
-
-                  {/* Authentication */}
+                  
+                  {/* Authentication Routes */}
                   <Route path="register/user" element={<Register />} />
                   <Route path="register/provider" element={<Register />} />
                   <Route path="login" element={<Login />} />
                   <Route path="login/admin" element={<Login />} />
-
-                  {/* Protected dashboards */}
-                  <Route
-                    path="dashboard/user"
+                  
+                  {/* Protected Dashboard Routes */}
+                  <Route 
+                    path="dashboard/user" 
                     element={
                       <ProtectedRoute requiredRole="user">
                         <UserDashboard />
                       </ProtectedRoute>
-                    }
+                    } 
                   />
-                  <Route
-                    path="dashboard/provider"
+                  <Route 
+                    path="dashboard/provider" 
                     element={
                       <ProtectedRoute requiredRole="provider" requireApproval={true}>
                         <ProviderDashboard />
                       </ProtectedRoute>
-                    }
+                    } 
                   />
-                  <Route
-                    path="dashboard/provider/pending"
+                  <Route 
+                    path="dashboard/provider/pending" 
                     element={
                       <ProtectedRoute requiredRole="provider">
                         <ProviderPendingPage />
                       </ProtectedRoute>
-                    }
+                    } 
                   />
-                  <Route
-                    path="dashboard/admin"
+                  <Route 
+                    path="dashboard/admin" 
                     element={
                       <ProtectedRoute requiredRole="admin">
                         <AdminDashboard />
                       </ProtectedRoute>
-                    }
+                    } 
                   />
                 </Route>
-
-                {/* 404 Not Found */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
