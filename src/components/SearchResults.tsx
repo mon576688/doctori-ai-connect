@@ -1,21 +1,25 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-export const SearchResults = () => {
+interface ResultItem {
+  type: "Doctor" | "Blog" | "Medicine";
+  name: string;
+  link: string;
+}
+
+const SearchResults = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search).get("q") || "";
-
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<ResultItem[]>([]);
 
   useEffect(() => {
     if (!query) return;
 
-    // TODO: Replace this with actual API calls to fetch doctors, blogs, etc.
-    // Example mock:
-    const mockResults = [
-      { type: "Doctor", name: "Dr. John Doe" },
-      { type: "Blog", name: "10 Health Tips" },
-      { type: "Medicine", name: "Paracetamol" },
+    // TODO: Replace with real API calls to fetch doctors, blogs, medicines
+    const mockResults: ResultItem[] = [
+      { type: "Doctor", name: "Dr. John Doe", link: "/doctor/1" },
+      { type: "Blog", name: "10 Health Tips", link: "/blog/health-tips-bd" },
+      { type: "Medicine", name: "Paracetamol", link: "/medicine" },
     ].filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
 
     setResults(mockResults);
@@ -24,13 +28,20 @@ export const SearchResults = () => {
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-2xl font-bold mb-4">Search Results for "{query}"</h1>
+
       {results.length === 0 ? (
         <p>No results found.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {results.map((item, index) => (
-            <li key={index} className="border p-3 rounded">
-              <span className="font-semibold">{item.type}:</span> {item.name}
+            <li
+              key={index}
+              className="border p-3 rounded hover:shadow-md transition-shadow"
+            >
+              <span className="font-semibold">{item.type}:</span>{" "}
+              <Link to={item.link} className="text-primary hover:underline">
+                {item.name}
+              </Link>
             </li>
           ))}
         </ul>
@@ -38,3 +49,5 @@ export const SearchResults = () => {
     </div>
   );
 };
+
+export default SearchResults;
