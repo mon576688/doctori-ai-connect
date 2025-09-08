@@ -17,9 +17,9 @@ const SearchResults = () => {
 
     // Mock data, replace with API calls later
     const mockResults: ResultItem[] = [
-      { type: "Doctor", name: "Dr. John Doe", link: "/doctor/1" },
-      { type: "Blog", name: "10 Health Tips", link: "/blog/health-tips-bd" },
-      { type: "Medicine", name: "Paracetamol", link: "/medicine" },
+      { type: "Doctor" as const, name: "Dr. John Doe", link: "/doctor/1" },
+      { type: "Blog" as const, name: "10 Health Tips", link: "/blog/health-tips-bd" },
+      { type: "Medicine" as const, name: "Paracetamol", link: "/medicine" },
     ].filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
 
     setResults(mockResults);
