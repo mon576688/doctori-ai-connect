@@ -132,7 +132,12 @@ const retryWithBackoff = async (fn: () => Promise<any>, maxRetries = 3, baseDela
 };
 
 serve(async (req) => {
+  console.log('AI Chat Assistant function called');
+  console.log('Request method:', req.method);
+  console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+  
   const origin = req.headers.get('Origin');
+  console.log('Request origin:', origin);
   const corsHeaders = getCorsHeaders(origin);
   
   // Handle CORS preflight requests
@@ -173,6 +178,9 @@ serve(async (req) => {
     }
 
     const { messages, userMessage, sessionContext } = await req.json();
+    console.log('Request body parsed successfully');
+    console.log('User message length:', userMessage?.length || 0);
+    console.log('Messages count:', messages?.length || 0);
     
     // Input validation
     if (!userMessage || typeof userMessage !== 'string') {
@@ -222,6 +230,9 @@ Since this user is registered, you already have their basic information. DO NOT 
     }
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    console.log('OpenAI API Key present:', !!OPENAI_API_KEY);
+    console.log('OpenAI API Key length:', OPENAI_API_KEY?.length || 0);
+    
     if (!OPENAI_API_KEY) {
       console.error('OpenAI API key not found in environment variables');
       throw new Error('OpenAI API key not configured');

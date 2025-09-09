@@ -117,6 +117,13 @@ export const useGuestChat = () => {
       }
 
       // Call our secure AI chat assistant with language context and user profile
+      console.log('Attempting to call ai-chat-assistant function...');
+      console.log('Session context:', {
+        phase: sessionState.phase,
+        language: language,
+        isRegisteredUser
+      });
+      
       const { data, error } = await supabase.functions.invoke('ai-chat-assistant', {
         body: {
           userMessage: content,
@@ -132,6 +139,10 @@ export const useGuestChat = () => {
           }
         }
       });
+
+      console.log('Supabase function call completed');
+      console.log('Response data:', data);
+      console.log('Response error:', error);
 
       if (error) {
         console.error('Supabase function error:', error);
