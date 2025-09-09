@@ -116,6 +116,15 @@ export const useGuestChat = () => {
         profileData = profile;
       }
 
+      // First test basic connectivity
+      console.log('Testing connection...');
+      try {
+        const testResponse = await supabase.functions.invoke('test-connection');
+        console.log('Test connection result:', testResponse);
+      } catch (testError) {
+        console.error('Test connection failed:', testError);
+      }
+
       // Call our secure AI chat assistant with language context and user profile
       console.log('Attempting to call ai-chat-assistant function...');
       console.log('Session context:', {

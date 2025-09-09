@@ -3,6 +3,9 @@ project_id = "lhamshhjmmruybdcfivr"
 [functions.ai-chat-assistant]
 verify_jwt = false
 
+[functions.test-connection]
+verify_jwt = false
+
 [functions.medicine-lookup]
 verify_jwt = false
 
