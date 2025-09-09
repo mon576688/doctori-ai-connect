@@ -3,15 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Shield, Download, Globe } from "lucide-react";
+import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useGuestChat } from "@/hooks/useGuestChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage, Language } from "@/contexts/LanguageContext";
-import { isHealthRelated, getHealthFilterResponse } from '@/hooks/useHealthTopicFilter';
+import { isHealthRelated } from '@/hooks/useHealthTopicFilter';
 import { VoiceChatInterface } from "@/components/VoiceChatInterface";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
@@ -19,7 +18,6 @@ const Chat = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { t, language, setLanguage } = useLanguage();
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [messageInput, setMessageInput] = useState("");
   const [chatLanguage, setChatLanguage] = useState<Language>(language);
   const { speak } = useTextToSpeech();
@@ -43,16 +41,13 @@ const Chat = () => {
     if (!content) return;
 
     console.log('Sending message:', content);
-    
-    // Check if the message is health-related
+
     if (!isHealthRelated(content)) {
       console.log('Message not health-related, showing filter response');
-      // Just return early without adding the message, let user rephrase
       return;
     }
 
     setMessageInput("");
-    console.log('Calling chat.sendMessage with:', content);
     chat.sendMessage(content).catch(error => {
       console.error('Error sending message:', error);
     });
@@ -66,7 +61,6 @@ const Chat = () => {
   };
 
   const handleViewSummary = () => {
-    // Always allow summary view, just navigate directly
     navigate('/chat-summary');
   };
 
@@ -179,99 +173,88 @@ const Chat = () => {
               )}
             </div>
 
-            {/* Input Area */}
-            <div className="p-4 md:p-6 border-t">
-              {chat.sessionState.phase === "summary" || ('requiresAuth' in chat.sessionState && chat.sessionState.requiresAuth) ? (
-                <div className="space-y-4">
-                  <Button onClick={handleViewSummary} variant="default" size="lg" className="w-full text-sm md:text-base">
-                    <Download className="h-4 w-4 mr-2" />
-                    View Your Health Summary & Recommended Doctors
-                  </Button>
-                  
-                  {/* Emergency Call Button - Always Visible */}
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                    <div className="flex items-center justify-center space-x-2 mb-2">
-                      <AlertTriangle className="h-5 w-5 text-red-600" />
-                      <span className="text-red-800 font-semibold text-sm">EMERGENCY</span>
-                    </div>
-                    <p className="text-red-700 text-xs md:text-sm text-center mb-3">
-                      If you're experiencing a medical emergency, call {chatLanguage === 'bn' ? '999' : '911'} immediately
-                    </p>
-                    <Button variant="destructive" size="sm" className="w-full" onClick={() => window.open(`tel:${chatLanguage === 'bn' ? '999' : '911'}`)}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      Call {chatLanguage === 'bn' ? '999' : '911'} Emergency
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Voice Chat Interface for Premium Users */}
-                  {isAuthenticated && (
-                    <VoiceChatInterface 
-                      onVoiceMessage={handleVoiceMessage}
-                      onSpeakText={handleSpeakText}
-                      disabled={chat.sessionState.isLoading}
-                    />
-                  )}
-                  
-                  {/* Emergency Alert - Always Visible */}
-                  {(chat.sessionState.urgencyLevel === "high" || chat.sessionState.urgencyLevel === "emergency") && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
-                        <span className="text-red-800 font-semibold text-sm">URGENT MEDICAL ATTENTION NEEDED</span>
-                      </div>
-                      <p className="text-red-700 text-xs md:text-sm mb-3">
-                        Based on your symptoms, please seek immediate medical care. Call {chatLanguage === 'bn' ? '999' : '911'} or go to the nearest emergency room.
-                      </p>
-                      <Button variant="destructive" size="sm" className="w-full" onClick={() => window.open(`tel:${chatLanguage === 'bn' ? '999' : '911'}`)}>
-                        <Phone className="h-4 w-4 mr-2" />
-                        Call {chatLanguage === 'bn' ? '999' : '911'} Emergency
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {/* Language Selector */}
+            {/* Input Area - Always Visible */}
+            <div className="p-4 md:p-6 border-t space-y-4">
+              {/* Voice Chat Interface for Premium Users */}
+              {isAuthenticated && (
+                <VoiceChatInterface 
+                  onVoiceMessage={handleVoiceMessage}
+                  onSpeakText={handleSpeakText}
+                  disabled={chat.sessionState.isLoading}
+                />
+              )}
+
+              {/* Emergency Alert */}
+              {(chat.sessionState.urgencyLevel === "high" || chat.sessionState.urgencyLevel === "emergency") && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-center space-x-2 mb-2">
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                    <Select value={chatLanguage} onValueChange={(value: string) => setChatLanguage(value as Language)}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="bn">বাংলা</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <span className="text-red-800 font-semibold text-sm">URGENT MEDICAL ATTENTION NEEDED</span>
                   </div>
-                  
-                  <div className="flex space-x-2">
-                    <Textarea 
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyPress={handleKeyPress} 
-                      placeholder={getPlaceholder()}
-                      className="flex-1 min-h-[60px] text-sm md:text-base resize-none" 
-                      disabled={chat.sessionState.isLoading} 
-                    />
-                    <Button onClick={handleSendMessage} variant="default" size="icon" className="self-end h-[60px] w-12 md:w-14" disabled={chat.sessionState.isLoading}>
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  {/* Medical Disclaimer - Always Visible */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-center">
-                      <p className="text-xs md:text-sm text-blue-800 mb-1">
-                        ℹ️ <strong>Medical Disclaimer</strong>
-                      </p>
-                      <p className="text-xs text-blue-700">
-                        This AI provides general health information only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for personal health concerns.
-                      </p>
-                    </div>
-                  </div>
+                  <p className="text-red-700 text-xs md:text-sm mb-3">
+                    Based on your symptoms, please seek immediate medical care. Call {chatLanguage === 'bn' ? '999' : '911'} or go to the nearest emergency room.
+                  </p>
+                  <Button variant="destructive" size="sm" className="w-full" onClick={() => window.open(`tel:${chatLanguage === 'bn' ? '999' : '911'}`)}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    Call {chatLanguage === 'bn' ? '999' : '911'} Emergency
+                  </Button>
                 </div>
               )}
+
+              {/* Language Selector */}
+              <div className="flex items-center space-x-2 mb-2">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <Select value={chatLanguage} onValueChange={(value: string) => setChatLanguage(value as Language)}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="bn">বাংলা</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Text Input + Send */}
+              <div className="flex space-x-2">
+                <Textarea 
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyPress={handleKeyPress} 
+                  placeholder={getPlaceholder()}
+                  className="flex-1 min-h-[60px] text-sm md:text-base resize-none" 
+                  disabled={chat.sessionState.isLoading} 
+                />
+                <Button 
+                  onClick={handleSendMessage} 
+                  variant="default" 
+                  size="icon" 
+                  className="self-end h-[60px] w-12 md:w-14" 
+                  disabled={chat.sessionState.isLoading}
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Summary Option (non-blocking) */}
+              {chat.sessionState.phase === "summary" && (
+                <Button onClick={handleViewSummary} variant="secondary" size="sm" className="w-full">
+                  <Download className="h-4 w-4 mr-2" />
+                  View Your Health Summary & Recommended Doctors
+                </Button>
+              )}
+
+              {/* Medical Disclaimer */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="text-center">
+                  <p className="text-xs md:text-sm text-blue-800 mb-1">
+                    ℹ️ <strong>Medical Disclaimer</strong>
+                  </p>
+                  <p className="text-xs text-blue-700">
+                    This AI provides general health information only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for personal health concerns.
+                  </p>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
