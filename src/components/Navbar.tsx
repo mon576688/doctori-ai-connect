@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useAuth } from "@/hooks/useAuth";
 import { useRoleBasedAuth } from "@/hooks/useRoleBasedAuth";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { NotificationBell } from "@/components/NotificationBell";
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -95,6 +96,7 @@ export const Navbar = () => {
         {/* Language selector and Auth buttons */}
         <div className="hidden md:flex items-center space-x-2">
           <LanguageSelector />
+          {user && <NotificationBell />}
           {user ? <Button variant="ghost" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4" />
             </Button> : <Link to="/login">

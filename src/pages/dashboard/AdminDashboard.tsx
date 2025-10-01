@@ -1,365 +1,539 @@
 import { useState, useEffect } from 'react';
-import { useRoleBasedAuth } from '@/hooks/useRoleBasedAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Shield, Users, UserCheck, Activity, Search, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Users, 
+  UserCheck, 
+  UserX, 
+  CheckCircle, 
+  XCircle,
+  Clock,
+  Mail,
+  Phone,
+  Calendar,
+  Stethoscope,
+  Award,
+  FileText
+} from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { formatDistanceToNow } from 'date-fns';
 
-interface Profile {
+interface User {
   id: string;
-  name: string;
   email: string;
-  role: 'user' | 'provider' | 'admin';
-  approval_status: 'pending' | 'approved' | 'rejected';
+  first_name: string;
+  last_name: string;
+  role: string;
+  approval_status: string;
   created_at: string;
+  phone?: string;
+  photo_url?: string;
 }
 
-interface ActivityLog {
-  id: number;
-  action: string;
-  actor_id: string;
-  target_id?: string;
-  created_at: string;
-  actor_name?: string;
-  target_name?: string;
+interface Provider extends User {
+  bio?: string;
+  specialty?: string;
+  experience?: number;
+  license_number?: string;
 }
 
 export default function AdminDashboard() {
-  const { profile } = useRoleBasedAuth();
   const { toast } = useToast();
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [pendingProviders, setPendingProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [actionDialog, setActionDialog] = useState<{
+    open: boolean;
+    action: 'approve' | 'reject';
+    provider: Provider | null;
+  }>({ open: false, action: 'approve', provider: null });
 
   useEffect(() => {
-    fetchProfiles();
-    fetchActivityLogs();
+    fetchData();
   }, []);
 
-  const fetchProfiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, name, email, role, approval_status, created_at')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProfiles(data || []);
-    } catch (error) {
-      console.error('Error fetching profiles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load user profiles",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const fetchActivityLogs = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('activity_logs')
-        .select(`
-          id,
-          action,
-          actor_id,
-          target_id,
-          created_at,
-          actor:profiles!activity_logs_actor_id_fkey(name),
-          target:profiles!activity_logs_target_id_fkey(name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) throw error;
-
-      const logs = data?.map(log => ({
-        id: log.id,
-        action: log.action,
-        actor_id: log.actor_id,
-        target_id: log.target_id,
-        created_at: log.created_at,
-        actor_name: log.actor?.name,
-        target_name: log.target?.name
-      })) || [];
-
-      setActivityLogs(logs);
-    } catch (error) {
-      console.error('Error fetching activity logs:', error);
-    }
-  };
-
-  const updateProviderStatus = async (userId: string, status: 'approved' | 'rejected') => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { data: allUsers, error: usersError } = await supabase
         .from('profiles')
-        .update({ approval_status: status })
-        .eq('id', userId);
+        .select('*')
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (usersError) throw usersError;
 
-      // Log the action
-      await supabase
-        .from('activity_logs')
-        .insert({
-          actor_id: profile?.id,
-          action: `provider_${status}`,
-          target_id: userId
-        });
+      const regularUsers = allUsers?.filter(u => u.role === 'user') || [];
+      const allProviders = allUsers?.filter(u => u.role === 'provider') || [];
+      const pending = allProviders.filter(p => p.approval_status === 'pending');
 
-      toast({
-        title: "Status updated",
-        description: `Provider has been ${status}`,
-      });
-
-      fetchProfiles();
-      fetchActivityLogs();
+      setUsers(regularUsers);
+      setProviders(allProviders);
+      setPendingProviders(pending);
     } catch (error) {
-      console.error('Error updating provider status:', error);
+      console.error('Error fetching data:', error);
       toast({
-        title: "Error",
-        description: "Failed to update provider status",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to load data',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProfiles = profiles.filter(profile => {
-    const matchesSearch = profile.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         profile.email?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || profile.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const handleProviderAction = async (providerId: string, action: 'approve' | 'reject') => {
+    try {
+      const newStatus = action === 'approve' ? 'approved' : 'rejected';
+      
+      const { error } = await supabase
+        .from('profiles')
+        .update({ approval_status: newStatus })
+        .eq('id', providerId);
 
-  const stats = {
-    totalUsers: profiles.filter(p => p.role === 'user').length,
-    totalProviders: profiles.filter(p => p.role === 'provider').length,
-    pendingApprovals: profiles.filter(p => p.role === 'provider' && p.approval_status === 'pending').length,
-    approvedProviders: profiles.filter(p => p.role === 'provider' && p.approval_status === 'approved').length
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: `Provider has been ${action === 'approve' ? 'approved' : 'rejected'}`,
+      });
+
+      fetchData();
+      setActionDialog({ open: false, action: 'approve', provider: null });
+    } catch (error) {
+      console.error('Error updating provider:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update provider status',
+        variant: 'destructive'
+      });
+    }
   };
 
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage users, providers, and system settings
-          </p>
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, { variant: any; icon: any }> = {
+      pending: { variant: 'secondary', icon: Clock },
+      approved: { variant: 'default', icon: CheckCircle },
+      rejected: { variant: 'destructive', icon: XCircle }
+    };
+    
+    const config = variants[status] || variants.pending;
+    const Icon = config.icon;
+    
+    return (
+      <Badge variant={config.variant} className="gap-1">
+        <Icon className="h-3 w-3" />
+        {status}
+      </Badge>
+    );
+  };
+
+  const StatsCard = ({ title, value, icon: Icon, description }: any) => (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
+  );
+
+  const ProviderDetailView = ({ provider }: { provider: Provider }) => (
+    <ScrollArea className="h-[500px] w-full rounded-md border p-6">
+      <div className="space-y-6">
+        <div className="flex items-start gap-4">
+          <Avatar className="h-20 w-20">
+            <AvatarImage src={provider.photo_url} />
+            <AvatarFallback className="text-lg">
+              {provider.first_name?.[0]}{provider.last_name?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1">
+            <h3 className="text-2xl font-bold">
+              {provider.first_name} {provider.last_name}
+            </h3>
+            <div className="flex items-center gap-2 mt-2">
+              {getStatusBadge(provider.approval_status)}
+              <Badge variant="outline">{provider.role}</Badge>
+            </div>
+          </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
-                </div>
-                <Users className="h-8 w-8 text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
+        <Separator />
 
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Providers</p>
-                  <p className="text-2xl font-bold">{stats.totalProviders}</p>
-                </div>
-                <UserCheck className="h-8 w-8 text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending Approvals</p>
-                  <p className="text-2xl font-bold text-yellow-600">{stats.pendingApprovals}</p>
-                </div>
-                <Clock className="h-8 w-8 text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Approved Providers</p>
-                  <p className="text-2xl font-bold text-green-600">{stats.approvedProviders}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-4">
+          <div className="flex items-center gap-2">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{provider.email}</span>
+          </div>
+          {provider.phone && (
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{provider.phone}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">
+              Registered {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
+            </span>
+          </div>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="users">
-              <Users className="w-4 h-4 mr-2" />
-              Users & Providers
-            </TabsTrigger>
-            <TabsTrigger value="activity">
-              <Activity className="w-4 h-4 mr-2" />
-              Activity Logs
-            </TabsTrigger>
-          </TabsList>
+        <Separator />
 
-          <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-5 h-5" />
-                  User Management
-                </CardTitle>
-                <CardDescription>
-                  Manage user accounts and provider approvals
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-4 mb-6">
-                  <div className="flex-1">
-                    <Label htmlFor="search">Search</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="search"
-                        placeholder="Search by name or email..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="role-filter">Role Filter</Label>
-                    <Select value={roleFilter} onValueChange={setRoleFilter}>
-                      <SelectTrigger className="w-40">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Roles</SelectItem>
-                        <SelectItem value="user">Users</SelectItem>
-                        <SelectItem value="provider">Providers</SelectItem>
-                        <SelectItem value="admin">Admins</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+        <div className="space-y-4">
+          <h4 className="font-semibold flex items-center gap-2">
+            <Stethoscope className="h-4 w-4" />
+            Professional Information
+          </h4>
+          
+          {provider.specialty && (
+            <div>
+              <p className="text-sm font-medium">Specialty</p>
+              <p className="text-sm text-muted-foreground">{provider.specialty}</p>
+            </div>
+          )}
+          
+          {provider.experience !== undefined && (
+            <div>
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Award className="h-4 w-4" />
+                Experience
+              </p>
+              <p className="text-sm text-muted-foreground">{provider.experience} years</p>
+            </div>
+          )}
+          
+          {provider.license_number && (
+            <div>
+              <p className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                License Number
+              </p>
+              <p className="text-sm text-muted-foreground">{provider.license_number}</p>
+            </div>
+          )}
+          
+          {provider.bio && (
+            <div>
+              <p className="text-sm font-medium">Bio</p>
+              <p className="text-sm text-muted-foreground whitespace-pre-wrap">{provider.bio}</p>
+            </div>
+          )}
+        </div>
 
-                <div className="space-y-4">
-                  {filteredProfiles.map((userProfile) => (
-                    <Card key={userProfile.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{userProfile.name || 'No name'}</h3>
-                              <Badge variant={
-                                userProfile.role === 'admin' ? 'default' :
-                                userProfile.role === 'provider' ? 'secondary' : 'outline'
-                              }>
-                                {userProfile.role}
-                              </Badge>
-                              {userProfile.role === 'provider' && (
-                                <Badge variant={
-                                  userProfile.approval_status === 'approved' ? 'default' :
-                                  userProfile.approval_status === 'rejected' ? 'destructive' : 'secondary'
-                                }>
-                                  {userProfile.approval_status}
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">{userProfile.email}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Joined: {new Date(userProfile.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          
-                          {userProfile.role === 'provider' && userProfile.approval_status === 'pending' && (
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="default"
-                                onClick={() => updateProviderStatus(userProfile.id, 'approved')}
-                                disabled={loading}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-1" />
-                                Approve
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => updateProviderStatus(userProfile.id, 'rejected')}
-                                disabled={loading}
-                              >
-                                <XCircle className="w-4 h-4 mr-1" />
-                                Reject
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="activity">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
-                  Activity Logs
-                </CardTitle>
-                <CardDescription>
-                  View recent administrative actions and system events
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {activityLogs.map((log) => (
-                    <Card key={log.id}>
-                      <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                          <div className="space-y-1">
-                            <p className="font-medium">
-                              {log.actor_name} {log.action.replace('_', ' ')} {log.target_name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(log.created_at).toLocaleString()}
-                            </p>
-                          </div>
-                          <Badge variant="outline">{log.action}</Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        {provider.approval_status === 'pending' && (
+          <>
+            <Separator />
+            <div className="flex gap-2">
+              <Button
+                onClick={() => setActionDialog({ open: true, action: 'approve', provider })}
+                className="flex-1"
+              >
+                <UserCheck className="mr-2 h-4 w-4" />
+                Approve Provider
+              </Button>
+              <Button
+                onClick={() => setActionDialog({ open: true, action: 'reject', provider })}
+                variant="destructive"
+                className="flex-1"
+              >
+                <UserX className="mr-2 h-4 w-4" />
+                Reject Application
+              </Button>
+            </div>
+          </>
+        )}
       </div>
+    </ScrollArea>
+  );
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center">Loading...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto py-8 space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <p className="text-muted-foreground">Manage users, providers, and system settings</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total Users"
+          value={users.length}
+          icon={Users}
+          description="Registered patients"
+        />
+        <StatsCard
+          title="Total Providers"
+          value={providers.length}
+          icon={Stethoscope}
+          description="Healthcare professionals"
+        />
+        <StatsCard
+          title="Pending Approvals"
+          value={pendingProviders.length}
+          icon={Clock}
+          description="Awaiting review"
+        />
+        <StatsCard
+          title="Active Providers"
+          value={providers.filter(p => p.approval_status === 'approved').length}
+          icon={CheckCircle}
+          description="Approved professionals"
+        />
+      </div>
+
+      <Tabs defaultValue="pending" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="pending">
+            Pending Approvals ({pendingProviders.length})
+          </TabsTrigger>
+          <TabsTrigger value="providers">
+            All Providers ({providers.length})
+          </TabsTrigger>
+          <TabsTrigger value="users">
+            Users ({users.length})
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending" className="space-y-4">
+          {selectedProvider ? (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Provider Details</CardTitle>
+                  <Button variant="outline" onClick={() => setSelectedProvider(null)}>
+                    Back to List
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ProviderDetailView provider={selectedProvider} />
+              </CardContent>
+            </Card>
+          ) : pendingProviders.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                No pending provider applications
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Pending Provider Applications</CardTitle>
+                <CardDescription>Review and approve healthcare provider registrations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Provider</TableHead>
+                      <TableHead>Specialty</TableHead>
+                      <TableHead>Experience</TableHead>
+                      <TableHead>Registered</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingProviders.map((provider) => (
+                      <TableRow key={provider.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={provider.photo_url} />
+                              <AvatarFallback>
+                                {provider.first_name?.[0]}{provider.last_name?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">
+                                {provider.first_name} {provider.last_name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">{provider.email}</p>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{provider.specialty || 'Not specified'}</TableCell>
+                        <TableCell>{provider.experience ? `${provider.experience} years` : 'N/A'}</TableCell>
+                        <TableCell>
+                          {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedProvider(provider)}
+                            >
+                              View Details
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="providers" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>All Healthcare Providers</CardTitle>
+              <CardDescription>View all registered healthcare professionals</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Provider</TableHead>
+                    <TableHead>Specialty</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Registered</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {providers.map((provider) => (
+                    <TableRow key={provider.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={provider.photo_url} />
+                            <AvatarFallback>
+                              {provider.first_name?.[0]}{provider.last_name?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">
+                              {provider.first_name} {provider.last_name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">{provider.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{provider.specialty || 'Not specified'}</TableCell>
+                      <TableCell>{getStatusBadge(provider.approval_status)}</TableCell>
+                      <TableCell>
+                        {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Registered Users</CardTitle>
+              <CardDescription>View all patient accounts</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Registered</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={user.photo_url} />
+                            <AvatarFallback>
+                              {user.first_name?.[0]}{user.last_name?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">
+                              {user.first_name} {user.last_name}
+                            </p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{user.role}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <AlertDialog open={actionDialog.open} onOpenChange={(open) => setActionDialog({ ...actionDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {actionDialog.action === 'approve' ? 'Approve Provider' : 'Reject Application'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionDialog.action === 'approve'
+                ? `Are you sure you want to approve ${actionDialog.provider?.first_name} ${actionDialog.provider?.last_name} as a healthcare provider?`
+                : `Are you sure you want to reject ${actionDialog.provider?.first_name} ${actionDialog.provider?.last_name}'s application?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => actionDialog.provider && handleProviderAction(actionDialog.provider.id, actionDialog.action)}
+              className={actionDialog.action === 'reject' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              {actionDialog.action === 'approve' ? 'Approve' : 'Reject'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
