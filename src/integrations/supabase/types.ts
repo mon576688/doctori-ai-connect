@@ -372,6 +372,47 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age: number | null
@@ -490,6 +531,57 @@ export type Database = {
           },
         ]
       }
+      provider_services: {
+        Row: {
+          category_id: string
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          price: number | null
+          provider_id: string
+          service_name: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          price?: number | null
+          provider_id: string
+          service_name: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          price?: number | null
+          provider_id?: string
+          service_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_services_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_services_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limiter: {
         Row: {
           created_at: string | null
@@ -554,6 +646,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      service_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       visit_preparations: {
         Row: {
@@ -657,6 +773,16 @@ export type Database = {
       log_activity_safe: {
         Args: { _action: string; _metadata?: Json }
         Returns: undefined
+      }
+      send_notification: {
+        Args: {
+          _link?: string
+          _message: string
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: string
       }
     }
     Enums: {

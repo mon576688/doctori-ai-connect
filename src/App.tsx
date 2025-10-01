@@ -20,6 +20,7 @@ import BlogPost from "./pages/BlogPost";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Register from "./pages/auth/Register";
+import ProviderRegister from "./pages/auth/ProviderRegister";
 import Login from "./pages/auth/Login";
 import UserDashboard from "./pages/dashboard/UserDashboard";
 import ProviderDashboard from "./pages/dashboard/ProviderDashboard";
@@ -60,7 +61,7 @@ const App = () => (
                   
                   {/* Authentication Routes */}
                   <Route path="register/user" element={<Register />} />
-                  <Route path="register/provider" element={<Register />} />
+                  <Route path="register/provider" element={<ProviderRegister />} />
                   <Route path="login" element={<Login />} />
                   <Route path="login/admin" element={<Login />} />
                   
