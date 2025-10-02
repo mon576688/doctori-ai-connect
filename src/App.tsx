@@ -63,6 +63,9 @@ const App = () => (
                   <Route path="auth/register/user" element={<Register />} />
                   <Route path="auth/register/provider" element={<ProviderRegister />} />
                   <Route path="auth/register/admin" element={<Register />} />
+                  <Route path="register/user" element={<Register />} />
+                  <Route path="register/provider" element={<ProviderRegister />} />
+                  <Route path="register/admin" element={<Register />} />
                   <Route path="register" element={<Register />} />
                   <Route path="login" element={<Login />} />
                   <Route path="auth/login" element={<Login />} />
