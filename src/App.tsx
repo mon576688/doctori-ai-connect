@@ -27,6 +27,8 @@ import ProviderDashboard from "./pages/dashboard/ProviderDashboard";
 import ProviderPendingPage from "./pages/dashboard/ProviderPendingPage";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import BMICalculator from "./pages/BMICalculator";
+import Reminders from "./pages/Reminders";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,8 @@ const App = () => (
                   <Route path="about" element={<About />} />
                   <Route path="contact" element={<Contact />} />
                   <Route path="profile" element={<UserProfile />} />
+                  <Route path="bmi-calculator" element={<BMICalculator />} />
+                  <Route path="reminders" element={<Reminders />} />
                   
                   {/* Authentication Routes */}
                   <Route path="auth/register/user" element={<Register />} />

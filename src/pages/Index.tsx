@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle, Search, BookOpen, Heart, Shield, Users, Stethoscope, Brain, Activity, Clock, Star, CheckCircle, Globe, Smartphone, Calendar, FileText, Target, TrendingUp, Award, Lightbulb, ChevronRight, Phone, Mail, MapPin, Languages, ThumbsUp, Eye, Zap } from "lucide-react";
+import { MessageCircle, Search, BookOpen, Heart, Shield, Users, Stethoscope, Brain, Activity, Clock, Star, CheckCircle, Globe, Smartphone, Calendar, FileText, Target, TrendingUp, Award, Lightbulb, ChevronRight, Phone, Mail, MapPin, Languages, ThumbsUp, Eye, Zap, Calculator, Bell } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 const Index = () => {
@@ -46,6 +46,21 @@ const Index = () => {
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <BookOpen className="mr-2 h-5 w-5" />
                     Health Blog
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Link to="/bmi-calculator">
+                  <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                    <Calculator className="mr-2 h-5 w-5" />
+                    BMI Calculator
+                  </Button>
+                </Link>
+                <Link to="/reminders">
+                  <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                    <Bell className="mr-2 h-5 w-5" />
+                    Health Reminders
                   </Button>
                 </Link>
               </div>
