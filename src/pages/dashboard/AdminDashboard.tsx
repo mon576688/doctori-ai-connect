@@ -88,8 +88,40 @@ export default function AdminDashboard() {
 
       if (usersError) throw usersError;
 
-      const regularUsers = allUsers?.filter(u => u.role === 'user') || [];
-      const allProviders = allUsers?.filter(u => u.role === 'provider') || [];
+      // Fetch all user roles from user_roles table
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+
+      if (rolesError) throw rolesError;
+
+      // Create a map of user_id to primary role
+      const roleMap = new Map<string, string>();
+      rolesData?.forEach(({ user_id, role }) => {
+        const currentRole = roleMap.get(user_id);
+        // Priority: admin > provider > user
+        if (!currentRole || 
+            (role === 'admin') ||
+            (role === 'provider' && currentRole === 'user')) {
+          roleMap.set(user_id, role);
+        }
+      });
+
+      // Separate users and providers based on role from user_roles table
+      const regularUsers: User[] = [];
+      const allProviders: Provider[] = [];
+
+      allUsers?.forEach((user) => {
+        const userRole = roleMap.get(user.id) || 'user';
+        const userWithRole = { ...user, role: userRole };
+        
+        if (userRole === 'provider') {
+          allProviders.push(userWithRole as Provider);
+        } else {
+          regularUsers.push(userWithRole);
+        }
+      });
+
       const pending = allProviders.filter(p => p.approval_status === 'pending');
 
       setUsers(regularUsers);

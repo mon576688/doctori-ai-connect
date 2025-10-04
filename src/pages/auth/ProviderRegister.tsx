@@ -110,27 +110,80 @@ export default function ProviderRegister() {
     setLoading(true);
 
     try {
-      const { error } = await signUp(
+      // Sign up the user
+      const { error: signUpError } = await signUp(
         formData.email,
         formData.password,
         formData.firstName,
-        formData.lastName,
-        'provider'
+        formData.lastName
       );
 
-      if (error) {
+      if (signUpError) {
         toast({
           title: "Registration failed",
-          description: error.message,
+          description: signUpError.message,
           variant: "destructive"
         });
-      } else {
-        toast({
-          title: "Registration successful!",
-          description: "Please check your email to verify your account. Your application will be reviewed by our team.",
-        });
-        navigate('/login');
+        return;
       }
+
+      // Get the new user's session
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('Failed to get user after signup');
+      }
+
+      // Update profile with provider-specific info
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          bio: formData.bio
+        })
+        .eq('id', user.id);
+      
+      if (profileError) {
+        console.error('Profile update error:', profileError);
+        throw profileError;
+      }
+
+      // Add provider role to user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({ 
+          user_id: user.id,
+          role: 'provider'
+        });
+      
+      if (roleError) {
+        console.error('Role assignment error:', roleError);
+        throw roleError;
+      }
+
+      // Create doctor profile with additional info
+      const { error: doctorError } = await supabase
+        .from('doctors')
+        .insert({
+          user_id: user.id,
+          specialty: formData.specialty,
+          license_number: formData.licenseNumber || null,
+          experience: formData.experience ? parseInt(formData.experience) : 0,
+          bio: formData.bio
+        });
+
+      if (doctorError) {
+        console.error('Doctor profile error:', doctorError);
+        throw doctorError;
+      }
+
+      toast({
+        title: "Registration successful!",
+        description: "Please check your email to verify your account. Your application will be reviewed by our team.",
+      });
+      navigate('/login');
     } catch (error) {
       console.error('Registration error:', error);
       toast({

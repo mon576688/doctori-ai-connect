@@ -671,6 +671,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       visit_preparations: {
         Row: {
           created_at: string | null
@@ -758,17 +779,24 @@ export type Database = {
         }
         Returns: boolean
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       get_user_approval_status: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["approval_status"]
       }
+      get_user_primary_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       get_user_role: {
         Args: Record<PropertyKey, never>
-        Returns: Database["public"]["Enums"]["user_role"]
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       log_activity_safe: {
         Args: { _action: string; _metadata?: Json }
@@ -786,6 +814,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "user" | "provider" | "admin"
       approval_status: "pending" | "approved" | "rejected"
       blood_group_type: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-"
       gender_type: "male" | "female" | "other"
@@ -917,6 +946,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["user", "provider", "admin"],
       approval_status: ["pending", "approved", "rejected"],
       blood_group_type: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
       gender_type: ["male", "female", "other"],

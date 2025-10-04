@@ -52,18 +52,44 @@ export const useRoleBasedAuth = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch profile data
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
 
-      if (error) {
-        console.error('Error fetching profile:', error);
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        setLoading(false);
         return;
       }
 
-      setProfile(data);
+      // Fetch user roles from user_roles table
+      const { data: rolesData, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      if (rolesError) {
+        console.error('Error fetching roles:', rolesError);
+        setLoading(false);
+        return;
+      }
+
+      // Get primary role (admin > provider > user)
+      const roles = rolesData?.map(r => r.role) || [];
+      const primaryRole = roles.includes('admin') 
+        ? 'admin' 
+        : roles.includes('provider') 
+        ? 'provider' 
+        : 'user';
+
+      // Combine profile data with role from user_roles table
+      setProfile({
+        ...profileData,
+        role: primaryRole as UserRole
+      });
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
