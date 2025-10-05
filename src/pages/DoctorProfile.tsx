@@ -1,8 +1,11 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { AppointmentBookingForm } from "@/components/AppointmentBookingForm";
 import { 
   Star, 
   MapPin, 
@@ -113,6 +116,7 @@ const getDoctorById = (id: string) => {
 export default function DoctorProfile() {
   const { id } = useParams<{ id: string }>();
   const doctor = id ? getDoctorById(id) : null;
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
 
   if (!doctor) {
     return (
@@ -266,14 +270,27 @@ export default function DoctorProfile() {
                 <Separator />
                 
                 <div className="space-y-3">
-                  <Button variant="medical" className="w-full">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Book Appointment
-                  </Button>
+                  <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="medical" className="w-full">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Book Appointment
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <AppointmentBookingForm
+                        doctorId={String(doctor.id)}
+                        doctorName={doctor.name}
+                        onSuccess={() => setShowBookingDialog(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
                   
-                  <Button variant="healing" className="w-full">
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call {doctor.phone}
+                  <Button variant="healing" className="w-full" asChild>
+                    <a href={`tel:${doctor.phone}`}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      Call {doctor.phone}
+                    </a>
                   </Button>
                   
                   <div className="flex gap-2">

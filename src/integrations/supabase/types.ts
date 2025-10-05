@@ -59,8 +59,11 @@ export type Database = {
       appointments: {
         Row: {
           appointment_date: string
+          appointment_type: string | null
+          cancellation_reason: string | null
           created_at: string
           doctor_id: string
+          duration_minutes: number | null
           id: string
           notes: string | null
           status: string | null
@@ -69,8 +72,11 @@ export type Database = {
         }
         Insert: {
           appointment_date: string
+          appointment_type?: string | null
+          cancellation_reason?: string | null
           created_at?: string
           doctor_id: string
+          duration_minutes?: number | null
           id?: string
           notes?: string | null
           status?: string | null
@@ -79,8 +85,11 @@ export type Database = {
         }
         Update: {
           appointment_date?: string
+          appointment_type?: string | null
+          cancellation_reason?: string | null
           created_at?: string
           doctor_id?: string
+          duration_minutes?: number | null
           id?: string
           notes?: string | null
           status?: string | null
@@ -127,6 +136,47 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      availability_slots: {
+        Row: {
+          created_at: string | null
+          day_of_week: number
+          end_time: string
+          id: string
+          is_available: boolean | null
+          provider_id: string
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_available?: boolean | null
+          provider_id: string
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_available?: boolean | null
+          provider_id?: string
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       chat_messages: {
         Row: {

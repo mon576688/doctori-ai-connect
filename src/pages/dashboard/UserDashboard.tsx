@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Plus, User, Camera, Heart, Weight, Ruler } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AppointmentsList } from '@/components/AppointmentsList';
 
 interface Reminder {
   id: number;
@@ -178,6 +179,10 @@ export default function UserDashboard() {
               <User className="w-4 h-4 mr-2" />
               Profile
             </TabsTrigger>
+            <TabsTrigger value="appointments">
+              <Calendar className="w-4 h-4 mr-2" />
+              Appointments
+            </TabsTrigger>
             <TabsTrigger value="reminders">
               <Clock className="w-4 h-4 mr-2" />
               Reminders
@@ -311,6 +316,10 @@ export default function UserDashboard() {
                 </form>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="appointments">
+            <AppointmentsList viewAs="patient" />
           </TabsContent>
 
           <TabsContent value="reminders">

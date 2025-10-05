@@ -9,7 +9,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Stethoscope, Users, FileText, User, Upload } from 'lucide-react';
+import { Stethoscope, Users, FileText, User, Upload, Calendar as CalendarIcon } from 'lucide-react';
+import { ProviderAvailability } from '@/components/ProviderAvailability';
+import { AppointmentsList } from '@/components/AppointmentsList';
 
 interface Patient {
   id: string;
@@ -167,6 +169,14 @@ export default function ProviderDashboard() {
               <User className="w-4 h-4 mr-2" />
               Profile
             </TabsTrigger>
+            <TabsTrigger value="availability">
+              <CalendarIcon className="w-4 h-4 mr-2" />
+              Availability
+            </TabsTrigger>
+            <TabsTrigger value="appointments">
+              <CalendarIcon className="w-4 h-4 mr-2" />
+              Appointments
+            </TabsTrigger>
             <TabsTrigger value="patients">
               <Users className="w-4 h-4 mr-2" />
               Patients
@@ -254,6 +264,14 @@ export default function ProviderDashboard() {
                 </form>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="availability">
+            <ProviderAvailability />
+          </TabsContent>
+
+          <TabsContent value="appointments">
+            <AppointmentsList viewAs="provider" />
           </TabsContent>
 
           <TabsContent value="patients">
