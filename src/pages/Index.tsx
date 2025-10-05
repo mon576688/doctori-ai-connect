@@ -7,10 +7,10 @@ import heroImage from "@/assets/hero-image.jpg";
 const Index = () => {
   return <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-hero py-20 px-4">
+      <section className="relative bg-gradient-hero py-20 px-4 overflow-hidden">
         <div className="container max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8 z-10">
               <div className="space-y-4">
                 <Badge className="bg-primary/10 text-primary border-primary/20">
                   🩺 Your AI Health Assistant
@@ -29,20 +29,20 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/chat">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+                <Link to="/chat" className="flex-shrink-0">
                   <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <MessageCircle className="mr-2 h-5 w-5" />
                     Start Chat
                   </Button>
                 </Link>
-                <Link to="/doctors">
+                <Link to="/doctors" className="flex-shrink-0">
                   <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Search className="mr-2 h-5 w-5" />
                     Find Doctors
                   </Button>
                 </Link>
-                <Link to="/blog">
+                <Link to="/blog" className="flex-shrink-0">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <BookOpen className="mr-2 h-5 w-5" />
                     Health Blog
@@ -50,14 +50,14 @@ const Index = () => {
                 </Link>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link to="/bmi-calculator">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-4">
+                <Link to="/bmi-calculator" className="flex-shrink-0">
                   <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Calculator className="mr-2 h-5 w-5" />
                     BMI Calculator
                   </Button>
                 </Link>
-                <Link to="/reminders">
+                <Link to="/reminders" className="flex-shrink-0">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Bell className="mr-2 h-5 w-5" />
                     Health Reminders
@@ -66,7 +66,7 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="relative">
+            <div className="relative lg:block hidden">
               <img src={heroImage} alt="Doctori AI Health Assistant" className="rounded-2xl shadow-medical w-full animate-float" />
             </div>
           </div>
