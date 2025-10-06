@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { toast } from 'sonner';
 
 export interface Notification {
   id: string;
@@ -41,10 +42,23 @@ export const useNotifications = () => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
-          if (!(payload.new as Notification).is_read) {
+          const newNotification = payload.new as Notification;
+          console.log('New notification received:', newNotification);
+          
+          setNotifications(prev => [newNotification, ...prev]);
+          if (!newNotification.is_read) {
             setUnreadCount(prev => prev + 1);
           }
+          
+          // Show toast notification
+          const toastType = newNotification.type === 'error' ? 'error' : 
+                           newNotification.type === 'warning' ? 'warning' :
+                           newNotification.type === 'success' ? 'success' : 'info';
+          
+          toast[toastType](newNotification.title, {
+            description: newNotification.message,
+            duration: 5000,
+          });
         }
       )
       .subscribe();

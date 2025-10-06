@@ -1,50 +1,186 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Search, Stethoscope, Pill, Briefcase, ExternalLink } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
-interface ResultItem {
-  type: "Doctor" | "Blog" | "Medicine";
+interface SearchResult {
+  id: string;
+  type: 'doctor' | 'medicine' | 'service';
   name: string;
+  description?: string;
+  specialty?: string;
+  experience?: number;
+  consultationFee?: number;
+  verified?: boolean;
   link: string;
+  relevance: number;
 }
 
 const SearchResults = () => {
   const location = useLocation();
   const query = new URLSearchParams(location.search).get("q") || "";
-  const [results, setResults] = useState<ResultItem[]>([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    if (!query) return;
+    if (!query || query.length < 2) {
+      setResults([]);
+      return;
+    }
 
-    // Mock data, replace with API calls later
-    const mockResults: ResultItem[] = [
-      { type: "Doctor" as const, name: "Dr. John Doe", link: "/doctor/1" },
-      { type: "Blog" as const, name: "10 Health Tips", link: "/blog/health-tips-bd" },
-      { type: "Medicine" as const, name: "Paracetamol", link: "/medicine" },
-    ].filter(item => item.name.toLowerCase().includes(query.toLowerCase()));
+    const searchData = async () => {
+      setLoading(true);
+      setError("");
+      
+      try {
+        const { data, error: searchError } = await supabase.functions.invoke('search', {
+          body: { query, types: ['doctors', 'medicine', 'services'] }
+        });
 
-    setResults(mockResults);
+        if (searchError) throw searchError;
+        
+        setResults(data.results || []);
+      } catch (err: any) {
+        console.error('Search error:', err);
+        setError(err.message || 'Failed to perform search');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchData, 300);
+    return () => clearTimeout(debounceTimer);
   }, [query]);
 
-  return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-2xl font-bold mb-4">Search Results for "{query}"</h1>
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'doctor': return <Stethoscope className="h-5 w-5" />;
+      case 'medicine': return <Pill className="h-5 w-5" />;
+      case 'service': return <Briefcase className="h-5 w-5" />;
+      default: return <Search className="h-5 w-5" />;
+    }
+  };
 
-      {results.length === 0 ? (
-        <p>No results found.</p>
-      ) : (
-        <ul className="space-y-3">
-          {results.map((item, index) => (
-            <li
-              key={index}
-              className="border p-3 rounded hover:shadow-md transition-shadow"
-            >
-              <span className="font-semibold">{item.type}:</span>{" "}
-              <Link to={item.link} className="text-primary hover:underline">
-                {item.name}
-              </Link>
-            </li>
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'doctor': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'medicine': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'service': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+    }
+  };
+
+  return (
+    <div className="container mx-auto py-8 px-4 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Search Results</h1>
+        <p className="text-muted-foreground">
+          Showing results for "<span className="font-medium">{query}</span>"
+        </p>
+      </div>
+
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Searching...</span>
+        </div>
+      )}
+
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {!loading && !error && results.length === 0 && query.length >= 2 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Search className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold mb-2">No results found</h3>
+            <p className="text-muted-foreground">
+              Try searching with different keywords or check your spelling
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!loading && !error && results.length > 0 && (
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Found {results.length} result{results.length !== 1 ? 's' : ''}
+          </p>
+          
+          {results.map((result) => (
+            <Link key={result.id} to={result.link}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 rounded-lg bg-accent">
+                        {getIcon(result.type)}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-lg">{result.name}</h3>
+                          {result.verified && (
+                            <Badge variant="secondary" className="text-xs">
+                              ✓ Verified
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {result.specialty && (
+                          <p className="text-sm text-muted-foreground mb-1">
+                            {result.specialty}
+                          </p>
+                        )}
+                        
+                        {result.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {result.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center gap-3 mt-3">
+                          <Badge className={getTypeColor(result.type)}>
+                            {result.type}
+                          </Badge>
+                          
+                          {result.experience && (
+                            <span className="text-xs text-muted-foreground">
+                              {result.experience} years exp.
+                            </span>
+                          )}
+                          
+                          {result.consultationFee && (
+                            <span className="text-xs text-muted-foreground">
+                              ৳{result.consultationFee}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
-        </ul>
+        </div>
+      )}
+
+      {query.length > 0 && query.length < 2 && (
+        <Alert>
+          <AlertDescription>
+            Please enter at least 2 characters to search
+          </AlertDescription>
+        </Alert>
       )}
     </div>
   );

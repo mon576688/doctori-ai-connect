@@ -173,15 +173,17 @@ const Chat = () => {
               )}
             </div>
 
-            {/* Input Area - Always Visible */}
+          {/* Input Area - Always Visible */}
             <div className="p-4 md:p-6 border-t space-y-4">
               {/* Voice Chat Interface for Premium Users */}
               {isAuthenticated && (
-                <VoiceChatInterface 
-                  onVoiceMessage={handleVoiceMessage}
-                  onSpeakText={handleSpeakText}
-                  disabled={chat.sessionState.isLoading}
-                />
+                <div className="mb-4">
+                  <VoiceChatInterface 
+                    onVoiceMessage={handleVoiceMessage}
+                    onSpeakText={handleSpeakText}
+                    disabled={chat.sessionState.isLoading}
+                  />
+                </div>
               )}
 
               {/* Emergency Alert */}

@@ -34,6 +34,7 @@ const queryClient = new QueryClient();
 
 const HealthTipsBD = lazy(() => import('./pages/HealthTipsBD'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
+const Search = lazy(() => import('./pages/Search'));
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -47,6 +48,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<Index />} />
+                  <Route path="search" element={<Search />} />
                   <Route path="chat" element={<Chat />} />
                   <Route path="chat-summary" element={<ChatSummary />} />
                   <Route path="doctors" element={<Doctors />} />
