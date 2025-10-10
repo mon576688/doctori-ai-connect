@@ -18,7 +18,11 @@ import {
   Calendar,
   Stethoscope,
   Award,
-  FileText
+  FileText,
+  BarChart3,
+  Settings,
+  FolderKanban,
+  UserCog
 } from 'lucide-react';
 import {
   Table,
@@ -41,6 +45,10 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { formatDistanceToNow } from 'date-fns';
+import AdminAnalytics from '@/components/AdminAnalytics';
+import ContentManagement from '@/components/admin/ContentManagement';
+import BulkOperations from '@/components/admin/BulkOperations';
+import UserManagement from '@/components/admin/UserManagement';
 
 interface User {
   id: string;
@@ -352,15 +360,31 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="pending" className="space-y-4">
-        <TabsList>
+        <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="pending">
-            Pending Approvals ({pendingProviders.length})
+            Pending ({pendingProviders.length})
           </TabsTrigger>
           <TabsTrigger value="providers">
-            All Providers ({providers.length})
+            Providers ({providers.length})
           </TabsTrigger>
           <TabsTrigger value="users">
             Users ({users.length})
+          </TabsTrigger>
+          <TabsTrigger value="analytics">
+            <BarChart3 className="h-4 w-4 mr-2" />
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="content">
+            <FolderKanban className="h-4 w-4 mr-2" />
+            Content
+          </TabsTrigger>
+          <TabsTrigger value="bulk">
+            <Settings className="h-4 w-4 mr-2" />
+            Bulk Ops
+          </TabsTrigger>
+          <TabsTrigger value="user-mgmt">
+            <UserCog className="h-4 w-4 mr-2" />
+            User Mgmt
           </TabsTrigger>
         </TabsList>
 
@@ -540,6 +564,22 @@ export default function AdminDashboard() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <AdminAnalytics />
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-4">
+          <ContentManagement />
+        </TabsContent>
+
+        <TabsContent value="bulk" className="space-y-4">
+          <BulkOperations />
+        </TabsContent>
+
+        <TabsContent value="user-mgmt" className="space-y-4">
+          <UserManagement />
         </TabsContent>
       </Tabs>
 
