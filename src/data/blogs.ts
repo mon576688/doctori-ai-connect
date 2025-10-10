@@ -90,4 +90,6 @@ export const blogPosts: BlogPost[] = [
   make(58, "Healthy Morning Routine", "Healthy Living", '2025-01-10'),
   make(59, "Reading Food Labels Simply", "Nutrition and Fitness", '2025-01-07'),
   make(60, "Mindful Eating for Beginners", "Nutrition and Fitness", '2025-01-04'),
+  // Mental Health & Treatments (61)
+  make(61, "Which Supplements Can Boost the Effects of Antidepressants?", "Treatments and Prevention", '2025-07-15'),
 ];
