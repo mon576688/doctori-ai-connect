@@ -82,38 +82,16 @@ export default function UserManagement() {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Use server-side admin function for secure data fetching
+      const { data, error } = await supabase.rpc('admin_get_all_users');
 
       if (error) throw error;
 
-      const { data: rolesData } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      const roleMap = new Map<string, string>();
-      rolesData?.forEach(({ user_id, role }) => {
-        const currentRole = roleMap.get(user_id);
-        if (!currentRole || 
-            (role === 'admin') ||
-            (role === 'provider' && currentRole === 'user')) {
-          roleMap.set(user_id, role);
-        }
-      });
-
-      const usersWithRoles = profiles?.map(profile => ({
-        ...profile,
-        role: roleMap.get(profile.id) || 'user'
-      })) || [];
-
-      setUsers(usersWithRoles);
-    } catch (error) {
-      console.error('Error fetching users:', error);
+      setUsers(data || []);
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to load users',
+        description: error.message || 'Failed to load users',
         variant: 'destructive'
       });
     } finally {
@@ -123,10 +101,11 @@ export default function UserManagement() {
 
   const handleUpdateStatus = async (userId: string, status: 'approved' | 'pending' | 'rejected') => {
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ approval_status: status })
-        .eq('id', userId);
+      // Use server-side admin function for secure status update
+      const { error } = await supabase.rpc('admin_update_user_status', {
+        _user_id: userId,
+        _approval_status: status
+      });
 
       if (error) throw error;
 
@@ -136,10 +115,10 @@ export default function UserManagement() {
       });
 
       fetchUsers();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'Failed to update user status',
+        description: error.message || 'Failed to update user status',
         variant: 'destructive'
       });
     }

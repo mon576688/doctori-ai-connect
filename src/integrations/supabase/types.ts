@@ -103,7 +103,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_data: Json | null
           old_data: Json | null
           record_id: string | null
@@ -115,7 +115,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
@@ -127,7 +127,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
@@ -287,7 +287,7 @@ export type Database = {
           consent_type: string
           consented_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           user_agent: string | null
           user_id: string
         }
@@ -295,7 +295,7 @@ export type Database = {
           consent_type?: string
           consented_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id: string
         }
@@ -303,7 +303,7 @@ export type Database = {
           consent_type?: string
           consented_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           user_agent?: string | null
           user_id?: string
         }
@@ -820,6 +820,33 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_get_all_users: {
+        Args: never
+        Returns: {
+          approval_status: Database["public"]["Enums"]["approval_status"]
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          role: Database["public"]["Enums"]["app_role"]
+        }[]
+      }
+      admin_update_user_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_update_user_status: {
+        Args: {
+          _approval_status: Database["public"]["Enums"]["approval_status"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       check_rate_limit: {
         Args: {
           _endpoint: string
@@ -830,7 +857,7 @@ export type Database = {
         Returns: boolean
       }
       get_user_approval_status: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["approval_status"]
       }
       get_user_primary_role: {
@@ -838,7 +865,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       get_user_role: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: Database["public"]["Enums"]["app_role"]
       }
       has_role: {
@@ -862,6 +889,7 @@ export type Database = {
         }
         Returns: string
       }
+      verify_admin_access: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "user" | "provider" | "admin"
