@@ -1,7 +1,7 @@
 project_id = "lhamshhjmmruybdcfivr"
 
 [functions.ai-chat-assistant]
-verify_jwt = false
+verify_jwt = true
 
 [functions.test-connection]
 verify_jwt = false
@@ -10,10 +10,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.text-to-speech]
-verify_jwt = false
+verify_jwt = true
 
 [functions.speech-to-text]
-verify_jwt = false
+verify_jwt = true
 
 [functions.search]
 verify_jwt = false
