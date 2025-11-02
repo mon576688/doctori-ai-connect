@@ -36,21 +36,27 @@ const Index = () => {
                     Start Chat
                   </Button>
                 </Link>
+                <Link to="/booking/location">
+                  <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                    <Calendar className="mr-2 h-5 w-5" />
+                    Book Appointment
+                  </Button>
+                </Link>
                 <Link to="/doctors">
                   <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Search className="mr-2 h-5 w-5" />
                     Find Doctors
                   </Button>
                 </Link>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/blog">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <BookOpen className="mr-2 h-5 w-5" />
                     Health Blog
                   </Button>
                 </Link>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/bmi-calculator">
                   <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Calculator className="mr-2 h-5 w-5" />

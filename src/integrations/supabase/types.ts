@@ -137,6 +137,47 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_dates: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_available: boolean | null
+          is_booked: boolean | null
+          provider_id: string
+          time_slot: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          is_available?: boolean | null
+          is_booked?: boolean | null
+          provider_id: string
+          time_slot: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_available?: boolean | null
+          is_booked?: boolean | null
+          provider_id?: string
+          time_slot?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_dates_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       availability_slots: {
         Row: {
           created_at: string | null
@@ -465,11 +506,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           age: number | null
           allergies: string[] | null
           approval_status: Database["public"]["Enums"]["approval_status"] | null
           bio: string | null
           blood_group: Database["public"]["Enums"]["blood_group_type"] | null
+          city: string | null
           created_at: string | null
           date_of_birth: string | null
           email: string | null
@@ -480,16 +523,20 @@ export type Database = {
           height: number | null
           id: string
           last_name: string | null
+          latitude: number | null
+          longitude: number | null
           medical_conditions: string[] | null
           medications: string[] | null
           name: string | null
           phone: string | null
           photo_url: string | null
+          provider_type: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
           weight: number | null
         }
         Insert: {
+          address?: string | null
           age?: number | null
           allergies?: string[] | null
           approval_status?:
@@ -497,6 +544,7 @@ export type Database = {
             | null
           bio?: string | null
           blood_group?: Database["public"]["Enums"]["blood_group_type"] | null
+          city?: string | null
           created_at?: string | null
           date_of_birth?: string | null
           email?: string | null
@@ -507,16 +555,20 @@ export type Database = {
           height?: number | null
           id: string
           last_name?: string | null
+          latitude?: number | null
+          longitude?: number | null
           medical_conditions?: string[] | null
           medications?: string[] | null
           name?: string | null
           phone?: string | null
           photo_url?: string | null
+          provider_type?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
           weight?: number | null
         }
         Update: {
+          address?: string | null
           age?: number | null
           allergies?: string[] | null
           approval_status?:
@@ -524,6 +576,7 @@ export type Database = {
             | null
           bio?: string | null
           blood_group?: Database["public"]["Enums"]["blood_group_type"] | null
+          city?: string | null
           created_at?: string | null
           date_of_birth?: string | null
           email?: string | null
@@ -534,11 +587,14 @@ export type Database = {
           height?: number | null
           id?: string
           last_name?: string | null
+          latitude?: number | null
+          longitude?: number | null
           medical_conditions?: string[] | null
           medications?: string[] | null
           name?: string | null
           phone?: string | null
           photo_url?: string | null
+          provider_type?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
           weight?: number | null
