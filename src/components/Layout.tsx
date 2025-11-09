@@ -3,6 +3,7 @@ import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { ChatWidget } from "./ChatWidget";
 import { SearchBar } from "./SearchBar";
+import { SyncStatus } from "./SyncStatus";
 
 export const Layout = () => {
   return (
@@ -14,6 +15,7 @@ export const Layout = () => {
       </main>
       <Footer />
       <ChatWidget />
+      <SyncStatus />
     </div>
   );
 };
