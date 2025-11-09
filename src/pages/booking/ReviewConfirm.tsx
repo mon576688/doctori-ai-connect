@@ -43,33 +43,31 @@ export default function ReviewConfirm() {
       const [hours, minutes] = selectedTime.split(':');
       appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
 
-      // Insert appointment
-      const { error: appointmentError } = await supabase.from('appointments').insert({
-        user_id: user.id,
-        doctor_id: providerId,
-        appointment_date: appointmentDateTime.toISOString(),
-        status: 'scheduled',
-        appointment_type: providerData.provider_type,
-        duration_minutes: providerData.duration || 30,
+      // Use atomic booking function to prevent race conditions
+      const { data: appointmentId, error } = await supabase.rpc('book_appointment_slot', {
+        _user_id: user.id,
+        _provider_id: providerId,
+        _appointment_date: appointmentDateTime.toISOString(),
+        _date: format(selectedDate, 'yyyy-MM-dd'),
+        _time_slot: selectedTime,
+        _appointment_type: providerData.provider_type,
+        _duration_minutes: providerData.duration || 30,
       });
 
-      if (appointmentError) throw appointmentError;
-
-      // Mark time slot as booked
-      const { error: updateError } = await supabase
-        .from('availability_dates')
-        .update({ is_booked: true })
-        .eq('provider_id', providerId)
-        .eq('date', format(selectedDate, 'yyyy-MM-dd'))
-        .eq('time_slot', selectedTime);
-
-      if (updateError) throw updateError;
+      if (error) {
+        // Handle specific error cases
+        if (error.message.includes('no longer available')) {
+          toast.error('This time slot is no longer available. Please select another time.');
+          navigate(`/booking/time/${providerId}`);
+          return;
+        }
+        throw error;
+      }
 
       toast.success('Appointment confirmed successfully!');
       navigate('/booking/confirmed');
-    } catch (error) {
-      console.error('Error confirming appointment:', error);
-      toast.error('Failed to confirm appointment. Please try again.');
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to confirm appointment. Please try again.');
     } finally {
       setConfirming(false);
     }

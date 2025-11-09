@@ -903,6 +903,18 @@ export type Database = {
         }
         Returns: undefined
       }
+      book_appointment_slot: {
+        Args: {
+          _appointment_date: string
+          _appointment_type: string
+          _date: string
+          _duration_minutes: number
+          _provider_id: string
+          _time_slot: string
+          _user_id: string
+        }
+        Returns: string
+      }
       check_rate_limit: {
         Args: {
           _endpoint: string
