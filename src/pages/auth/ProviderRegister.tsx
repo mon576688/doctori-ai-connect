@@ -141,7 +141,10 @@ export default function ProviderRegister() {
           first_name: formData.firstName,
           last_name: formData.lastName,
           phone: formData.phone,
-          bio: formData.bio
+          bio: formData.bio,
+          role: 'provider',
+          provider_type: formData.specialty,
+          approval_status: 'pending'
         })
         .eq('id', user.id);
       
