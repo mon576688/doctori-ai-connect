@@ -25,11 +25,17 @@ export default function ProviderDashboard() {
   const { profile, refetchProfile } = useRoleBasedAuth();
   const { toast } = useToast();
   const [profileData, setProfileData] = useState({
-    name: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
     bio: '',
+    address: '',
+    city: '',
+    provider_type: '',
     specialty: '',
     experience: '',
-    license_number: ''
+    license_number: '',
+    photo_url: ''
   });
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(false);
@@ -43,25 +49,29 @@ export default function ProviderDashboard() {
 
   const fetchProviderData = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: doctorData, error: doctorError } = await supabase
         .from('doctors')
         .select('*')
         .eq('user_id', profile?.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (doctorError) {
+        throw doctorError;
       }
 
-      if (data) {
-        setProfileData({
-          name: profile?.name || '',
-          bio: data.bio || '',
-          specialty: data.specialty || '',
-          experience: data.experience?.toString() || '',
-          license_number: data.license_number || ''
-        });
-      }
+      setProfileData({
+        first_name: profile?.first_name || '',
+        last_name: profile?.last_name || '',
+        phone: profile?.phone || '',
+        bio: profile?.bio || doctorData?.bio || '',
+        address: profile?.address || '',
+        city: profile?.city || '',
+        provider_type: profile?.provider_type || '',
+        specialty: doctorData?.specialty || '',
+        experience: doctorData?.experience?.toString() || '',
+        license_number: doctorData?.license_number || '',
+        photo_url: profile?.photo_url || ''
+      });
     } catch (error) {
       console.error('Error fetching provider data:', error);
     }
@@ -109,10 +119,19 @@ export default function ProviderDashboard() {
     setLoading(true);
 
     try {
-      // Update profiles table
+      // Update profiles table with comprehensive data
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ name: profileData.name })
+        .update({ 
+          first_name: profileData.first_name,
+          last_name: profileData.last_name,
+          phone: profileData.phone,
+          bio: profileData.bio,
+          address: profileData.address,
+          city: profileData.city,
+          provider_type: profileData.provider_type,
+          photo_url: profileData.photo_url
+        })
         .eq('id', profile?.id);
 
       if (profileError) throw profileError;
@@ -124,11 +143,17 @@ export default function ProviderDashboard() {
           user_id: profile?.id,
           bio: profileData.bio,
           specialty: profileData.specialty,
-          experience: profileData.experience ? parseInt(profileData.experience) : 0,
+          experience: parseInt(profileData.experience) || 0,
           license_number: profileData.license_number
         });
 
       if (doctorError) throw doctorError;
+
+      // Refetch the updated profile
+      if (refetchProfile) {
+        await refetchProfile();
+      }
+      await fetchProviderData();
 
       toast({
         title: "Profile updated",
@@ -202,12 +227,46 @@ export default function ProviderDashboard() {
                 <form onSubmit={handleProfileUpdate} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="first_name">First Name *</Label>
                       <Input
-                        id="name"
-                        value={profileData.name}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="Enter your full name"
+                        id="first_name"
+                        value={profileData.first_name}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, first_name: e.target.value }))}
+                        placeholder="Enter your first name"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="last_name">Last Name *</Label>
+                      <Input
+                        id="last_name"
+                        value={profileData.last_name}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, last_name: e.target.value }))}
+                        placeholder="Enter your last name"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={profileData.phone}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, phone: e.target.value }))}
+                        placeholder="+880 XXX XXX XXXX"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="provider_type">Provider Type *</Label>
+                      <Input
+                        id="provider_type"
+                        value={profileData.provider_type}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, provider_type: e.target.value }))}
+                        placeholder="e.g., Doctor, Nurse, Therapist"
                         required
                       />
                     </div>
@@ -218,7 +277,7 @@ export default function ProviderDashboard() {
                         id="specialty"
                         value={profileData.specialty}
                         onChange={(e) => setProfileData(prev => ({ ...prev, specialty: e.target.value }))}
-                        placeholder="e.g., Internal Medicine"
+                        placeholder="e.g., Cardiology, Pediatrics"
                         required
                       />
                     </div>
@@ -245,16 +304,50 @@ export default function ProviderDashboard() {
                         placeholder="Medical license number"
                       />
                     </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City *</Label>
+                      <Input
+                        id="city"
+                        value={profileData.city}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, city: e.target.value }))}
+                        placeholder="City name"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="bio">Professional Bio</Label>
+                    <Label htmlFor="address">Full Address *</Label>
+                    <Input
+                      id="address"
+                      value={profileData.address}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
+                      placeholder="Complete address with street, area, etc."
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="photo_url">Profile Photo URL</Label>
+                    <Input
+                      id="photo_url"
+                      type="url"
+                      value={profileData.photo_url}
+                      onChange={(e) => setProfileData(prev => ({ ...prev, photo_url: e.target.value }))}
+                      placeholder="https://example.com/photo.jpg"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="bio">Professional Bio *</Label>
                     <Textarea
                       id="bio"
                       value={profileData.bio}
                       onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
                       placeholder="Describe your experience, specializations, and approach to patient care..."
                       rows={4}
+                      required
                     />
                   </div>
 

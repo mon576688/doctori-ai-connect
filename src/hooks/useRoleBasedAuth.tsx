@@ -26,6 +26,9 @@ interface UserProfile {
   medications?: string[];
   allergies?: string[];
   bio?: string;
+  address?: string;
+  city?: string;
+  provider_type?: string;
   created_at: string;
   updated_at?: string;
 }
