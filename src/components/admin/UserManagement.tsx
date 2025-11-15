@@ -27,6 +27,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   Search, 
   Filter, 
@@ -74,6 +84,12 @@ export default function UserManagement() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [roleChangeDialog, setRoleChangeDialog] = useState<{
+    open: boolean;
+    userId: string;
+    currentRole: string;
+    newRole: 'admin' | 'provider' | 'user';
+  }>({ open: false, userId: '', currentRole: '', newRole: 'user' });
 
   useEffect(() => {
     fetchUsers();
@@ -122,6 +138,47 @@ export default function UserManagement() {
         variant: 'destructive'
       });
     }
+  };
+
+  const handleUpdateRole = async (userId: string, newRole: 'admin' | 'provider' | 'user') => {
+    try {
+      // Use server-side admin function for secure role update
+      const { error } = await supabase.rpc('admin_update_user_role', {
+        _user_id: userId,
+        _role: newRole
+      });
+
+      if (error) throw error;
+
+      // Also update the profile role field for consistency
+      await supabase
+        .from('profiles')
+        .update({ role: newRole, updated_at: new Date().toISOString() })
+        .eq('id', userId);
+
+      toast({
+        title: 'Success',
+        description: `User role updated to ${newRole}`,
+      });
+
+      fetchUsers();
+      setRoleChangeDialog({ open: false, userId: '', currentRole: '', newRole: 'user' });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update user role',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const openRoleChangeDialog = (userId: string, currentRole: string, newRole: 'admin' | 'provider' | 'user') => {
+    setRoleChangeDialog({
+      open: true,
+      userId,
+      currentRole,
+      newRole
+    });
   };
 
   const filteredUsers = users.filter(user => {
@@ -296,22 +353,59 @@ export default function UserManagement() {
                             <Edit className="h-4 w-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
-                          {user.approval_status === 'pending' && (
-                            <>
-                              <DropdownMenuItem 
-                                onClick={() => handleUpdateStatus(user.id, 'approved')}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Approve
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => handleUpdateStatus(user.id, 'rejected')}
-                              >
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Reject
-                              </DropdownMenuItem>
-                            </>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Change Role</DropdownMenuLabel>
+                          {user.role !== 'admin' && (
+                            <DropdownMenuItem 
+                              onClick={() => openRoleChangeDialog(user.id, user.role, 'admin')}
+                            >
+                              <Shield className="h-4 w-4 mr-2 text-purple-500" />
+                              Make Admin
+                            </DropdownMenuItem>
                           )}
+                          {user.role !== 'provider' && (
+                            <DropdownMenuItem 
+                              onClick={() => openRoleChangeDialog(user.id, user.role, 'provider')}
+                            >
+                              <Shield className="h-4 w-4 mr-2 text-blue-500" />
+                              Make Provider
+                            </DropdownMenuItem>
+                          )}
+                          {user.role !== 'user' && (
+                            <DropdownMenuItem 
+                              onClick={() => openRoleChangeDialog(user.id, user.role, 'user')}
+                            >
+                              <Shield className="h-4 w-4 mr-2 text-gray-500" />
+                              Make User
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Approval Status</DropdownMenuLabel>
+                          {user.approval_status !== 'approved' && (
+                            <DropdownMenuItem 
+                              onClick={() => handleUpdateStatus(user.id, 'approved')}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Approve
+                            </DropdownMenuItem>
+                          )}
+                          {user.approval_status !== 'rejected' && (
+                            <DropdownMenuItem 
+                              onClick={() => handleUpdateStatus(user.id, 'rejected')}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Reject
+                            </DropdownMenuItem>
+                          )}
+                          {user.approval_status !== 'pending' && (
+                            <DropdownMenuItem 
+                              onClick={() => handleUpdateStatus(user.id, 'pending')}
+                            >
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Set Pending
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem>
                             <Mail className="h-4 w-4 mr-2" />
                             Send Email
@@ -371,11 +465,123 @@ export default function UserManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {users.filter(u => u.role === 'admin').length}
+          {users.filter(u => u.role === 'admin').length}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Role Change Confirmation Dialog */}
+      <AlertDialog open={roleChangeDialog.open} onOpenChange={(open) => setRoleChangeDialog({ ...roleChangeDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Role Change</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to change this user's role from <strong>{roleChangeDialog.currentRole}</strong> to <strong>{roleChangeDialog.newRole}</strong>?
+              <br /><br />
+              This action will update their permissions immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => handleUpdateRole(roleChangeDialog.userId, roleChangeDialog.newRole)}
+            >
+              Confirm Change
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* User Details Dialog */}
+      <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+            <DialogDescription>
+              View and manage user information
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedUser && (
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={selectedUser.photo_url} />
+                  <AvatarFallback className="text-2xl">
+                    {selectedUser.first_name?.[0]}{selectedUser.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-semibold">
+                    {selectedUser.first_name} {selectedUser.last_name}
+                  </h3>
+                  <p className="text-muted-foreground">{selectedUser.email}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Role</label>
+                  <div className="mt-1">{getRoleBadge(selectedUser.role)}</div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Status</label>
+                  <div className="mt-1">{getStatusBadge(selectedUser.approval_status)}</div>
+                </div>
+                {selectedUser.phone && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                    <p className="mt-1">{selectedUser.phone}</p>
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Joined</label>
+                  <p className="mt-1">
+                    {formatDistanceToNow(new Date(selectedUser.created_at), { addSuffix: true })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Select 
+                  value={selectedUser.role} 
+                  onValueChange={(value) => openRoleChangeDialog(selectedUser.id, selectedUser.role, value as 'admin' | 'provider' | 'user')}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Change Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="provider">Provider</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select 
+                  value={selectedUser.approval_status} 
+                  onValueChange={(value) => handleUpdateStatus(selectedUser.id, value as 'approved' | 'pending' | 'rejected')}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Change Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUserDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
