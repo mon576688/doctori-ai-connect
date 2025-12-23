@@ -110,81 +110,48 @@ export default function ProviderRegister() {
     setLoading(true);
 
     try {
-      // Sign up the user
-      const { error: signUpError } = await signUp(
-        formData.email,
-        formData.password,
-        formData.firstName,
-        formData.lastName
-      );
+      // Sign up the user with all provider data in metadata
+      // The handle_new_user trigger will create profile, role, and doctor entries
+      const redirectUrl = `${window.location.origin}/login`;
+      
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            role: 'provider',
+            specialty: formData.specialty,
+            license_number: formData.licenseNumber || null,
+            experience: formData.experience ? parseInt(formData.experience) : 0,
+            bio: formData.bio,
+            phone: formData.phone
+          }
+        }
+      });
 
       if (signUpError) {
-        toast({
-          title: "Registration failed",
-          description: signUpError.message,
-          variant: "destructive"
-        });
+        if (signUpError.message.includes('already registered')) {
+          toast({
+            title: "Account exists",
+            description: "This email is already registered. Please try logging in instead.",
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Registration failed",
+            description: signUpError.message,
+            variant: "destructive"
+          });
+        }
         return;
       }
 
-      // Get the new user's session
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('Failed to get user after signup');
-      }
-
-      // Update profile with provider-specific info
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ 
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          bio: formData.bio,
-          role: 'provider',
-          provider_type: formData.specialty,
-          approval_status: 'pending'
-        })
-        .eq('id', user.id);
-      
-      if (profileError) {
-        console.error('Profile update error:', profileError);
-        throw profileError;
-      }
-
-      // Add provider role to user_roles table
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({ 
-          user_id: user.id,
-          role: 'provider'
-        });
-      
-      if (roleError) {
-        console.error('Role assignment error:', roleError);
-        throw roleError;
-      }
-
-      // Create doctor profile with additional info
-      const { error: doctorError } = await supabase
-        .from('doctors')
-        .insert({
-          user_id: user.id,
-          specialty: formData.specialty,
-          license_number: formData.licenseNumber || null,
-          experience: formData.experience ? parseInt(formData.experience) : 0,
-          bio: formData.bio
-        });
-
-      if (doctorError) {
-        console.error('Doctor profile error:', doctorError);
-        throw doctorError;
-      }
-
       toast({
-        title: "Registration successful!",
-        description: "Please check your email to verify your account. Your application will be reviewed by our team.",
+        title: "Registration submitted!",
+        description: "Please check your email to verify your account. Once verified, your application will be reviewed by our team.",
       });
       navigate('/login');
     } catch (error) {

@@ -130,9 +130,9 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
   ];
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="p-4 border-b shrink-0">
+      <div className="p-4 border-b flex-shrink-0">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">Admin Panel</span>
@@ -140,7 +140,7 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
       </div>
       
       {/* Scrollable Menu */}
-      <div className="flex-1 overflow-y-auto p-3">
+      <div className="flex-1 overflow-y-auto p-3 min-h-0">
         <div className="space-y-1">
           {menuItems.map((item) => (
             <button
@@ -167,8 +167,8 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t shrink-0 bg-card">
+      {/* Footer - Always at bottom */}
+      <div className="p-4 border-t flex-shrink-0 mt-auto bg-card">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Doctori AI</span>
@@ -209,7 +209,7 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-card border-r z-40 transition-transform duration-200",
+          "fixed left-0 top-0 h-screen w-64 bg-card border-r z-40 transition-transform duration-200 flex flex-col",
           "md:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         )}
