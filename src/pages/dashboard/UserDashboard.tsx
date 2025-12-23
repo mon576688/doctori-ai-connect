@@ -10,9 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, User, Camera, Heart, Weight, Ruler } from 'lucide-react';
+import { Calendar, Clock, Plus, User, Heart, Weight, Ruler, MessageSquare } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AppointmentsList } from '@/components/AppointmentsList';
+import { Inbox } from '@/components/messaging/Inbox';
 
 interface Reminder {
   id: number;
@@ -190,6 +191,10 @@ export default function UserDashboard() {
             <TabsTrigger value="health">
               <Heart className="w-4 h-4 mr-2" />
               Health Info
+            </TabsTrigger>
+            <TabsTrigger value="messages">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Messages
             </TabsTrigger>
           </TabsList>
 
@@ -453,6 +458,10 @@ export default function UserDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <Inbox />
           </TabsContent>
         </Tabs>
       </div>

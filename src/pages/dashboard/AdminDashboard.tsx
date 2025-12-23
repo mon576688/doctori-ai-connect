@@ -47,6 +47,8 @@ import UserManagement from '@/components/admin/UserManagement';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminOverview from '@/components/admin/AdminOverview';
 import BookingManagement from '@/components/admin/BookingManagement';
+import { DocumentReview } from '@/components/admin/DocumentReview';
+import { DataExport } from '@/components/admin/DataExport';
 
 interface User {
   id: string;
@@ -545,6 +547,12 @@ export default function AdminDashboard() {
 
       case 'user-mgmt':
         return <UserManagement />;
+
+      case 'documents':
+        return <DocumentReview />;
+
+      case 'export':
+        return <DataExport />;
 
       default:
         return null;

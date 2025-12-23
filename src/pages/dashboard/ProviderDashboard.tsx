@@ -9,9 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Stethoscope, Users, FileText, User, Upload, Calendar as CalendarIcon } from 'lucide-react';
+import { Stethoscope, Users, FileText, User, MessageSquare, Calendar as CalendarIcon } from 'lucide-react';
 import { ProviderAvailability } from '@/components/ProviderAvailability';
 import { AppointmentsList } from '@/components/AppointmentsList';
+import { DocumentUpload } from '@/components/provider/DocumentUpload';
+import { Inbox } from '@/components/messaging/Inbox';
 
 interface Patient {
   id: string;
@@ -209,6 +211,10 @@ export default function ProviderDashboard() {
             <TabsTrigger value="documents">
               <FileText className="w-4 h-4 mr-2" />
               Documents
+            </TabsTrigger>
+            <TabsTrigger value="messages">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Messages
             </TabsTrigger>
           </TabsList>
 
@@ -417,26 +423,11 @@ export default function ProviderDashboard() {
           </TabsContent>
 
           <TabsContent value="documents">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  Professional Documents
-                </CardTitle>
-                <CardDescription>
-                  Upload and manage your professional credentials
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-semibold">Document management</h3>
-                  <p className="text-muted-foreground">
-                    Coming soon - Upload licenses, certifications, and other professional documents
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <DocumentUpload />
+          </TabsContent>
+
+          <TabsContent value="messages">
+            <Inbox />
           </TabsContent>
         </Tabs>
       </div>

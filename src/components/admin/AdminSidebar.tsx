@@ -119,9 +119,11 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
     { id: 'providers', icon: Stethoscope, label: 'Healthcare Providers' },
     { id: 'users', icon: Users, label: 'All Users' },
     { id: 'user-mgmt', icon: UserCog, label: 'User Management' },
+    { id: 'documents', icon: FileText, label: 'Document Review' },
     { id: 'analytics', icon: BarChart3, label: 'Analytics' },
     { id: 'content', icon: FolderKanban, label: 'Content Management' },
     { id: 'bulk', icon: Settings, label: 'Bulk Operations' },
+    { id: 'export', icon: ClipboardList, label: 'Data Export' },
   ];
 
   const SidebarContent = () => (
