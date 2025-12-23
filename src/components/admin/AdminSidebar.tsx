@@ -130,15 +130,17 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
   ];
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="p-4 border-b">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Header */}
+      <div className="p-4 border-b shrink-0">
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">Admin Panel</span>
         </div>
       </div>
       
-      <ScrollArea className="flex-1 p-3">
+      {/* Scrollable Menu */}
+      <div className="flex-1 overflow-y-auto p-3">
         <div className="space-y-1">
           {menuItems.map((item) => (
             <button
@@ -163,11 +165,10 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
             </button>
           ))}
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
-      <div className="p-4 border-t mt-auto">
-        <Separator className="mb-4" />
+      <div className="p-4 border-t shrink-0 bg-card">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium">Doctori AI</span>
