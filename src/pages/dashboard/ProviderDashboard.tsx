@@ -9,11 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Stethoscope, Users, FileText, User, MessageSquare, Calendar as CalendarIcon } from 'lucide-react';
+import { Stethoscope, Users, FileText, User, MessageSquare, Calendar as CalendarIcon, Video } from 'lucide-react';
 import { ProviderAvailability } from '@/components/ProviderAvailability';
 import { AppointmentsList } from '@/components/AppointmentsList';
 import { DocumentUpload } from '@/components/provider/DocumentUpload';
 import { Inbox } from '@/components/messaging/Inbox';
+import ConsultationAppointments from '@/components/provider/ConsultationAppointments';
 
 interface Patient {
   id: string;
@@ -200,6 +201,10 @@ export default function ProviderDashboard() {
               <CalendarIcon className="w-4 h-4 mr-2" />
               Availability
             </TabsTrigger>
+            <TabsTrigger value="consultations">
+              <Video className="w-4 h-4 mr-2" />
+              Consultations
+            </TabsTrigger>
             <TabsTrigger value="appointments">
               <CalendarIcon className="w-4 h-4 mr-2" />
               Appointments
@@ -363,6 +368,10 @@ export default function ProviderDashboard() {
                 </form>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="consultations">
+            <ConsultationAppointments />
           </TabsContent>
 
           <TabsContent value="availability">

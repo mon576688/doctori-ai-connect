@@ -61,6 +61,11 @@ export type Database = {
           appointment_date: string
           appointment_type: string | null
           cancellation_reason: string | null
+          consultation_ended_at: string | null
+          consultation_platform: string | null
+          consultation_started_at: string | null
+          consultation_status: string | null
+          consultation_type: string | null
           created_at: string
           doctor_id: string
           duration_minutes: number | null
@@ -74,6 +79,11 @@ export type Database = {
           appointment_date: string
           appointment_type?: string | null
           cancellation_reason?: string | null
+          consultation_ended_at?: string | null
+          consultation_platform?: string | null
+          consultation_started_at?: string | null
+          consultation_status?: string | null
+          consultation_type?: string | null
           created_at?: string
           doctor_id: string
           duration_minutes?: number | null
@@ -87,6 +97,11 @@ export type Database = {
           appointment_date?: string
           appointment_type?: string | null
           cancellation_reason?: string | null
+          consultation_ended_at?: string | null
+          consultation_platform?: string | null
+          consultation_started_at?: string | null
+          consultation_status?: string | null
+          consultation_type?: string | null
           created_at?: string
           doctor_id?: string
           duration_minutes?: number | null
@@ -590,6 +605,65 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescriptions: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          diagnosis: string | null
+          doctor_id: string
+          doctor_notes: string | null
+          id: string
+          image_url: string | null
+          medicines: Json | null
+          patient_id: string
+          prescription_type: string
+          shared_on_platform: boolean | null
+          shared_via_email: boolean | null
+          shared_via_whatsapp: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id: string
+          doctor_notes?: string | null
+          id?: string
+          image_url?: string | null
+          medicines?: Json | null
+          patient_id: string
+          prescription_type?: string
+          shared_on_platform?: boolean | null
+          shared_via_email?: boolean | null
+          shared_via_whatsapp?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id?: string
+          doctor_notes?: string | null
+          id?: string
+          image_url?: string | null
+          medicines?: Json | null
+          patient_id?: string
+          prescription_type?: string
+          shared_on_platform?: boolean | null
+          shared_via_email?: boolean | null
+          shared_via_whatsapp?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescriptions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
         ]
