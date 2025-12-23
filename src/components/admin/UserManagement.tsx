@@ -545,8 +545,8 @@ export default function UserManagement() {
 
               <div className="flex gap-2">
                 <Select 
-                  value={selectedUser.role} 
-                  onValueChange={(value) => openRoleChangeDialog(selectedUser.id, selectedUser.role, value as 'admin' | 'provider' | 'user')}
+                  value={selectedUser.role || 'user'} 
+                  onValueChange={(value) => openRoleChangeDialog(selectedUser.id, selectedUser.role || 'user', value as 'admin' | 'provider' | 'user')}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Change Role" />
@@ -559,7 +559,7 @@ export default function UserManagement() {
                 </Select>
                 
                 <Select 
-                  value={selectedUser.approval_status} 
+                  value={selectedUser.approval_status || 'pending'} 
                   onValueChange={(value) => handleUpdateStatus(selectedUser.id, value as 'approved' | 'pending' | 'rejected')}
                 >
                   <SelectTrigger className="w-full">
