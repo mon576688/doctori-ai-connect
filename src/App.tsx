@@ -38,6 +38,8 @@ import TimeSelect from "./pages/booking/TimeSelect";
 import ReviewConfirm from "./pages/booking/ReviewConfirm";
 import Confirmed from "./pages/booking/Confirmed";
 import BloodDonation from "./pages/BloodDonation";
+import WritePrescription from "./pages/provider/WritePrescription";
+import MyPrescriptions from "./pages/patient/MyPrescriptions";
 
 const queryClient = new QueryClient();
 
@@ -136,6 +138,32 @@ const App = () => (
                       element={
                         <ProtectedRoute requiredRole="admin">
                           <AdminDashboard />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    {/* Provider Prescription Route */}
+                    <Route 
+                      path="provider/prescription" 
+                      element={
+                        <ProtectedRoute requiredRole="provider" requireApproval={true}>
+                          <WritePrescription />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="provider/prescription/:appointmentId" 
+                      element={
+                        <ProtectedRoute requiredRole="provider" requireApproval={true}>
+                          <WritePrescription />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    {/* Patient Prescriptions Route */}
+                    <Route 
+                      path="my-prescriptions" 
+                      element={
+                        <ProtectedRoute requiredRole="user">
+                          <MyPrescriptions />
                         </ProtectedRoute>
                       } 
                     />
