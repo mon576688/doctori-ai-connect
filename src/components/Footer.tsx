@@ -9,7 +9,7 @@ export const Footer = () => {
   
   return <footer className="bg-muted/30 border-t">
       <div className="container py-12">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
@@ -57,6 +57,22 @@ export const Footer = () => {
               </Link>
               <Link to="/contact" className="block text-muted-foreground hover:text-primary transition-colors">
                 Contact
+              </Link>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Legal</h3>
+            <div className="space-y-2 text-sm">
+              <Link to="/terms" className="block text-muted-foreground hover:text-primary transition-colors">
+                Terms & Conditions
+              </Link>
+              <Link to="/privacy" className="block text-muted-foreground hover:text-primary transition-colors">
+                Privacy Policy
+              </Link>
+              <Link to="/doctor-verification" className="block text-muted-foreground hover:text-primary transition-colors">
+                Doctor Verification
               </Link>
             </div>
           </div>

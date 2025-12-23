@@ -42,6 +42,9 @@ import Confirmed from "./pages/booking/Confirmed";
 import BloodDonation from "./pages/BloodDonation";
 import WritePrescription from "./pages/provider/WritePrescription";
 import MyPrescriptions from "./pages/patient/MyPrescriptions";
+import TermsAndConditions from "./pages/legal/TermsAndConditions";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import DoctorVerificationPolicy from "./pages/legal/DoctorVerificationPolicy";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +78,9 @@ const App = () => (
                     <Route path="blog/:slug" element={<BlogPost />} />
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
+                    <Route path="terms" element={<TermsAndConditions />} />
+                    <Route path="privacy" element={<PrivacyPolicy />} />
+                    <Route path="doctor-verification" element={<DoctorVerificationPolicy />} />
                     <Route path="profile" element={<UserProfile />} />
                     <Route path="bmi-calculator" element={<BMICalculator />} />
                     <Route path="reminders" element={<Reminders />} />
