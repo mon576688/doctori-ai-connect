@@ -49,6 +49,7 @@ import AdminOverview from '@/components/admin/AdminOverview';
 import BookingManagement from '@/components/admin/BookingManagement';
 import { DocumentReview } from '@/components/admin/DocumentReview';
 import { DataExport } from '@/components/admin/DataExport';
+import BloodDonorManagement from '@/components/admin/BloodDonorManagement';
 
 interface User {
   id: string;
@@ -547,6 +548,9 @@ export default function AdminDashboard() {
 
       case 'user-mgmt':
         return <UserManagement />;
+
+      case 'blood-donors':
+        return <BloodDonorManagement />;
 
       case 'documents':
         return <DocumentReview />;

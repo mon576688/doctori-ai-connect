@@ -10,7 +10,6 @@ import {
   ClipboardList,
   BarChart3,
   Settings,
-  Bell,
   FileText,
   ChevronDown,
   ChevronRight,
@@ -18,12 +17,15 @@ import {
   Clock,
   FolderKanban,
   Menu,
-  X
+  X,
+  Heart,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
 
 interface SidebarItemProps {
   icon: React.ElementType;
@@ -119,6 +121,7 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
     { id: 'providers', icon: Stethoscope, label: 'Healthcare Providers' },
     { id: 'users', icon: Users, label: 'All Users' },
     { id: 'user-mgmt', icon: UserCog, label: 'User Management' },
+    { id: 'blood-donors', icon: Heart, label: 'Blood Donors' },
     { id: 'documents', icon: FileText, label: 'Document Review' },
     { id: 'analytics', icon: BarChart3, label: 'Analytics' },
     { id: 'content', icon: FolderKanban, label: 'Content Management' },
@@ -161,6 +164,24 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
           ))}
         </div>
       </ScrollArea>
+
+      {/* Footer */}
+      <div className="p-4 border-t mt-auto">
+        <Separator className="mb-4" />
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Doctori AI</span>
+            <Badge variant="outline" className="text-xs">v1.0</Badge>
+          </div>
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ExternalLink className="h-3 w-3" />
+            Go to Main Site
+          </Link>
+        </div>
+      </div>
     </div>
   );
 
