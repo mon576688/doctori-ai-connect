@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { AppointmentBookingForm } from "@/components/AppointmentBookingForm";
+import { ReviewsList } from "@/components/reviews/ReviewsList";
+import { ReviewForm } from "@/components/reviews/ReviewForm";
 import { 
   Star, 
   MapPin, 
@@ -18,7 +20,8 @@ import {
   Award,
   Users,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  MessageSquare
 } from "lucide-react";
 
 // This would normally come from an API or database
@@ -117,6 +120,7 @@ export default function DoctorProfile() {
   const { id } = useParams<{ id: string }>();
   const doctor = id ? getDoctorById(id) : null;
   const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
 
   if (!doctor) {
     return (
@@ -248,6 +252,34 @@ export default function DoctorProfile() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Reviews Section */}
+            <Card className="shadow-card">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <MessageSquare className="h-5 w-5 mr-2 text-primary" />
+                    Patient Reviews
+                  </CardTitle>
+                  <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        Write Review
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <ReviewForm 
+                        providerId={String(doctor.id)} 
+                        onSuccess={() => setShowReviewDialog(false)} 
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ReviewsList providerId={String(doctor.id)} />
               </CardContent>
             </Card>
           </div>
