@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,11 +17,7 @@ import {
   Calendar,
   Stethoscope,
   Award,
-  FileText,
-  BarChart3,
-  Settings,
-  FolderKanban,
-  UserCog
+  FileText
 } from 'lucide-react';
 import {
   Table,
@@ -49,6 +44,9 @@ import AdminAnalytics from '@/components/AdminAnalytics';
 import ContentManagement from '@/components/admin/ContentManagement';
 import BulkOperations from '@/components/admin/BulkOperations';
 import UserManagement from '@/components/admin/UserManagement';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import AdminOverview from '@/components/admin/AdminOverview';
+import BookingManagement from '@/components/admin/BookingManagement';
 
 interface User {
   id: string;
@@ -76,6 +74,9 @@ export default function AdminDashboard() {
   const [pendingProviders, setPendingProviders] = useState<Provider[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
+  const [recentActivity, setRecentActivity] = useState<Array<{ id: string; type: string; message: string; time: Date }>>([]);
   const [actionDialog, setActionDialog] = useState<{
     open: boolean;
     action: 'approve' | 'reject';
@@ -103,11 +104,17 @@ export default function AdminDashboard() {
 
       if (rolesError) throw rolesError;
 
+      // Fetch appointments count
+      const { count: apptCount } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true });
+
+      setAppointmentsCount(apptCount || 0);
+
       // Create a map of user_id to primary role
       const roleMap = new Map<string, string>();
       rolesData?.forEach(({ user_id, role }) => {
         const currentRole = roleMap.get(user_id);
-        // Priority: admin > provider > user
         if (!currentRole || 
             (role === 'admin') ||
             (role === 'provider' && currentRole === 'user')) {
@@ -132,9 +139,18 @@ export default function AdminDashboard() {
 
       const pending = allProviders.filter(p => p.approval_status === 'pending');
 
+      // Create recent activity from users/providers
+      const activity = allUsers?.slice(0, 10).map(user => ({
+        id: user.id,
+        type: roleMap.get(user.id) === 'provider' ? 'provider' : 'user',
+        message: `${user.first_name || 'User'} ${user.last_name || ''} registered`,
+        time: new Date(user.created_at)
+      })) || [];
+
       setUsers(regularUsers);
       setProviders(allProviders);
       setPendingProviders(pending);
+      setRecentActivity(activity);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -176,7 +192,7 @@ export default function AdminDashboard() {
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: any; icon: any }> = {
+    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive'; icon: typeof Clock }> = {
       pending: { variant: 'secondary', icon: Clock },
       approved: { variant: 'default', icon: CheckCircle },
       rejected: { variant: 'destructive', icon: XCircle }
@@ -192,19 +208,6 @@ export default function AdminDashboard() {
       </Badge>
     );
   };
-
-  const StatsCard = ({ title, value, icon: Icon, description }: any) => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
-  );
 
   const ProviderDetailView = ({ provider }: { provider: Provider }) => (
     <ScrollArea className="h-[500px] w-full rounded-md border p-6">
@@ -317,163 +320,122 @@ export default function AdminDashboard() {
     </ScrollArea>
   );
 
-  if (loading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
-  }
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return (
+          <AdminOverview
+            stats={{
+              totalUsers: users.length,
+              totalProviders: providers.length,
+              pendingApprovals: pendingProviders.length,
+              activeProviders: providers.filter(p => p.approval_status === 'approved').length,
+              totalAppointments: appointmentsCount
+            }}
+            recentActivity={recentActivity}
+            onNavigate={setActiveTab}
+          />
+        );
 
-  return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Manage users, providers, and system settings</p>
-      </div>
+      case 'bookings':
+        return <BookingManagement />;
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Users"
-          value={users.length}
-          icon={Users}
-          description="Registered patients"
-        />
-        <StatsCard
-          title="Total Providers"
-          value={providers.length}
-          icon={Stethoscope}
-          description="Healthcare professionals"
-        />
-        <StatsCard
-          title="Pending Approvals"
-          value={pendingProviders.length}
-          icon={Clock}
-          description="Awaiting review"
-        />
-        <StatsCard
-          title="Active Providers"
-          value={providers.filter(p => p.approval_status === 'approved').length}
-          icon={CheckCircle}
-          description="Approved professionals"
-        />
-      </div>
-
-      <Tabs defaultValue="pending" className="space-y-4">
-        <TabsList className="grid grid-cols-7 w-full">
-          <TabsTrigger value="pending">
-            Pending ({pendingProviders.length})
-          </TabsTrigger>
-          <TabsTrigger value="providers">
-            Providers ({providers.length})
-          </TabsTrigger>
-          <TabsTrigger value="users">
-            Users ({users.length})
-          </TabsTrigger>
-          <TabsTrigger value="analytics">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="content">
-            <FolderKanban className="h-4 w-4 mr-2" />
-            Content
-          </TabsTrigger>
-          <TabsTrigger value="bulk">
-            <Settings className="h-4 w-4 mr-2" />
-            Bulk Ops
-          </TabsTrigger>
-          <TabsTrigger value="user-mgmt">
-            <UserCog className="h-4 w-4 mr-2" />
-            User Mgmt
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="pending" className="space-y-4">
-          {selectedProvider ? (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Provider Details</CardTitle>
-                  <Button variant="outline" onClick={() => setSelectedProvider(null)}>
-                    Back to List
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <ProviderDetailView provider={selectedProvider} />
-              </CardContent>
-            </Card>
-          ) : pendingProviders.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center text-muted-foreground">
-                No pending provider applications
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Pending Provider Applications</CardTitle>
-                <CardDescription>Review and approve healthcare provider registrations</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Provider</TableHead>
-                      <TableHead>Specialty</TableHead>
-                      <TableHead>Experience</TableHead>
-                      <TableHead>Registered</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pendingProviders.map((provider) => (
-                      <TableRow key={provider.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={provider.photo_url} />
-                              <AvatarFallback>
-                                {provider.first_name?.[0]}{provider.last_name?.[0]}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium">
-                                {provider.first_name} {provider.last_name}
-                              </p>
-                              <p className="text-sm text-muted-foreground">{provider.email}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{provider.specialty || 'Not specified'}</TableCell>
-                        <TableCell>{provider.experience ? `${provider.experience} years` : 'N/A'}</TableCell>
-                        <TableCell>
-                          {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => setSelectedProvider(provider)}
-                            >
-                              View Details
-                            </Button>
-                          </div>
-                        </TableCell>
+      case 'pending':
+        return (
+          <div className="space-y-4">
+            {selectedProvider ? (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Provider Details</CardTitle>
+                    <Button variant="outline" onClick={() => setSelectedProvider(null)}>
+                      Back to List
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <ProviderDetailView provider={selectedProvider} />
+                </CardContent>
+              </Card>
+            ) : pendingProviders.length === 0 ? (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  No pending provider applications
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Pending Provider Applications
+                  </CardTitle>
+                  <CardDescription>Review and approve healthcare provider registrations</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Provider</TableHead>
+                        <TableHead>Specialty</TableHead>
+                        <TableHead>Experience</TableHead>
+                        <TableHead>Registered</TableHead>
+                        <TableHead>Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingProviders.map((provider) => (
+                        <TableRow key={provider.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar>
+                                <AvatarImage src={provider.photo_url} />
+                                <AvatarFallback>
+                                  {provider.first_name?.[0]}{provider.last_name?.[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">
+                                  {provider.first_name} {provider.last_name}
+                                </p>
+                                <p className="text-sm text-muted-foreground">{provider.email}</p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{provider.specialty || 'Not specified'}</TableCell>
+                          <TableCell>{provider.experience ? `${provider.experience} years` : 'N/A'}</TableCell>
+                          <TableCell>
+                            {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setSelectedProvider(provider)}
+                              >
+                                View Details
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        );
 
-        <TabsContent value="providers" className="space-y-4">
+      case 'providers':
+        return (
           <Card>
             <CardHeader>
-              <CardTitle>All Healthcare Providers</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Stethoscope className="h-5 w-5" />
+                All Healthcare Providers
+              </CardTitle>
               <CardDescription>View all registered healthcare professionals</CardDescription>
             </CardHeader>
             <CardContent>
@@ -516,13 +478,17 @@ export default function AdminDashboard() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        );
 
-        <TabsContent value="users" className="space-y-4">
+      case 'users':
+        return (
           <Card>
             <CardHeader>
-              <CardTitle>Registered Users</CardTitle>
-              <CardDescription>View all patient accounts</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                All Users
+              </CardTitle>
+              <CardDescription>View all registered patients and users</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -530,6 +496,7 @@ export default function AdminDashboard() {
                   <TableRow>
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Registered</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -553,8 +520,9 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{user.role}</Badge>
+                        <Badge variant="outline" className="capitalize">{user.role}</Badge>
                       </TableCell>
+                      <TableCell>{getStatusBadge(user.approval_status)}</TableCell>
                       <TableCell>
                         {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
                       </TableCell>
@@ -564,42 +532,71 @@ export default function AdminDashboard() {
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
+        );
 
-        <TabsContent value="analytics" className="space-y-4">
-          <AdminAnalytics />
-        </TabsContent>
+      case 'analytics':
+        return <AdminAnalytics />;
 
-        <TabsContent value="content" className="space-y-4">
-          <ContentManagement />
-        </TabsContent>
+      case 'content':
+        return <ContentManagement />;
 
-        <TabsContent value="bulk" className="space-y-4">
-          <BulkOperations />
-        </TabsContent>
+      case 'bulk':
+        return <BulkOperations />;
 
-        <TabsContent value="user-mgmt" className="space-y-4">
-          <UserManagement />
-        </TabsContent>
-      </Tabs>
+      case 'user-mgmt':
+        return <UserManagement />;
 
-      <AlertDialog open={actionDialog.open} onOpenChange={(open) => setActionDialog({ ...actionDialog, open })}>
+      default:
+        return null;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading admin dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <AdminSidebar 
+        pendingCount={pendingProviders.length}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
+      
+      {/* Main Content */}
+      <main className="md:ml-64 p-6 pt-16 md:pt-6">
+        {renderContent()}
+      </main>
+
+      {/* Action Confirmation Dialog */}
+      <AlertDialog 
+        open={actionDialog.open} 
+        onOpenChange={(open) => setActionDialog({ ...actionDialog, open })}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {actionDialog.action === 'approve' ? 'Approve Provider' : 'Reject Application'}
+              {actionDialog.action === 'approve' ? 'Approve Provider' : 'Reject Provider'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {actionDialog.action === 'approve'
-                ? `Are you sure you want to approve ${actionDialog.provider?.first_name} ${actionDialog.provider?.last_name} as a healthcare provider?`
-                : `Are you sure you want to reject ${actionDialog.provider?.first_name} ${actionDialog.provider?.last_name}'s application?`}
+              Are you sure you want to {actionDialog.action} {actionDialog.provider?.first_name} {actionDialog.provider?.last_name}'s application?
+              {actionDialog.action === 'approve' 
+                ? ' They will be able to access the provider dashboard.'
+                : ' They will be notified of the rejection.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => actionDialog.provider && handleProviderAction(actionDialog.provider.id, actionDialog.action)}
-              className={actionDialog.action === 'reject' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+              className={actionDialog.action === 'reject' ? 'bg-destructive hover:bg-destructive/90' : ''}
             >
               {actionDialog.action === 'approve' ? 'Approve' : 'Reject'}
             </AlertDialogAction>
