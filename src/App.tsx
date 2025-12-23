@@ -22,6 +22,8 @@ import Contact from "./pages/Contact";
 import Register from "./pages/auth/Register";
 import ProviderRegister from "./pages/auth/ProviderRegister";
 import Login from "./pages/auth/Login";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import UserDashboard from "./pages/dashboard/UserDashboard";
 import ProviderDashboard from "./pages/dashboard/ProviderDashboard";
 import ProviderPendingPage from "./pages/dashboard/ProviderPendingPage";
@@ -99,6 +101,8 @@ const App = () => (
                     <Route path="login" element={<Login />} />
                     <Route path="auth/login" element={<Login />} />
                     <Route path="login/admin" element={<Login />} />
+                    <Route path="auth/forgot-password" element={<ForgotPassword />} />
+                    <Route path="auth/reset-password" element={<ResetPassword />} />
                     
                     {/* Protected Dashboard Routes */}
                     <Route 
