@@ -166,17 +166,26 @@ export default function About() {
         </div>
 
         {/* Disclaimer */}
-        <Card className="bg-muted/30 border-l-4 border-l-primary">
+        <Card className="bg-destructive/5 border-l-4 border-l-destructive">
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-3 text-primary">Important Medical Disclaimer</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Doctori AI provides health information and guidance for educational purposes only. 
-              Our AI assistant is not a substitute for professional medical advice, diagnosis, or treatment. 
-              Always consult with qualified healthcare providers for medical concerns.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              In case of medical emergencies, contact your local emergency services immediately.
-            </p>
+            <h3 className="font-semibold mb-3 text-destructive flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Important: Platform & Medical Disclaimer
+            </h3>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Doctori AI is a health-tech platform, NOT a medical service provider.</strong> We 
+                connect users with independent healthcare professionals but do not directly provide medical care.
+              </p>
+              <p>
+                Our AI chatbot provides <strong className="text-foreground">informational guidance only</strong> — it does NOT 
+                diagnose conditions, prescribe medications, or replace professional medical advice. All medical decisions 
+                must be made by licensed healthcare professionals.
+              </p>
+              <p>
+                <strong className="text-destructive">In case of medical emergencies, contact your local emergency services immediately.</strong>
+              </p>
+            </div>
           </CardContent>
         </Card>
 

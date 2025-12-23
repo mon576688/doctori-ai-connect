@@ -79,6 +79,10 @@ export default function Contact() {
                 <Send className="mr-2 h-4 w-4" />
                 Send Message
               </Button>
+              
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                We typically respond within 24-48 hours during business days.
+              </p>
             </CardContent>
           </Card>
 
