@@ -119,3 +119,114 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Modern Section Box System */
+@layer components {
+  /* Section container base */
+  .section-box {
+    @apply rounded-3xl p-8 md:p-12 lg:p-16;
+  }
+
+  /* Section color variants */
+  .section-box-primary {
+    background: linear-gradient(135deg, hsl(217 91% 60% / 0.08), hsl(217 91% 75% / 0.04));
+    border: 1px solid hsl(217 91% 60% / 0.1);
+  }
+
+  .section-box-secondary {
+    background: linear-gradient(135deg, hsl(158 64% 52% / 0.08), hsl(142 71% 45% / 0.04));
+    border: 1px solid hsl(158 64% 52% / 0.1);
+  }
+
+  .section-box-accent {
+    background: linear-gradient(135deg, hsl(262 83% 58% / 0.08), hsl(262 83% 70% / 0.04));
+    border: 1px solid hsl(262 83% 58% / 0.1);
+  }
+
+  .section-box-warm {
+    background: linear-gradient(135deg, hsl(38 92% 50% / 0.06), hsl(45 93% 47% / 0.03));
+    border: 1px solid hsl(38 92% 50% / 0.1);
+  }
+
+  .section-box-muted {
+    @apply bg-muted/60;
+    border: 1px solid hsl(214 32% 91% / 0.5);
+  }
+
+  .section-box-gradient {
+    background: linear-gradient(135deg, 
+      hsl(217 91% 60% / 0.06), 
+      hsl(262 83% 58% / 0.04), 
+      hsl(158 64% 52% / 0.06)
+    );
+    border: 1px solid hsl(217 91% 60% / 0.08);
+  }
+
+  /* Glass morphism effect */
+  .card-glass {
+    @apply bg-background/70 backdrop-blur-md border border-border/50;
+    box-shadow: 0 8px 32px hsl(217 91% 60% / 0.1);
+  }
+
+  /* Hover lift effect */
+  .card-hover-lift {
+    @apply transition-all duration-300;
+  }
+  .card-hover-lift:hover {
+    @apply -translate-y-2;
+    box-shadow: 0 12px 40px hsl(217 91% 60% / 0.15);
+  }
+
+  /* Gradient border effect */
+  .card-gradient-border {
+    position: relative;
+    background: hsl(var(--background));
+    border-radius: 1rem;
+  }
+  .card-gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, hsl(217 91% 60%), hsl(158 64% 52%), hsl(262 83% 58%));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0.3;
+  }
+
+  /* Floating shapes for decoration */
+  .floating-shape {
+    @apply absolute rounded-full opacity-20 blur-3xl;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  /* Section divider wave */
+  .section-wave {
+    position: relative;
+  }
+  .section-wave::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: hsl(var(--background));
+    clip-path: ellipse(60% 100% at 50% 100%);
+  }
+
+  /* Quote decoration for testimonials */
+  .quote-decoration::before {
+    content: '"';
+    @apply absolute -top-4 -left-2 text-6xl text-primary/20 font-serif;
+  }
+
+  /* Stat card glow */
+  .stat-glow {
+    box-shadow: 0 0 40px hsl(217 91% 60% / 0.2);
+  }
+}
