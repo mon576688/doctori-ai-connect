@@ -38,40 +38,39 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/chat">
                   <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto shadow-medical">
-                    <MessageCircle className="mr-2 h-5 w-5" />
                     Start Chat
                   </Button>
                 </Link>
                 <Link to="/booking/location">
                   <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    <Calendar className="mr-2 h-5 w-5" />
                     Book Appointment
                   </Button>
                 </Link>
-                <Link to="/doctors">
-                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    <Search className="mr-2 h-5 w-5" />
-                    Find Doctors
+                <Link to="/blood-donation">
+                  <Button variant="destructive" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                    Register for Blood Donation
                   </Button>
                 </Link>
               </div>
-
+              
               <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/doctors">
+                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                    Find Doctors
+                  </Button>
+                </Link>
                 <Link to="/blog">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    <BookOpen className="mr-2 h-5 w-5" />
                     Health Blog
                   </Button>
                 </Link>
                 <Link to="/bmi-calculator">
                   <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    <Calculator className="mr-2 h-5 w-5" />
                     BMI Calculator
                   </Button>
                 </Link>
                 <Link to="/reminders">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    <Bell className="mr-2 h-5 w-5" />
                     Health Reminders
                   </Button>
                 </Link>

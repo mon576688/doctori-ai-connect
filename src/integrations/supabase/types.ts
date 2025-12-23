@@ -219,6 +219,51 @@ export type Database = {
           },
         ]
       }
+      blood_donors: {
+        Row: {
+          age: number
+          available_for_donation: boolean
+          blood_group: string
+          city: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          last_donated_date: string | null
+          mobile_number: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          age: number
+          available_for_donation?: boolean
+          blood_group: string
+          city: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          last_donated_date?: string | null
+          mobile_number: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          age?: number
+          available_for_donation?: boolean
+          blood_group?: string
+          city?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          last_donated_date?: string | null
+          mobile_number?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string

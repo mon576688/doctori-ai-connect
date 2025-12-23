@@ -37,6 +37,7 @@ import DateSelect from "./pages/booking/DateSelect";
 import TimeSelect from "./pages/booking/TimeSelect";
 import ReviewConfirm from "./pages/booking/ReviewConfirm";
 import Confirmed from "./pages/booking/Confirmed";
+import BloodDonation from "./pages/BloodDonation";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
                     <Route path="profile" element={<UserProfile />} />
                     <Route path="bmi-calculator" element={<BMICalculator />} />
                     <Route path="reminders" element={<Reminders />} />
+                    <Route path="blood-donation" element={<BloodDonation />} />
                     
                     {/* Booking Routes */}
                     <Route path="booking/location" element={<LocationSelect />} />
