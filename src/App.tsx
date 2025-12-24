@@ -28,6 +28,7 @@ import UserDashboard from "./pages/dashboard/UserDashboard";
 import ProviderDashboard from "./pages/dashboard/ProviderDashboard";
 import ProviderPendingPage from "./pages/dashboard/ProviderPendingPage";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import BMICalculator from "./pages/BMICalculator";
 import Reminders from "./pages/Reminders";
@@ -85,6 +86,9 @@ const App = () => (
                     <Route path="bmi-calculator" element={<BMICalculator />} />
                     <Route path="reminders" element={<Reminders />} />
                     <Route path="blood-donation" element={<BloodDonation />} />
+                    
+                    {/* Dashboard redirect route */}
+                    <Route path="dashboard" element={<Dashboard />} />
                     
                     {/* Booking Routes */}
                     <Route path="booking/location" element={<LocationSelect />} />
