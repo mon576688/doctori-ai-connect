@@ -1,20 +1,48 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, Star, Briefcase, DollarSign, Clock } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { 
+  MapPin, 
+  Star, 
+  Briefcase, 
+  Clock, 
+  Phone, 
+  Mail, 
+  Calendar,
+  Heart,
+  Share2,
+  Award,
+  Users,
+  CheckCircle,
+  ArrowLeft,
+  MessageSquare,
+  Camera
+} from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/lib/bookingUtils';
 import { toast } from 'sonner';
+import { ReviewsList } from '@/components/reviews/ReviewsList';
+import { ReviewForm } from '@/components/reviews/ReviewForm';
+import { AppointmentBookingForm } from '@/components/AppointmentBookingForm';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function ProviderProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { setProvider } = useBooking();
+  const { user } = useAuth();
   const [provider, setProviderData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const isOwnProfile = user?.id === id;
 
   useEffect(() => {
     const fetchProvider = async () => {
@@ -31,7 +59,10 @@ export default function ProviderProfile() {
             latitude,
             longitude,
             address,
+            city,
             provider_type,
+            phone,
+            email,
             provider_services (
               price,
               service_name,
@@ -46,26 +77,42 @@ export default function ProviderProfile() {
 
         const formattedProvider = {
           id: data.id,
-          name: data.name || `${data.first_name || ''} ${data.last_name || ''}`.trim(),
-          bio: data.bio || 'No bio available',
+          name: data.name || `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Provider',
+          bio: data.bio || 'No bio available. This provider has not added a description yet.',
           photo_url: data.photo_url || '/placeholder.svg',
           latitude: data.latitude ? parseFloat(String(data.latitude)) : 0,
           longitude: data.longitude ? parseFloat(String(data.longitude)) : 0,
           address: data.address || 'Address not provided',
-          provider_type: data.provider_type,
+          city: data.city || '',
+          provider_type: data.provider_type || 'Healthcare Provider',
+          phone: data.phone || 'Not provided',
+          email: data.email || 'Not provided',
           specialty: data.provider_services?.[0]?.service_name || 'General Practice',
           price: data.provider_services?.[0]?.price || 0,
           duration: data.provider_services?.[0]?.duration_minutes || 30,
-          experience: 5, // Default
+          experience: 5,
           rating: 4.8,
+          reviews: 0,
           services: data.provider_services || [],
+          languages: ['English', 'Bengali'],
+          education: ['Medical Degree', 'Board Certified'],
+          certifications: ['Licensed Healthcare Provider'],
+          hours: {
+            saturday: '9:00 AM - 5:00 PM',
+            sunday: '9:00 AM - 5:00 PM',
+            monday: '9:00 AM - 5:00 PM',
+            tuesday: '9:00 AM - 5:00 PM',
+            wednesday: '9:00 AM - 5:00 PM',
+            thursday: '9:00 AM - 5:00 PM',
+            friday: 'Closed'
+          }
         };
 
         setProviderData(formattedProvider);
       } catch (error) {
         console.error('Error fetching provider:', error);
         toast.error('Failed to load provider details');
-        navigate('/booking/providers');
+        navigate('/doctors');
       } finally {
         setLoading(false);
       }
@@ -83,6 +130,47 @@ export default function ProviderProfile() {
     }
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      setUploading(true);
+
+      // Upload to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ photo_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProviderData((prev: any) => ({ ...prev, photo_url: publicUrl }));
+      toast.success('Profile photo updated successfully!');
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast.error('Failed to upload photo');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -92,92 +180,153 @@ export default function ProviderProfile() {
   }
 
   if (!provider) {
-    return null;
+    return (
+      <div className="container py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Provider Not Found</h1>
+          <Link to="/doctors">
+            <Button variant="medical">Back to Providers</Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <Card className="overflow-hidden">
-          <div className="bg-gradient-primary h-32"></div>
-          <CardHeader className="relative -mt-16">
-            <div className="flex flex-col md:flex-row gap-6 items-start md:items-end">
-              <img
-                src={provider.photo_url}
-                alt={provider.name}
-                className="w-32 h-32 rounded-full border-4 border-background object-cover shadow-lg"
-              />
-              <div className="flex-1">
-                <div className="flex items-start justify-between flex-wrap gap-4">
-                  <div>
-                    <CardTitle className="text-3xl mb-2">{provider.name}</CardTitle>
-                    <div className="flex gap-2 flex-wrap">
-                      <Badge variant="secondary">{provider.specialty}</Badge>
-                      <Badge variant="outline">{provider.provider_type}</Badge>
+    <div className="container py-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Back Button */}
+        <Link to="/doctors" className="inline-flex items-center text-primary hover:text-primary/80 mb-6">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Providers
+        </Link>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Profile */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Provider Header */}
+            <Card className="shadow-medical">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="relative mx-auto md:mx-0">
+                    <img
+                      src={provider.photo_url}
+                      alt={provider.name}
+                      className="w-32 h-32 rounded-full object-cover border-4 border-background shadow-lg"
+                    />
+                    {isOwnProfile && (
+                      <label className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-2 cursor-pointer hover:bg-primary/90 transition-colors">
+                        <Camera className="h-4 w-4" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                      </label>
+                    )}
+                    {uploading && (
+                      <div className="absolute inset-0 bg-background/50 rounded-full flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 text-center md:text-left">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
+                      <div>
+                        <h1 className="text-3xl font-bold mb-2">{provider.name}</h1>
+                        <div className="flex gap-2 flex-wrap justify-center md:justify-start mb-2">
+                          <Badge variant="secondary" className="text-base px-3 py-1">
+                            {provider.specialty}
+                          </Badge>
+                          <Badge variant="outline">{provider.provider_type}</Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-center md:justify-start space-x-1 mb-2">
+                        <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                        <span className="text-lg font-medium">{provider.rating}</span>
+                        <span className="text-muted-foreground">({provider.reviews} reviews)</span>
+                      </div>
+                    </div>
+                    
+                    <p className="text-muted-foreground mb-4">{provider.bio}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div className="flex items-center gap-2 justify-center md:justify-start">
+                        <Award className="h-4 w-4 text-primary" />
+                        <span>{provider.experience}+ years experience</span>
+                      </div>
+                      <div className="flex items-center gap-2 justify-center md:justify-start">
+                        <Users className="h-4 w-4 text-secondary" />
+                        <span>Languages: {provider.languages.join(", ")}</span>
+                      </div>
+                      <div className="flex items-center gap-2 justify-center md:justify-start">
+                        <MapPin className="h-4 w-4 text-accent" />
+                        <span>{provider.city || provider.address}</span>
+                      </div>
+                      <div className="flex items-center gap-2 justify-center md:justify-start">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <span>Available for booking</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-primary">
-                      {formatPrice(provider.price)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">per session</div>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </CardHeader>
+              </CardContent>
+            </Card>
 
-          <CardContent className="space-y-6 mt-6">
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Briefcase className="text-primary" size={20} />
-                </div>
+            {/* Education & Certifications */}
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Award className="h-5 w-5 mr-2 text-primary" />
+                  Education & Certifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div>
-                  <div className="text-sm text-muted-foreground">Experience</div>
-                  <div className="font-semibold">{provider.experience} years</div>
+                  <h4 className="font-semibold mb-2">Education</h4>
+                  <ul className="space-y-1">
+                    {provider.education.map((item: string, index: number) => (
+                      <li key={index} className="flex items-center text-sm">
+                        <CheckCircle className="h-3 w-3 text-secondary mr-2" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Star className="text-primary" size={20} />
-                </div>
+                
+                <Separator />
+                
                 <div>
-                  <div className="text-sm text-muted-foreground">Rating</div>
-                  <div className="font-semibold">{provider.rating} ⭐</div>
+                  <h4 className="font-semibold mb-2">Certifications</h4>
+                  <ul className="space-y-1">
+                    {provider.certifications.map((item: string, index: number) => (
+                      <li key={index} className="flex items-center text-sm">
+                        <CheckCircle className="h-3 w-3 text-primary mr-2" />
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Clock className="text-primary" size={20} />
-                </div>
-                <div>
-                  <div className="text-sm text-muted-foreground">Duration</div>
-                  <div className="font-semibold">{provider.duration} min</div>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div>
-              <h3 className="text-lg font-semibold mb-2">About</h3>
-              <p className="text-muted-foreground leading-relaxed">{provider.bio}</p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Location</h3>
-              <div className="flex items-start gap-2">
-                <MapPin className="text-primary mt-1" size={20} />
-                <p className="text-muted-foreground">{provider.address}</p>
-              </div>
-            </div>
-
+            {/* Services Offered */}
             {provider.services.length > 0 && (
-              <div>
-                <h3 className="text-lg font-semibold mb-3">Services Offered</h3>
-                <div className="grid gap-3">
-                  {provider.services.map((service: any, idx: number) => (
-                    <Card key={idx} className="p-4">
-                      <div className="flex justify-between items-start">
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Briefcase className="h-5 w-5 mr-2 text-primary" />
+                    Services Offered
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3">
+                    {provider.services.map((service: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-start p-4 bg-muted/50 rounded-lg">
                         <div>
                           <h4 className="font-medium">{service.service_name}</h4>
                           {service.description && (
@@ -195,23 +344,165 @@ export default function ProviderProfile() {
                           </div>
                         </div>
                       </div>
-                    </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Office Hours */}
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Clock className="h-5 w-5 mr-2 text-primary" />
+                  Office Hours
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {Object.entries(provider.hours).map(([day, hours]) => (
+                    <div key={day} className="flex justify-between py-2 border-b border-border/50">
+                      <span className="font-medium capitalize">{day}</span>
+                      <span className="text-muted-foreground">{hours as string}</span>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
 
-        <div className="mt-6 sticky bottom-4">
-          <Button
-            onClick={handleBookAppointment}
-            variant="medical"
-            size="lg"
-            className="w-full shadow-float"
-          >
-            Book Appointment
-          </Button>
+            {/* Reviews Section */}
+            <Card className="shadow-card">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <MessageSquare className="h-5 w-5 mr-2 text-primary" />
+                    Patient Reviews
+                  </CardTitle>
+                  {user && !isOwnProfile && (
+                    <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          Write Review
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <ReviewForm 
+                          providerId={provider.id} 
+                          onSuccess={() => setShowReviewDialog(false)} 
+                        />
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ReviewsList providerId={provider.id} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Booking Card */}
+            <Card className="shadow-medical sticky top-4">
+              <CardHeader>
+                <CardTitle className="text-center">Book Appointment</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary mb-1">
+                    {formatPrice(provider.price)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Consultation Fee</div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="medical" className="w-full">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Book Appointment
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <AppointmentBookingForm
+                        doctorId={provider.id}
+                        doctorName={provider.name}
+                        onSuccess={() => setShowBookingDialog(false)}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <Button 
+                    variant="healing" 
+                    className="w-full" 
+                    onClick={handleBookAppointment}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule Now
+                  </Button>
+                  
+                  {provider.phone !== 'Not provided' && (
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href={`tel:${provider.phone}`}>
+                        <Phone className="h-4 w-4 mr-2" />
+                        Call {provider.phone}
+                      </a>
+                    </Button>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1">
+                      <Heart className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                    <Button variant="outline" className="flex-1">
+                      <Share2 className="h-4 w-4 mr-1" />
+                      Share
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Contact Info */}
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle>Contact Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <Phone className="h-4 w-4 text-primary" />
+                  <span className="text-sm">{provider.phone}</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <Mail className="h-4 w-4 text-secondary" />
+                  <span className="text-sm">{provider.email}</span>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-4 w-4 text-accent mt-0.5" />
+                  <span className="text-sm">{provider.address}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Emergency Notice */}
+            <Card className="bg-destructive/5 border-destructive/20">
+              <CardContent className="p-4">
+                <div className="text-center">
+                  <h4 className="font-semibold text-destructive mb-2">Medical Emergency?</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    For urgent medical care, call 999 or visit your nearest emergency room.
+                  </p>
+                  <Button variant="destructive" size="sm" className="w-full" asChild>
+                    <a href="tel:999">Emergency Services</a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
