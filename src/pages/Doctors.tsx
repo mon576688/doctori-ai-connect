@@ -288,7 +288,7 @@ export default function Doctors() {
                           </div>
                           
                           <div className="flex gap-2">
-                            <Link to={`/doctor/${provider.id}`}>
+                            <Link to={`/booking/provider/${provider.id}`}>
                               <Button variant="medical" size="sm">
                                 <Calendar className="h-4 w-4 mr-1" />
                                 View Profile
@@ -355,7 +355,7 @@ export default function Doctors() {
                       </div>
                       
                       <div className="space-y-2">
-                        <Link to={`/doctor/${selectedDoctor.id}`}>
+                        <Link to={`/booking/provider/${providers.find(p => convertToDoctor(p).id === selectedDoctor.id)?.id || ''}`}>
                           <Button variant="medical" size="sm" className="w-full">
                             View Full Profile
                           </Button>
