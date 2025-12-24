@@ -62,6 +62,7 @@ export type Database = {
           appointment_type: string | null
           cancellation_reason: string | null
           consultation_ended_at: string | null
+          consultation_link: string | null
           consultation_platform: string | null
           consultation_started_at: string | null
           consultation_status: string | null
@@ -80,6 +81,7 @@ export type Database = {
           appointment_type?: string | null
           cancellation_reason?: string | null
           consultation_ended_at?: string | null
+          consultation_link?: string | null
           consultation_platform?: string | null
           consultation_started_at?: string | null
           consultation_status?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           appointment_type?: string | null
           cancellation_reason?: string | null
           consultation_ended_at?: string | null
+          consultation_link?: string | null
           consultation_platform?: string | null
           consultation_started_at?: string | null
           consultation_status?: string | null
