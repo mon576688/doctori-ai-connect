@@ -9,12 +9,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Stethoscope, Users, FileText, User, MessageSquare, Calendar as CalendarIcon, Video } from 'lucide-react';
 import { ProviderAvailability } from '@/components/ProviderAvailability';
 import { AppointmentsList } from '@/components/AppointmentsList';
 import { DocumentUpload } from '@/components/provider/DocumentUpload';
 import { Inbox } from '@/components/messaging/Inbox';
 import ConsultationAppointments from '@/components/provider/ConsultationAppointments';
+import { ProfilePhotoUpload } from '@/components/provider/ProfilePhotoUpload';
+
+const PROVIDER_TYPES = [
+  { value: 'doctor', label: 'Doctor' },
+  { value: 'hospital', label: 'Hospital' },
+  { value: 'nurse', label: 'Nurse' }
+];
 
 interface Patient {
   id: string;
@@ -122,6 +130,12 @@ export default function ProviderDashboard() {
     setLoading(true);
 
     try {
+      // Validate provider_type is one of allowed values
+      const validProviderTypes = ['doctor', 'hospital', 'nurse'];
+      const providerType = validProviderTypes.includes(profileData.provider_type) 
+        ? profileData.provider_type 
+        : 'doctor';
+
       // Update profiles table with comprehensive data
       const { error: profileError } = await supabase
         .from('profiles')
@@ -132,22 +146,24 @@ export default function ProviderDashboard() {
           bio: profileData.bio,
           address: profileData.address,
           city: profileData.city,
-          provider_type: profileData.provider_type,
+          provider_type: providerType,
           photo_url: profileData.photo_url
         })
         .eq('id', profile?.id);
 
       if (profileError) throw profileError;
 
-      // Upsert doctors table
+      // Upsert doctors table - required for availability slots FK
       const { error: doctorError } = await supabase
         .from('doctors')
         .upsert({
           user_id: profile?.id,
           bio: profileData.bio,
-          specialty: profileData.specialty,
+          specialty: profileData.specialty || 'General',
           experience: parseInt(profileData.experience) || 0,
           license_number: profileData.license_number
+        }, {
+          onConflict: 'user_id'
         });
 
       if (doctorError) throw doctorError;
@@ -162,18 +178,20 @@ export default function ProviderDashboard() {
         title: "Profile updated",
         description: "Your provider profile has been updated successfully.",
       });
-      
-      refetchProfile();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating profile:', error);
       toast({
         title: "Error",
-        description: "Failed to update profile",
+        description: error.message || "Failed to update profile",
         variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhotoUpdated = (url: string) => {
+    setProfileData(prev => ({ ...prev, photo_url: url }));
   };
 
   return (
@@ -236,6 +254,17 @@ export default function ProviderDashboard() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleProfileUpdate} className="space-y-6">
+                  {/* Profile Photo Upload */}
+                  <div className="flex justify-center pb-4 border-b">
+                    <ProfilePhotoUpload
+                      currentPhotoUrl={profileData.photo_url}
+                      userId={profile?.id || ''}
+                      firstName={profileData.first_name}
+                      lastName={profileData.last_name}
+                      onPhotoUpdated={handlePhotoUpdated}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="first_name">First Name *</Label>
@@ -273,13 +302,21 @@ export default function ProviderDashboard() {
 
                     <div className="space-y-2">
                       <Label htmlFor="provider_type">Provider Type *</Label>
-                      <Input
-                        id="provider_type"
+                      <Select
                         value={profileData.provider_type}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, provider_type: e.target.value }))}
-                        placeholder="e.g., Doctor, Nurse, Therapist"
-                        required
-                      />
+                        onValueChange={(value) => setProfileData(prev => ({ ...prev, provider_type: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select provider type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROVIDER_TYPES.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
                     <div className="space-y-2">
@@ -336,17 +373,6 @@ export default function ProviderDashboard() {
                       onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
                       placeholder="Complete address with street, area, etc."
                       required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="photo_url">Profile Photo URL</Label>
-                    <Input
-                      id="photo_url"
-                      type="url"
-                      value={profileData.photo_url}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, photo_url: e.target.value }))}
-                      placeholder="https://example.com/photo.jpg"
                     />
                   </div>
 

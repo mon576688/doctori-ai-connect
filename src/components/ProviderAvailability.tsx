@@ -31,10 +31,66 @@ export const ProviderAvailability = () => {
   const { toast } = useToast();
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasDoctorRecord, setHasDoctorRecord] = useState(false);
 
   useEffect(() => {
-    fetchAvailability();
+    if (user) {
+      checkDoctorRecord();
+      fetchAvailability();
+    }
   }, [user]);
+
+  const checkDoctorRecord = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from("doctors")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!error && data) {
+      setHasDoctorRecord(true);
+    } else {
+      setHasDoctorRecord(false);
+    }
+  };
+
+  const ensureDoctorRecord = async () => {
+    if (!user) return false;
+
+    // Check if doctor record exists
+    const { data: existing } = await supabase
+      .from("doctors")
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (existing) {
+      setHasDoctorRecord(true);
+      return true;
+    }
+
+    // Create doctor record if not exists
+    const { error } = await supabase.from("doctors").insert({
+      user_id: user.id,
+      specialty: "General",
+      bio: ""
+    });
+
+    if (error) {
+      console.error("Error creating doctor record:", error);
+      toast({
+        title: "Setup Required",
+        description: "Please update your profile first before setting availability.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    setHasDoctorRecord(true);
+    return true;
+  };
 
   const fetchAvailability = async () => {
     if (!user) return;
@@ -59,6 +115,13 @@ export const ProviderAvailability = () => {
 
     setIsLoading(true);
 
+    // Ensure doctor record exists first
+    const hasRecord = await ensureDoctorRecord();
+    if (!hasRecord) {
+      setIsLoading(false);
+      return;
+    }
+
     const { error } = await supabase.from("availability_slots").insert({
       provider_id: user.id,
       day_of_week: dayOfWeek,
@@ -70,6 +133,7 @@ export const ProviderAvailability = () => {
     setIsLoading(false);
 
     if (error) {
+      console.error("Error adding slot:", error);
       toast({
         title: "Error",
         description: error.message,
