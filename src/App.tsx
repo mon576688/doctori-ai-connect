@@ -73,10 +73,10 @@ const App = () => (
                     <Route path="doctor/:id" element={<DoctorProfile />} />
                     <Route path="medicine" element={<Medicine />} />
                     {/* Blog routes */}
-                    <Route path="blog" element={<Blog />}>
-                      <Route path="health-tips-bd" element={<HealthTipsBD />} />
-                    </Route>
+                    <Route path="blog" element={<Blog />} />
                     <Route path="blog/:slug" element={<BlogPost />} />
+                    {/* Health Tips - Separate page */}
+                    <Route path="health-tips" element={<HealthTipsBD />} />
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
                     <Route path="terms" element={<TermsAndConditions />} />

@@ -80,7 +80,7 @@ export const Navbar = () => {
                 <Link to="/blog" className="w-full">All Blogs</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/blog/health-tips-bd" className="w-full">Health Tips</Link>
+                <Link to="/health-tips" className="w-full">Health Tips</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -134,8 +134,8 @@ export const Navbar = () => {
                 <Link to="/blog" className="block text-foreground hover:text-primary transition-colors py-1 pl-4" onClick={() => setIsOpen(false)}>
                   All Blogs
                 </Link>
-                <Link to="/blog/health-tips-bd" className="block text-foreground hover:text-primary transition-colors py-1 pl-4" onClick={() => setIsOpen(false)}>
-                  Health Tips (BD)
+                <Link to="/health-tips" className="block text-foreground hover:text-primary transition-colors py-1 pl-4" onClick={() => setIsOpen(false)}>
+                  Health Tips
                 </Link>
               </div>
               
