@@ -720,7 +720,7 @@ const Index = () => {
                 {
                   question: "Is my health data secure?",
                   answer:
-                    "Absolutely. We follow industry-standard security practices. Your health information is encrypted and securely stored, and we do not sell your personal or health information.",
+                    "Absolutely. We use medical-grade security and are HIPAA compliant. Your health information is encrypted and protected.",
                 },
                 {
                   question: "How do I book an appointment with a doctor?",
@@ -795,7 +795,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center bg-background/50 rounded-full px-4 py-2">
                   <Shield className="h-4 w-4 text-primary mr-2" />
-                  HIPAA compliant
+                  Medical-Grade Security
                 </div>
                 <div className="flex items-center bg-background/50 rounded-full px-4 py-2">
                   <Clock className="h-4 w-4 text-accent mr-2" />
