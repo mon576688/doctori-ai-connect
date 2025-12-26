@@ -519,82 +519,74 @@ const Index = () => {
       </section>
 
       {/* Advanced Features Section - Bento Grid */}
-      <section className="py-20 px-4 bg-muted/10">
+      <section className="py-20 px-4">
         <div className="container max-w-6xl mx-auto">
-          {/* Section Header */}
-          <div className="text-center mb-12">
-            <Badge className="bg-primary/20 text-primary mb-4">Cutting Edge</Badge>
-            <h2 className="text-3xl lg:text-4xl font-bold mb-4">Advanced AI Features</h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Cutting-edge technology to support your health journey
-            </p>
-          </div>
+          <div className="section-box section-box-primary">
+            <div className="text-center mb-12">
+              <Badge className="bg-primary/20 text-primary mb-4">Cutting Edge</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Advanced AI Features</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Cutting-edge technology to support your health journey
+              </p>
+            </div>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6 auto-rows-fr">
-            {[
-              {
-                icon: Languages,
-                title: "Multi-Language Support",
-                description: "Chat in your preferred language including English, Bengali, and more",
-                colSpan: "md:col-span-4",
-                rowSpan: "md:row-span-1",
-              },
-              {
-                icon: Smartphone,
-                title: "Mobile Optimized",
-                description: "Access Doctori AI on any device, anywhere, anytime",
-                colSpan: "md:col-span-2",
-                rowSpan: "md:row-span-1",
-              },
-              {
-                icon: Calendar,
-                title: "Symptom Tracking",
-                description: "Track your symptoms over time and share with doctors",
-                colSpan: "md:col-span-3",
-                rowSpan: "md:row-span-1",
-              },
-              {
-                icon: FileText,
-                title: "Health Reports",
-                description: "Generate detailed health summaries and consultation reports",
-                colSpan: "md:col-span-3",
-                rowSpan: "md:row-span-2",
-              },
-              {
-                icon: TrendingUp,
-                title: "Progress Monitoring",
-                description: "Monitor your health trends and improvements over time",
-                colSpan: "md:col-span-2",
-                rowSpan: "md:row-span-1",
-              },
-              {
-                icon: Zap,
-                title: "Instant Analysis",
-                description: "Get immediate insights based on your symptoms and health data",
-                colSpan: "md:col-span-4",
-                rowSpan: "md:row-span-1",
-              },
-            ].map((feature, index) => {
-              const Icon = feature.icon;
-              return (
-                <Card
-                  key={index}
-                  className={`bg-background/80 backdrop-blur-sm p-6 flex items-start gap-4 ${feature.colSpan} ${feature.rowSpan} hover:shadow-xl transition-shadow duration-300`}
-                >
-                  <div className="bg-gradient-primary p-3 rounded-xl flex-shrink-0">
-                    <Icon className="h-6 w-6 text-primary-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </div>
+            {/* Bento Grid Layout */}
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Languages,
+                  title: "Multi-Language Support",
+                  description: "Chat in your preferred language including English, Bengali, and more",
+                  size: "md:col-span-2",
+                },
+                {
+                  icon: Smartphone,
+                  title: "Mobile Optimized",
+                  description: "Access Doctori AI on any device, anywhere, anytime",
+                  size: "",
+                },
+                {
+                  icon: Calendar,
+                  title: "Symptom Tracking",
+                  description: "Track your symptoms over time and share with doctors",
+                  size: "",
+                },
+                {
+                  icon: FileText,
+                  title: "Health Reports",
+                  description: "Generate detailed health summaries and consultation reports",
+                  size: "md:col-span-2",
+                },
+                {
+                  icon: TrendingUp,
+                  title: "Progress Monitoring",
+                  description: "Monitor your health trends and improvements over time",
+                  size: "",
+                },
+                {
+                  icon: Zap,
+                  title: "Instant Analysis",
+                  description: "Get immediate insights based on your symptoms and health data",
+                  size: "md:col-span-2",
+                },
+              ].map((feature, index) => (
+                <Card key={index} className={`bg-background/80 backdrop-blur-sm card-hover-lift ${feature.size}`}>
+                  <CardContent className="p-6 flex items-start gap-4">
+                    <div className="bg-gradient-primary p-3 rounded-xl flex-shrink-0">
+                      <feature.icon className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                      <p className="text-muted-foreground">{feature.description}</p>
+                    </div>
+                  </CardContent>
                 </Card>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </div>
       </section>
+
       {/* Testimonials Section */}
       <section className="py-20 px-4">
         <div className="container max-w-6xl mx-auto">
