@@ -720,6 +720,11 @@ const Index = () => {
                 {
                   question: "Is my health data secure?",
                   answer:
+                    "Absolutely. We follow industry-standard security practices. Your health information is encrypted and securely stored, and we do not sell your personal or health information.",
+                },
+                {
+                  question: "Is my health data secure?",
+                  answer:
                     "Absolutely. We use medical-grade security and are HIPAA compliant. Your health information is encrypted and protected.",
                 },
                 {
