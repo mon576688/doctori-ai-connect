@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HeroSearchBar } from "@/components/HeroSearchBar";
 import {
   MessageCircle,
   Search,
@@ -65,11 +64,6 @@ const Index = () => {
                 <p className="text-lg text-muted-foreground/80 leading-relaxed">
                   Your trusted virtual health companion, available 24/7 to guide you on your wellness journey.
                 </p>
-              </div>
-
-              {/* Hero Search Bar */}
-              <div className="py-4">
-                <HeroSearchBar />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
