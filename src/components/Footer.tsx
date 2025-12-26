@@ -2,12 +2,27 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Heart, Stethoscope, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, MessageCircle, Smartphone, Download, UserPlus } from "lucide-react";
+import {
+  Heart,
+  Stethoscope,
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  MessageCircle,
+  Smartphone,
+  Download,
+  UserPlus,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 export const Footer = () => {
   const { user } = useAuth();
-  
-  return <footer className="bg-muted/30 border-t">
+
+  return (
+    <footer className="bg-muted/30 border-t">
       <div className="container py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}
@@ -16,9 +31,7 @@ export const Footer = () => {
               <div className="bg-gradient-primary p-2 rounded-lg">
                 <Stethoscope className="h-5 w-5 text-white" />
               </div>
-              <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Doctori AI
-              </span>
+              <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">Doctori AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Your trusted virtual health assistant, available 24/7 to guide you on your wellness journey.
@@ -71,7 +84,10 @@ export const Footer = () => {
               <Link to="/privacy" className="block text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link to="/doctor-verification" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link
+                to="/doctor-verification"
+                className="block text-muted-foreground hover:text-primary transition-colors"
+              >
                 Doctor Verification
               </Link>
             </div>
@@ -99,9 +115,7 @@ export const Footer = () => {
           {/* Download Apps */}
           <div className="space-y-4">
             <h3 className="font-semibold">Download Our Apps</h3>
-            <p className="text-sm text-muted-foreground">
-              Get Doctori AI on your mobile device
-            </p>
+            <p className="text-sm text-muted-foreground">Get Doctori AI on your mobile device</p>
             <div className="space-y-2">
               <Button variant="outline" size="sm" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" />
@@ -112,17 +126,13 @@ export const Footer = () => {
                 Apple App Store
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Coming soon to mobile platforms
-            </p>
+            <p className="text-xs text-muted-foreground">Coming soon to mobile platforms</p>
           </div>
 
           {/* Newsletter */}
           <div className="space-y-4">
             <h3 className="font-semibold">Health Updates</h3>
-            <p className="text-sm text-muted-foreground">
-              Get weekly health tips from Doctori AI
-            </p>
+            <p className="text-sm text-muted-foreground">Get weekly health tips from Doctori AI</p>
             <div className="space-y-2">
               <Input placeholder="Enter your email" className="text-sm" />
               <Button variant="healing" size="sm" className="w-full">
@@ -136,8 +146,10 @@ export const Footer = () => {
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="text-sm text-muted-foreground">© 2025 Doctori AI, Mahnoor LLC. Powered by care, guided by AI.</div>
-          
+          <div className="text-sm text-muted-foreground">
+            © 2025 Doctori AI, Mahnoor LLC. Powered by care, guided by AI.
+          </div>
+
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">Follow us:</span>
             <div className="flex space-x-2">
@@ -155,10 +167,7 @@ export const Footer = () => {
               </Button>
             </div>
             {/* Staff Access Link */}
-            <Link 
-              to="/login/admin" 
-              className="text-muted-foreground hover:text-primary transition-colors text-xs"
-            >
+            <Link to="/login/admin" className="text-muted-foreground hover:text-primary transition-colors text-xs">
               Staff Access
             </Link>
           </div>
@@ -168,7 +177,7 @@ export const Footer = () => {
         <div className="flex flex-wrap justify-center gap-6 mt-8 pt-8 border-t opacity-60">
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Heart className="h-4 w-4" />
-            <span>HIPAA Compliant</span>
+            <span>Data Secured & Confidential</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Stethoscope className="h-4 w-4" />
@@ -180,5 +189,6 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
