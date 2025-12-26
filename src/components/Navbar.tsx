@@ -1,18 +1,29 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus } from "lucide-react";
+import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus, Search } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoleBasedAuth } from "@/hooks/useRoleBasedAuth";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { NotificationBell } from "@/components/NotificationBell";
+import { Input } from "@/components/ui/input";
+
 export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { profile } = useRoleBasedAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
   
   // Helper function to get dashboard path based on user role
   const getDashboardPath = () => {
@@ -37,7 +48,8 @@ export const Navbar = () => {
   };
   const isActive = (path: string) => location.pathname === path;
   const isBlogActive = location.pathname.startsWith('/blog');
-  return <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  return (
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
@@ -162,5 +174,22 @@ export const Navbar = () => {
             </div>
           </div>}
       </div>
-    </nav>;
+
+      {/* Search Bar - Separate line under menu */}
+      <div className="border-t bg-background/80">
+        <div className="container py-2">
+          <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search doctors, blogs, health tips, medicine..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full rounded-full border-primary/20 focus:border-primary"
+            />
+          </form>
+        </div>
+      </div>
+    </nav>
+  );
 };
