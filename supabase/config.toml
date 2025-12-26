@@ -17,3 +17,9 @@ verify_jwt = true
 
 [functions.search]
 verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.appointment-reminders]
+verify_jwt = false
