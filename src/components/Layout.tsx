@@ -3,6 +3,7 @@ import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { ChatWidget } from "./ChatWidget";
 import { SyncStatus } from "./SyncStatus";
+import { ScrollToTop } from "./ScrollToTop";
 
 export const Layout = () => {
   return (
@@ -14,6 +15,7 @@ export const Layout = () => {
       <Footer />
       <ChatWidget />
       <SyncStatus />
+      <ScrollToTop />
     </div>
   );
 };
