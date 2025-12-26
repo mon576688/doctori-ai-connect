@@ -8,10 +8,14 @@ export default function HealthTipsBD() {
   useEffect(() => {
     document.title = "Bangladesh Health Tips | Doctori AI";
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'Bangladesh-specific health tips: dengue prevention, safe water, heatwave safety, air pollution, maternal & child health, and more.');
-    const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement('link');
-    linkCanonical.setAttribute('rel', 'canonical');
-    linkCanonical.setAttribute('href', window.location.href);
+    if (metaDesc)
+      metaDesc.setAttribute(
+        "content",
+        "Bangladesh-specific health tips: dengue prevention, safe water, heatwave safety, air pollution, maternal & child health, and more.",
+      );
+    const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement("link");
+    linkCanonical.setAttribute("rel", "canonical");
+    linkCanonical.setAttribute("href", window.location.href);
     if (!linkCanonical.parentNode) document.head.appendChild(linkCanonical);
   }, []);
 
@@ -19,7 +23,7 @@ export default function HealthTipsBD() {
     <div className="container py-8">
       <div className="max-w-5xl mx-auto">
         <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2">Bangladesh Health Tips</h1>
+          <h1 className="text-4xl font-bold mb-2">Health Tips</h1>
           <p className="text-muted-foreground">Practical, locally-relevant guidance for healthier living</p>
         </header>
 
