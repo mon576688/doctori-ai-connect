@@ -75,7 +75,7 @@ export const ChatWidget = () => {
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">
-            Available 24/7 • HIPAA Compliant • Free to use
+            Available 24/7 • Medical Grade Security • Free to use
           </p>
         </div>
       </div>
