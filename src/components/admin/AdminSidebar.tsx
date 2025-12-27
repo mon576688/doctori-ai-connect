@@ -119,6 +119,8 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
     { id: 'bookings', icon: Calendar, label: 'Bookings', badge: 0 },
     { id: 'pending', icon: Clock, label: 'Pending Approvals', badge: pendingCount },
     { id: 'providers', icon: Stethoscope, label: 'Healthcare Providers' },
+    { id: 'add-provider', icon: UserCog, label: 'Add Provider' },
+    { id: 'hospitals', icon: FolderKanban, label: 'Hospitals & Clinics' },
     { id: 'users', icon: Users, label: 'All Users' },
     { id: 'user-mgmt', icon: UserCog, label: 'User Management' },
     { id: 'blood-donors', icon: Heart, label: 'Blood Donors' },

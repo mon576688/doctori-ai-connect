@@ -50,6 +50,8 @@ import BookingManagement from '@/components/admin/BookingManagement';
 import { DocumentReview } from '@/components/admin/DocumentReview';
 import { DataExport } from '@/components/admin/DataExport';
 import BloodDonorManagement from '@/components/admin/BloodDonorManagement';
+import HospitalManagement from '@/components/admin/HospitalManagement';
+import AddProviderForm from '@/components/admin/AddProviderForm';
 
 interface User {
   id: string;
@@ -557,6 +559,12 @@ export default function AdminDashboard() {
 
       case 'export':
         return <DataExport />;
+
+      case 'hospitals':
+        return <HospitalManagement />;
+
+      case 'add-provider':
+        return <AddProviderForm />;
 
       default:
         return null;
