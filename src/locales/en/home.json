@@ -1,0 +1,132 @@
+{
+  "hero": {
+    "badge": "🩺 Your AI Health Assistant",
+    "title": "Meet",
+    "titleHighlight": "Doctori AI",
+    "subtitle": "Chat with our AI to understand your symptoms, receive health suggestions, and connect with nearby doctors instantly.",
+    "description": "Your trusted virtual health companion, available 24/7 to guide you on your wellness journey.",
+    "startChat": "Start Chat",
+    "bookAppointment": "Book Appointment",
+    "bloodDonation": "Register for Blood Donation",
+    "findDoctors": "Find Doctors",
+    "healthBlog": "Health Blog",
+    "bmiCalculator": "BMI Calculator",
+    "healthReminders": "Health Reminders"
+  },
+  "howItWorks": {
+    "badge": "Simple Process",
+    "title": "How It Works",
+    "subtitle": "Get help in just 3 simple steps",
+    "step1Title": "Ask Your Symptoms",
+    "step1Desc": "Describe your health concerns to our intelligent AI assistant in natural language.",
+    "step2Title": "Get Instant Advice",
+    "step2Desc": "Receive personalized health guidance and recommendations based on your symptoms.",
+    "step3Title": "Connect with a Doctor",
+    "step3Desc": "Find and book appointments with verified healthcare professionals near you."
+  },
+  "healthCompanion": {
+    "badge": "All-in-One Platform",
+    "title": "Your Complete Health Companion",
+    "subtitle": "Get personalized health guidance, connect with doctors, and stay informed about your wellbeing",
+    "aiAssistant": "AI Health Assistant",
+    "aiAssistantDesc": "Chat with our intelligent AI to understand symptoms and get personalized health guidance 24/7.",
+    "startChat": "Start Chat",
+    "findDoctors": "Find Doctors",
+    "findDoctorsDesc": "Connect with verified healthcare professionals in your area and book appointments instantly.",
+    "browseDoctors": "Browse Doctors",
+    "healthEducation": "Health Education",
+    "healthEducationDesc": "Stay informed with expert articles, tips, and resources for better health and wellness.",
+    "readArticles": "Read Articles"
+  },
+  "featuredDoctors": {
+    "badge": "Top Professionals",
+    "title": "Featured Doctors",
+    "subtitle": "Meet some of our trusted healthcare professionals",
+    "availableToday": "🟢 Available Today",
+    "topRated": "⭐ Top Rated",
+    "verified": "✅ Verified",
+    "reviews": "reviews",
+    "viewProfile": "View Profile",
+    "viewAllDoctors": "View All Doctors"
+  },
+  "trust": {
+    "title": "Trusted by Thousands",
+    "happyUsers": "Happy Users",
+    "verifiedDoctors": "Verified Doctors",
+    "aiSupport": "AI Support",
+    "secure": "Secure",
+    "hipaaCompliant": "HIPAA Compliant",
+    "medicalGradeSecurity": "Medical Grade Security",
+    "trustedCare": "Trusted Care"
+  },
+  "healthConcerns": {
+    "badge": "We Can Help",
+    "title": "Common Health Concerns",
+    "subtitle": "Our AI is trained to help with a wide range of health symptoms and conditions",
+    "mentalHealth": "Mental Health",
+    "mentalHealthDesc": "Stress, anxiety, depression",
+    "cardiovascular": "Cardiovascular",
+    "cardiovascularDesc": "Heart conditions, blood pressure",
+    "generalHealth": "General Health",
+    "generalHealthDesc": "Common symptoms, wellness",
+    "preventiveCare": "Preventive Care",
+    "preventiveCareDesc": "Health screening, lifestyle"
+  },
+  "healthTips": {
+    "badge": "Stay Healthy",
+    "title": "Daily Health Tips",
+    "subtitle": "Expert advice to keep you healthy and informed",
+    "moreHealthTips": "More Health Tips"
+  },
+  "features": {
+    "badge": "Cutting Edge",
+    "title": "Advanced AI Features",
+    "subtitle": "Cutting-edge technology to support your health journey",
+    "multiLanguage": "Multi-Language Support",
+    "multiLanguageDesc": "Chat in your preferred language including English, Bengali, and more",
+    "mobileOptimized": "Mobile Optimized",
+    "mobileOptimizedDesc": "Access Doctori AI on any device, anywhere, anytime",
+    "symptomTracking": "Symptom Tracking",
+    "symptomTrackingDesc": "Track your symptoms over time and share with doctors",
+    "healthReports": "Health Reports",
+    "healthReportsDesc": "Generate detailed health summaries and consultation reports",
+    "progressMonitoring": "Progress Monitoring",
+    "progressMonitoringDesc": "Monitor your health trends and improvements over time",
+    "instantAnalysis": "Instant Analysis",
+    "instantAnalysisDesc": "Get immediate insights based on your symptoms and health data"
+  },
+  "testimonials": {
+    "badge": "Real Stories",
+    "title": "What Our Users Say",
+    "subtitle": "Real experiences from people who trust Doctori AI"
+  },
+  "emergency": {
+    "title": "Emergency Medical Assistance",
+    "subtitle": "If you're experiencing a medical emergency, please contact emergency services immediately",
+    "disclaimer": "Remember: Doctori AI is not a substitute for emergency medical care"
+  },
+  "faq": {
+    "badge": "Got Questions?",
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about Doctori AI",
+    "q1": "Is Doctori AI free to use?",
+    "a1": "Yes! Our AI health assistant is completely free. You can chat without creating an account. Premium features like PDF reports require registration.",
+    "q2": "How accurate is the AI diagnosis?",
+    "a2": "No. Doctori AI does not provide medical diagnoses or treatment. It offers general health information and guidance only. Always consult a qualified healthcare professional for medical advice.",
+    "q3": "Can I use Doctori AI in my language?",
+    "a3": "Yes! We support multiple languages including English, Bengali, and more. Select your preferred language from the dropdown menu.",
+    "q4": "Is my health data secure?",
+    "a4": "Absolutely. We use medical-grade security and are HIPAA compliant. Your health information is encrypted and protected.",
+    "q5": "How do I book an appointment with a doctor?",
+    "a5": "After chatting with our AI, you'll be shown nearby verified doctors. Click on any doctor to view their profile and book an appointment.",
+    "q6": "Can doctors join Doctori AI platform?",
+    "a6": "Yes! Healthcare professionals can register through our 'Join with Us' section. All doctors undergo verification before being listed."
+  },
+  "cta": {
+    "title": "Ready to Take Control of Your Health?",
+    "subtitle": "Join thousands of users who trust Doctori AI for their health guidance. Start your journey to better health today.",
+    "startJourney": "Start Your Health Journey",
+    "exploreDoctors": "Explore Doctors",
+    "noCreditCard": "No credit card required • Free to use • 24/7 availability"
+  }
+}

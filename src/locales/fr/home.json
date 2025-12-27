@@ -1,0 +1,132 @@
+{
+  "hero": {
+    "badge": "🩺 Votre Assistant Santé IA",
+    "title": "Découvrez",
+    "titleHighlight": "Doctori AI",
+    "subtitle": "Discutez avec notre IA pour comprendre vos symptômes, recevoir des conseils de santé et vous connecter instantanément avec des médecins à proximité.",
+    "description": "Votre compagnon santé virtuel de confiance, disponible 24h/24 et 7j/7 pour vous guider dans votre parcours bien-être.",
+    "startChat": "Démarrer le Chat",
+    "bookAppointment": "Prendre Rendez-vous",
+    "bloodDonation": "S'inscrire au Don de Sang",
+    "findDoctors": "Trouver des Médecins",
+    "healthBlog": "Blog Santé",
+    "bmiCalculator": "Calculateur d'IMC",
+    "healthReminders": "Rappels Santé"
+  },
+  "howItWorks": {
+    "badge": "Processus Simple",
+    "title": "Comment Ça Marche",
+    "subtitle": "Obtenez de l'aide en 3 étapes simples",
+    "step1Title": "Décrivez Vos Symptômes",
+    "step1Desc": "Décrivez vos préoccupations de santé à notre assistant IA intelligent en langage naturel.",
+    "step2Title": "Recevez des Conseils Instantanés",
+    "step2Desc": "Recevez des conseils de santé personnalisés et des recommandations basées sur vos symptômes.",
+    "step3Title": "Connectez-vous avec un Médecin",
+    "step3Desc": "Trouvez et réservez des rendez-vous avec des professionnels de santé vérifiés près de chez vous."
+  },
+  "healthCompanion": {
+    "badge": "Plateforme Tout-en-Un",
+    "title": "Votre Compagnon Santé Complet",
+    "subtitle": "Obtenez des conseils de santé personnalisés, connectez-vous avec des médecins et restez informé sur votre bien-être",
+    "aiAssistant": "Assistant Santé IA",
+    "aiAssistantDesc": "Discutez avec notre IA intelligente pour comprendre les symptômes et obtenir des conseils de santé personnalisés 24h/24.",
+    "startChat": "Démarrer le Chat",
+    "findDoctors": "Trouver des Médecins",
+    "findDoctorsDesc": "Connectez-vous avec des professionnels de santé vérifiés dans votre région et réservez des rendez-vous instantanément.",
+    "browseDoctors": "Parcourir les Médecins",
+    "healthEducation": "Éducation Santé",
+    "healthEducationDesc": "Restez informé avec des articles d'experts, des conseils et des ressources pour une meilleure santé et bien-être.",
+    "readArticles": "Lire les Articles"
+  },
+  "featuredDoctors": {
+    "badge": "Professionnels de Premier Plan",
+    "title": "Médecins en Vedette",
+    "subtitle": "Rencontrez certains de nos professionnels de santé de confiance",
+    "availableToday": "🟢 Disponible Aujourd'hui",
+    "topRated": "⭐ Mieux Noté",
+    "verified": "✅ Vérifié",
+    "reviews": "avis",
+    "viewProfile": "Voir le Profil",
+    "viewAllDoctors": "Voir Tous les Médecins"
+  },
+  "trust": {
+    "title": "La Confiance de Milliers de Personnes",
+    "happyUsers": "Utilisateurs Satisfaits",
+    "verifiedDoctors": "Médecins Vérifiés",
+    "aiSupport": "Support IA",
+    "secure": "Sécurisé",
+    "hipaaCompliant": "Conforme HIPAA",
+    "medicalGradeSecurity": "Sécurité de Grade Médical",
+    "trustedCare": "Soins de Confiance"
+  },
+  "healthConcerns": {
+    "badge": "Nous Pouvons Aider",
+    "title": "Préoccupations de Santé Courantes",
+    "subtitle": "Notre IA est formée pour aider avec une large gamme de symptômes et conditions de santé",
+    "mentalHealth": "Santé Mentale",
+    "mentalHealthDesc": "Stress, anxiété, dépression",
+    "cardiovascular": "Cardiovasculaire",
+    "cardiovascularDesc": "Problèmes cardiaques, tension artérielle",
+    "generalHealth": "Santé Générale",
+    "generalHealthDesc": "Symptômes courants, bien-être",
+    "preventiveCare": "Soins Préventifs",
+    "preventiveCareDesc": "Dépistage santé, mode de vie"
+  },
+  "healthTips": {
+    "badge": "Restez en Bonne Santé",
+    "title": "Conseils Santé Quotidiens",
+    "subtitle": "Conseils d'experts pour vous garder en bonne santé et informé",
+    "moreHealthTips": "Plus de Conseils Santé"
+  },
+  "features": {
+    "badge": "Technologie de Pointe",
+    "title": "Fonctionnalités IA Avancées",
+    "subtitle": "Technologie de pointe pour soutenir votre parcours santé",
+    "multiLanguage": "Support Multilingue",
+    "multiLanguageDesc": "Discutez dans votre langue préférée, y compris l'anglais, le bengali et plus",
+    "mobileOptimized": "Optimisé pour Mobile",
+    "mobileOptimizedDesc": "Accédez à Doctori AI sur n'importe quel appareil, n'importe où, n'importe quand",
+    "symptomTracking": "Suivi des Symptômes",
+    "symptomTrackingDesc": "Suivez vos symptômes au fil du temps et partagez-les avec les médecins",
+    "healthReports": "Rapports de Santé",
+    "healthReportsDesc": "Générez des résumés de santé détaillés et des rapports de consultation",
+    "progressMonitoring": "Suivi des Progrès",
+    "progressMonitoringDesc": "Surveillez les tendances de votre santé et les améliorations au fil du temps",
+    "instantAnalysis": "Analyse Instantanée",
+    "instantAnalysisDesc": "Obtenez des informations immédiates basées sur vos symptômes et données de santé"
+  },
+  "testimonials": {
+    "badge": "Histoires Vraies",
+    "title": "Ce Que Disent Nos Utilisateurs",
+    "subtitle": "Expériences réelles de personnes qui font confiance à Doctori AI"
+  },
+  "emergency": {
+    "title": "Assistance Médicale d'Urgence",
+    "subtitle": "Si vous vivez une urgence médicale, veuillez contacter les services d'urgence immédiatement",
+    "disclaimer": "N'oubliez pas : Doctori AI ne remplace pas les soins médicaux d'urgence"
+  },
+  "faq": {
+    "badge": "Des Questions ?",
+    "title": "Questions Fréquemment Posées",
+    "subtitle": "Tout ce que vous devez savoir sur Doctori AI",
+    "q1": "Doctori AI est-il gratuit ?",
+    "a1": "Oui ! Notre assistant santé IA est entièrement gratuit. Vous pouvez discuter sans créer de compte. Les fonctionnalités premium comme les rapports PDF nécessitent une inscription.",
+    "q2": "Quelle est la précision du diagnostic IA ?",
+    "a2": "Non. Doctori AI ne fournit pas de diagnostic médical ni de traitement. Il offre uniquement des informations et des conseils de santé généraux. Consultez toujours un professionnel de santé qualifié pour des conseils médicaux.",
+    "q3": "Puis-je utiliser Doctori AI dans ma langue ?",
+    "a3": "Oui ! Nous supportons plusieurs langues, y compris l'anglais, le bengali et plus. Sélectionnez votre langue préférée dans le menu déroulant.",
+    "q4": "Mes données de santé sont-elles sécurisées ?",
+    "a4": "Absolument. Nous utilisons une sécurité de grade médical et sommes conformes HIPAA. Vos informations de santé sont cryptées et protégées.",
+    "q5": "Comment réserver un rendez-vous avec un médecin ?",
+    "a5": "Après avoir discuté avec notre IA, des médecins vérifiés à proximité vous seront présentés. Cliquez sur n'importe quel médecin pour voir son profil et réserver un rendez-vous.",
+    "q6": "Les médecins peuvent-ils rejoindre la plateforme Doctori AI ?",
+    "a6": "Oui ! Les professionnels de santé peuvent s'inscrire via notre section 'Rejoignez-nous'. Tous les médecins passent par une vérification avant d'être répertoriés."
+  },
+  "cta": {
+    "title": "Prêt à Prendre le Contrôle de Votre Santé ?",
+    "subtitle": "Rejoignez des milliers d'utilisateurs qui font confiance à Doctori AI pour leurs conseils de santé. Commencez votre voyage vers une meilleure santé aujourd'hui.",
+    "startJourney": "Commencez Votre Parcours Santé",
+    "exploreDoctors": "Explorer les Médecins",
+    "noCreditCard": "Sans carte de crédit • Gratuit • Disponible 24h/24"
+  }
+}
