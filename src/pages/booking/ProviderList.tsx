@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Star, Briefcase, DollarSign } from 'lucide-react';
+import { MapPin, Star, Briefcase, DollarSign, Building2, Phone } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,10 +24,21 @@ interface Provider {
   services: Array<{ price: number; service_name: string }>;
 }
 
+interface Hospital {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  phone: string;
+  description: string;
+  logo_url: string;
+}
+
 export default function ProviderList() {
   const navigate = useNavigate();
   const { city, providerType, userLatitude, userLongitude } = useBooking();
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -39,71 +50,94 @@ export default function ProviderList() {
   useEffect(() => {
     if (!city || !providerType) return;
 
-    const fetchProviders = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            name,
-            first_name,
-            last_name,
-            bio,
-            photo_url,
-            latitude,
-            longitude,
-            address,
-            provider_type,
-            provider_services (
-              price,
-              service_name
-            )
-          `)
-          .eq('role', 'provider')
-          .eq('approval_status', 'approved')
-          .eq('provider_type', providerType)
-          .not('latitude', 'is', null)
-          .not('longitude', 'is', null);
+        if (providerType === 'hospital') {
+          // Fetch hospitals instead of providers
+          const { data, error } = await supabase
+            .from('hospitals')
+            .select('*')
+            .eq('is_active', true)
+            .ilike('city', `%${city}%`);
 
-        if (error) throw error;
+          if (error) throw error;
 
-        const formattedProviders: Provider[] = (data || []).map((p: any) => ({
-          id: p.id,
-          name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
-          specialty: p.provider_services?.[0]?.service_name || 'General Practice',
-          experience: 5, // Default, can be added to schema later
-          photo_url: p.photo_url || '/placeholder.svg',
-          latitude: parseFloat(p.latitude),
-          longitude: parseFloat(p.longitude),
-          bio: p.bio || '',
-          provider_type: p.provider_type,
-          address: p.address || '',
-          services: p.provider_services || [],
-        }));
+          setHospitals((data || []).map((h: any) => ({
+            id: h.id,
+            name: h.name,
+            address: h.address || '',
+            city: h.city,
+            phone: h.phone || '',
+            description: h.description || '',
+            logo_url: h.logo_url || '/placeholder.svg',
+          })));
+        } else {
+          // Fetch providers for doctor/nurse
+          const { data, error } = await supabase
+            .from('profiles')
+            .select(`
+              id,
+              name,
+              first_name,
+              last_name,
+              bio,
+              photo_url,
+              latitude,
+              longitude,
+              address,
+              provider_type,
+              city,
+              provider_services (
+                price,
+                service_name
+              )
+            `)
+            .eq('role', 'provider')
+            .eq('approval_status', 'approved')
+            .ilike('city', `%${city}%`);
 
-        // Calculate distances and sort
-        if (userLatitude && userLongitude) {
-          formattedProviders.forEach((provider) => {
-            (provider as any).distance = calculateDistance(
-              userLatitude,
-              userLongitude,
-              provider.latitude,
-              provider.longitude
-            );
-          });
-          formattedProviders.sort((a: any, b: any) => a.distance - b.distance);
+          if (error) throw error;
+
+          const formattedProviders: Provider[] = (data || []).map((p: any) => ({
+            id: p.id,
+            name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+            specialty: p.provider_services?.[0]?.service_name || 'General Practice',
+            experience: 5,
+            photo_url: p.photo_url || '/placeholder.svg',
+            latitude: p.latitude ? parseFloat(p.latitude) : 0,
+            longitude: p.longitude ? parseFloat(p.longitude) : 0,
+            bio: p.bio || '',
+            provider_type: p.provider_type || providerType,
+            address: p.address || '',
+            services: p.provider_services || [],
+          }));
+
+          // Calculate distances and sort if coordinates available
+          if (userLatitude && userLongitude) {
+            formattedProviders.forEach((provider) => {
+              if (provider.latitude && provider.longitude) {
+                (provider as any).distance = calculateDistance(
+                  userLatitude,
+                  userLongitude,
+                  provider.latitude,
+                  provider.longitude
+                );
+              }
+            });
+            formattedProviders.sort((a: any, b: any) => (a.distance || 999) - (b.distance || 999));
+          }
+
+          setProviders(formattedProviders);
         }
-
-        setProviders(formattedProviders);
       } catch (error) {
-        console.error('Error fetching providers:', error);
-        toast.error('Failed to load providers');
+        console.error('Error fetching data:', error);
+        toast.error('Failed to load data');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProviders();
+    fetchData();
   }, [city, providerType, userLatitude, userLongitude, navigate]);
 
   if (loading) {
@@ -117,27 +151,82 @@ export default function ProviderList() {
     );
   }
 
+  const itemCount = providerType === 'hospital' ? hospitals.length : providers.length;
+  const itemLabel = providerType === 'hospital' ? 'hospital' : providerType;
+
   return (
     <div className="min-h-screen bg-background py-8 px-4">
       <BookingProgress />
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            Available Providers in {city}
+            {providerType === 'hospital' ? 'Available Hospitals' : 'Available Providers'} in {city}
           </h1>
           <p className="text-muted-foreground">
-            Found {providers.length} {providerType}s near you
+            Found {itemCount} {itemLabel}{itemCount !== 1 ? 's' : ''} near you
           </p>
         </div>
 
-        {providers.length === 0 ? (
+        {itemCount === 0 ? (
           <Card className="p-12 text-center">
-            <p className="text-muted-foreground">No providers found in your area.</p>
+            <p className="text-muted-foreground">No {itemLabel}s found in your area.</p>
             <Button onClick={() => navigate('/booking/location')} className="mt-4">
               Try Different Location
             </Button>
           </Card>
+        ) : providerType === 'hospital' ? (
+          // Render hospitals
+          <div className="grid md:grid-cols-2 gap-6">
+            {hospitals.map((hospital) => (
+              <Card key={hospital.id} className="hover:shadow-float transition-shadow">
+                <CardHeader>
+                  <div className="flex gap-4">
+                    <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Building2 className="text-primary" size={32} />
+                    </div>
+                    <div className="flex-1">
+                      <CardTitle className="text-xl">{hospital.name}</CardTitle>
+                      <CardDescription className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary">{hospital.city}</Badge>
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2 text-sm">
+                    {hospital.address && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin size={16} />
+                        <span>{hospital.address}</span>
+                      </div>
+                    )}
+                    {hospital.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone size={16} />
+                        <span>{hospital.phone}</span>
+                      </div>
+                    )}
+                    {hospital.description && (
+                      <p className="text-muted-foreground mt-2 line-clamp-2">
+                        {hospital.description}
+                      </p>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button
+                    onClick={() => navigate(`/booking/provider/${hospital.id}?type=hospital`)}
+                    variant="medical"
+                    className="w-full"
+                  >
+                    View Details
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
         ) : (
+          // Render providers
           <div className="grid md:grid-cols-2 gap-6">
             {providers.map((provider) => (
               <Card key={provider.id} className="hover:shadow-float transition-shadow">
