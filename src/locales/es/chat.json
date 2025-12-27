@@ -1,0 +1,22 @@
+{
+  "title": "Chatea con Doctori AI",
+  "subtitle": "Tu asistente personal de salud con IA - Siempre aquí para ayudar",
+  "placeholder": "Describe tus síntomas en detalle...",
+  "placeholderAuthenticated": "Describe tus síntomas en detalle (cuenta Premium)...",
+  "placeholderGuest": "Describe tus síntomas en detalle...",
+  "send": "Enviar",
+  "emergency": "¿Emergencia? ¿Necesitas ayuda inmediata?",
+  "call911": "Llamar 911",
+  "disclaimer": "⚠️ Este asistente de IA proporciona solo información general y no es un sustituto del consejo médico profesional.",
+  "disclaimerTitle": "Aviso Médico",
+  "disclaimerText": "Esta IA proporciona solo información general de salud y no es un sustituto del consejo médico profesional, diagnóstico o tratamiento. Siempre consulte con un proveedor de atención médica calificado para preocupaciones de salud personales.",
+  "welcome": "¡Hola! Soy Doctori AI, tu asistente personal de salud. Estoy aquí para ayudarte a entender tus síntomas y conectarte con los proveedores de atención médica adecuados. Por favor describe tus síntomas o preocupaciones de salud en detalle.\n\n⚠️ Recuerda: Esto no es consejo médico y no debe reemplazar la atención médica profesional. En caso de emergencia, por favor llama al 911 inmediatamente.",
+  "thinking": "Doctor AI está pensando...",
+  "urgentTitle": "SE NECESITA ATENCIÓN MÉDICA URGENTE",
+  "urgentMessage": "Según tus síntomas, busca atención médica inmediata. Llama al 911 o ve a la sala de emergencias más cercana.",
+  "callEmergency": "Llamar 911 Emergencia",
+  "viewSummary": "Ver tu Resumen de Salud y Doctores Recomendados",
+  "loading": "Cargando chat...",
+  "headerTitle": "Asistente de Salud Doctori AI",
+  "premium": "Premium"
+}

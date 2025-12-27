@@ -1,0 +1,22 @@
+{
+  "title": "Chattez avec Doctori AI",
+  "subtitle": "Votre assistant santé IA personnel - Toujours là pour vous aider",
+  "placeholder": "Décrivez vos symptômes en détail...",
+  "placeholderAuthenticated": "Décrivez vos symptômes en détail (compte Premium)...",
+  "placeholderGuest": "Décrivez vos symptômes en détail...",
+  "send": "Envoyer",
+  "emergency": "Urgence ? Besoin d'aide immédiate ?",
+  "call911": "Appeler le 15",
+  "disclaimer": "⚠️ Cet assistant IA fournit uniquement des informations générales et ne remplace pas les conseils médicaux professionnels.",
+  "disclaimerTitle": "Avis Médical",
+  "disclaimerText": "Cette IA fournit uniquement des informations générales sur la santé et ne remplace pas les conseils médicaux professionnels, le diagnostic ou le traitement. Consultez toujours un professionnel de santé qualifié pour vos préoccupations de santé personnelles.",
+  "welcome": "Bonjour ! Je suis Doctori AI, votre assistant santé personnel. Je suis là pour vous aider à comprendre vos symptômes et vous connecter avec les bons prestataires de soins. Veuillez décrire vos symptômes ou préoccupations de santé en détail.\n\n⚠️ Rappel : Ceci n'est pas un conseil médical et ne doit pas remplacer les soins médicaux professionnels. En cas d'urgence, veuillez appeler le 15 immédiatement.",
+  "thinking": "Docteur AI réfléchit...",
+  "urgentTitle": "ATTENTION MÉDICALE URGENTE NÉCESSAIRE",
+  "urgentMessage": "Selon vos symptômes, veuillez consulter immédiatement un médecin. Appelez le 15 ou rendez-vous aux urgences les plus proches.",
+  "callEmergency": "Appeler le 15 Urgence",
+  "viewSummary": "Voir votre Résumé de Santé et Médecins Recommandés",
+  "loading": "Chargement du chat...",
+  "headerTitle": "Assistant Santé Doctori AI",
+  "premium": "Premium"
+}

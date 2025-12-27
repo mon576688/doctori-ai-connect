@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +10,6 @@ import { useNavigate } from "react-router-dom";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useGuestChat } from "@/hooks/useGuestChat";
 import { useAuth } from "@/hooks/useAuth";
-import { useLanguage, Language } from "@/contexts/LanguageContext";
 import { isHealthRelated } from '@/hooks/useHealthTopicFilter';
 import { VoiceChatInterface } from "@/components/VoiceChatInterface";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
@@ -17,9 +17,9 @@ import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 const Chat = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
-  const { t, language, setLanguage } = useLanguage();
+  const { t, i18n } = useTranslation('chat');
   const [messageInput, setMessageInput] = useState("");
-  const [chatLanguage, setChatLanguage] = useState<Language>(language);
+  const [chatLanguage, setChatLanguage] = useState(i18n.language || 'en');
   const { speak } = useTextToSpeech();
 
   // Use guest chat by default, authenticated chat when logged in
@@ -31,10 +31,17 @@ const Chat = () => {
   useEffect(() => {
     if (!loading) {
       console.log('Initializing chat, isAuthenticated:', isAuthenticated);
-      const welcomeMessage = t('chat.welcome');
+      const welcomeMessage = t('welcome');
       chat.initializeChat(welcomeMessage);
     }
   }, [loading, chat.initializeChat, t]);
+
+  // Sync chat language with i18n
+  useEffect(() => {
+    if (chatLanguage !== i18n.language) {
+      i18n.changeLanguage(chatLanguage);
+    }
+  }, [chatLanguage, i18n]);
 
   const handleSendMessage = () => {
     const content = messageInput.trim();
@@ -76,8 +83,8 @@ const Chat = () => {
 
   const getPlaceholder = () => {
     return isAuthenticated 
-      ? t('chat.placeholder.authenticated')
-      : t('chat.placeholder.guest');
+      ? t('placeholderAuthenticated')
+      : t('placeholderGuest');
   };
 
   const formatMessage = (content: string) => {
@@ -89,11 +96,15 @@ const Chat = () => {
     ));
   };
 
+  const getEmergencyNumber = () => {
+    return chatLanguage === 'bn' ? '999' : '911';
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <MessageCircle className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p>Loading chat...</p>
+        <p>{t('loading')}</p>
       </div>
     </div>;
   }
@@ -107,10 +118,10 @@ const Chat = () => {
               <div className="bg-white/20 p-2 rounded-lg">
                 <Bot className="h-6 w-6" />
               </div>
-              <span>Doctori AI Health Assistant</span>
+              <span>{t('headerTitle')}</span>
               {isAuthenticated && (
                 <Badge variant="secondary" className="bg-white/20 text-white">
-                  Premium
+                  {t('premium')}
                 </Badge>
               )}
             </CardTitle>
@@ -166,7 +177,7 @@ const Chat = () => {
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
-                      <span className="text-sm text-gray-600">Doctor AI is thinking...</span>
+                      <span className="text-sm text-gray-600">{t('thinking')}</span>
                     </div>
                   </div>
                 </div>
@@ -191,14 +202,14 @@ const Chat = () => {
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-center space-x-2 mb-2">
                     <AlertTriangle className="h-5 w-5 text-red-600" />
-                    <span className="text-red-800 font-semibold text-sm">URGENT MEDICAL ATTENTION NEEDED</span>
+                    <span className="text-red-800 font-semibold text-sm">{t('urgentTitle')}</span>
                   </div>
                   <p className="text-red-700 text-xs md:text-sm mb-3">
-                    Based on your symptoms, please seek immediate medical care. Call {chatLanguage === 'bn' ? '999' : '911'} or go to the nearest emergency room.
+                    {t('urgentMessage')}
                   </p>
-                  <Button variant="destructive" size="sm" className="w-full" onClick={() => window.open(`tel:${chatLanguage === 'bn' ? '999' : '911'}`)}>
+                  <Button variant="destructive" size="sm" className="w-full" onClick={() => window.open(`tel:${getEmergencyNumber()}`)}>
                     <Phone className="h-4 w-4 mr-2" />
-                    Call {chatLanguage === 'bn' ? '999' : '911'} Emergency
+                    {t('callEmergency')}
                   </Button>
                 </div>
               )}
@@ -206,13 +217,16 @@ const Chat = () => {
               {/* Language Selector */}
               <div className="flex items-center space-x-2 mb-2">
                 <Globe className="h-4 w-4 text-muted-foreground" />
-                <Select value={chatLanguage} onValueChange={(value: string) => setChatLanguage(value as Language)}>
+                <Select value={chatLanguage} onValueChange={(value: string) => setChatLanguage(value)}>
                   <SelectTrigger className="w-32">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en">English</SelectItem>
                     <SelectItem value="bn">বাংলা</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                    <SelectItem value="ar">العربية</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -242,7 +256,7 @@ const Chat = () => {
               {chat.sessionState.phase === "summary" && (
                 <Button onClick={handleViewSummary} variant="secondary" size="sm" className="w-full">
                   <Download className="h-4 w-4 mr-2" />
-                  View Your Health Summary & Recommended Doctors
+                  {t('viewSummary')}
                 </Button>
               )}
 
@@ -250,10 +264,10 @@ const Chat = () => {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <div className="text-center">
                   <p className="text-xs md:text-sm text-blue-800 mb-1">
-                    ℹ️ <strong>Medical Disclaimer</strong>
+                    ℹ️ <strong>{t('disclaimerTitle')}</strong>
                   </p>
                   <p className="text-xs text-blue-700">
-                    This AI provides general health information only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for personal health concerns.
+                    {t('disclaimerText')}
                   </p>
                 </div>
               </div>
