@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -18,8 +19,10 @@ import {
   UserPlus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+
 export const Footer = () => {
   const { user } = useAuth();
+  const { t } = useTranslation('common');
 
   return (
     <footer className="bg-muted/30 border-t">
@@ -34,19 +37,19 @@ export const Footer = () => {
               <span className="text-lg font-bold bg-gradient-primary bg-clip-text text-transparent">Doctori AI</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your trusted virtual health assistant, available 24/7 to guide you on your wellness journey.
+              {t('footer.tagline')}
             </p>
             <Link to="/chat">
               <Button variant="medical" size="sm" className="w-full">
                 <MessageCircle className="mr-2 h-4 w-4" />
-                Start Chat Now
+                {t('footer.startChatNow')}
               </Button>
             </Link>
             {!user && (
               <Link to="/register/provider">
                 <Button variant="outline" size="sm" className="w-full mt-2">
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Become a Provider
+                  {t('footer.becomeProvider')}
                 </Button>
               </Link>
             )}
@@ -54,48 +57,48 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Quick Links</h3>
+            <h3 className="font-semibold">{t('footer.quickLinks')}</h3>
             <div className="space-y-2 text-sm">
               <Link to="/" className="block text-muted-foreground hover:text-primary transition-colors">
-                Home
+                {t('footer.home')}
               </Link>
               <Link to="/doctors" className="block text-muted-foreground hover:text-primary transition-colors">
-                Find Doctors
+                {t('footer.findDoctors')}
               </Link>
               <Link to="/blog" className="block text-muted-foreground hover:text-primary transition-colors">
-                Health Blog
+                {t('footer.healthBlog')}
               </Link>
               <Link to="/about" className="block text-muted-foreground hover:text-primary transition-colors">
-                About Us
+                {t('footer.aboutUs')}
               </Link>
               <Link to="/contact" className="block text-muted-foreground hover:text-primary transition-colors">
-                Contact
+                {t('footer.contact')}
               </Link>
             </div>
           </div>
 
           {/* Legal */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Legal</h3>
+            <h3 className="font-semibold">{t('footer.legal')}</h3>
             <div className="space-y-2 text-sm">
               <Link to="/terms" className="block text-muted-foreground hover:text-primary transition-colors">
-                Terms & Conditions
+                {t('footer.termsConditions')}
               </Link>
               <Link to="/privacy" className="block text-muted-foreground hover:text-primary transition-colors">
-                Privacy Policy
+                {t('footer.privacyPolicy')}
               </Link>
               <Link
                 to="/doctor-verification"
                 className="block text-muted-foreground hover:text-primary transition-colors"
               >
-                Doctor Verification
+                {t('footer.doctorVerification')}
               </Link>
             </div>
           </div>
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Contact Info</h3>
+            <h3 className="font-semibold">{t('footer.contactInfo')}</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
@@ -107,36 +110,36 @@ export const Footer = () => {
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <MapPin className="h-4 w-4" />
-                <span>Available Now Worldwide</span>
+                <span>{t('footer.availableWorldwide')}</span>
               </div>
             </div>
           </div>
 
           {/* Download Apps */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Download Our Apps</h3>
-            <p className="text-sm text-muted-foreground">Get Doctori AI on your mobile device</p>
+            <h3 className="font-semibold">{t('footer.downloadApps')}</h3>
+            <p className="text-sm text-muted-foreground">{t('footer.getOnMobile')}</p>
             <div className="space-y-2">
               <Button variant="outline" size="sm" className="w-full justify-start">
                 <Download className="h-4 w-4 mr-2" />
-                Google Play Store
+                {t('footer.googlePlay')}
               </Button>
               <Button variant="outline" size="sm" className="w-full justify-start">
                 <Smartphone className="h-4 w-4 mr-2" />
-                Apple App Store
+                {t('footer.appStore')}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">Coming soon to mobile platforms</p>
+            <p className="text-xs text-muted-foreground">{t('footer.comingSoon')}</p>
           </div>
 
           {/* Newsletter */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Health Updates</h3>
-            <p className="text-sm text-muted-foreground">Get weekly health tips from Doctori AI</p>
+            <h3 className="font-semibold">{t('footer.healthUpdates')}</h3>
+            <p className="text-sm text-muted-foreground">{t('footer.weeklyTips')}</p>
             <div className="space-y-2">
-              <Input placeholder="Enter your email" className="text-sm" />
+              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" />
               <Button variant="healing" size="sm" className="w-full">
-                Subscribe
+                {t('footer.subscribe')}
               </Button>
             </div>
           </div>
@@ -147,11 +150,11 @@ export const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="text-sm text-muted-foreground">
-            © 2025 Doctori AI, Mahnoor LLC. Powered by care, guided by AI.
+            {t('footer.copyright')}
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="text-sm text-muted-foreground">Follow us:</span>
+            <span className="text-sm text-muted-foreground">{t('footer.followUs')}</span>
             <div className="flex space-x-2">
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Facebook className="h-4 w-4" />
@@ -168,7 +171,7 @@ export const Footer = () => {
             </div>
             {/* Staff Access Link */}
             <Link to="/login/admin" className="text-muted-foreground hover:text-primary transition-colors text-xs">
-              Staff Access
+              {t('footer.staffAccess')}
             </Link>
           </div>
         </div>
@@ -177,15 +180,15 @@ export const Footer = () => {
         <div className="flex flex-wrap justify-center gap-6 mt-8 pt-8 border-t opacity-60">
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Heart className="h-4 w-4" />
-            <span>Data Secured & Confidential</span>
+            <span>{t('footer.dataSecured')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Stethoscope className="h-4 w-4" />
-            <span>Medical Grade Security</span>
+            <span>{t('footer.medicalGradeSecurity')}</span>
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <Heart className="h-4 w-4" />
-            <span>24/7 Available</span>
+            <span>{t('footer.available247')}</span>
           </div>
         </div>
       </div>
