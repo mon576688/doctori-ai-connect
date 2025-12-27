@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateDistance, formatPrice } from '@/lib/bookingUtils';
+import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
 
 interface Provider {
@@ -32,8 +33,11 @@ export default function ProviderList() {
   useEffect(() => {
     if (!city || !providerType) {
       navigate('/booking/location');
-      return;
     }
+  }, [city, providerType, navigate]);
+
+  useEffect(() => {
+    if (!city || !providerType) return;
 
     const fetchProviders = async () => {
       try {
@@ -114,7 +118,8 @@ export default function ProviderList() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <BookingProgress />
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">

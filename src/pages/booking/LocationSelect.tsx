@@ -3,7 +3,8 @@ import { MapPin, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useBooking } from '@/contexts/BookingContext';
-import { SAUDI_CITIES, CityName } from '@/lib/bookingUtils';
+import { BANGLADESH_CITIES, CityName } from '@/lib/bookingUtils';
+import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
 
 export default function LocationSelect() {
@@ -11,8 +12,8 @@ export default function LocationSelect() {
   const { setCity, setUserLocation } = useBooking();
 
   const handleCitySelect = (cityName: CityName) => {
-    setCity(cityName);
-    const coords = SAUDI_CITIES[cityName];
+    setCity(cityName.replace('_', "'"));
+    const coords = BANGLADESH_CITIES[cityName];
     setUserLocation(coords.lat, coords.lng);
     navigate('/booking/type');
   };
@@ -37,7 +38,8 @@ export default function LocationSelect() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <BookingProgress />
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
@@ -60,19 +62,16 @@ export default function LocationSelect() {
           </Button>
         </Card>
 
-        <div className="space-y-3">
-          {(Object.keys(SAUDI_CITIES) as CityName[]).map((city) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {(Object.keys(BANGLADESH_CITIES) as CityName[]).map((city) => (
             <Card
               key={city}
-              className="p-6 hover:shadow-medical transition-shadow cursor-pointer"
+              className="p-4 hover:shadow-medical transition-shadow cursor-pointer hover:border-primary"
               onClick={() => handleCitySelect(city)}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <MapPin className="text-primary" size={24} />
-                  <span className="text-lg font-medium">{city}</span>
-                </div>
-                <span className="text-muted-foreground">→</span>
+              <div className="flex flex-col items-center text-center gap-2">
+                <MapPin className="text-primary" size={24} />
+                <span className="font-medium">{city.replace('_', "'")}</span>
               </div>
             </Card>
           ))}

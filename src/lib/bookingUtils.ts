@@ -49,16 +49,48 @@ export const groupTimeSlots = (
 };
 
 // Format price with currency
-export const formatPrice = (amount: number, currency: string = 'SAR'): string => {
-  return `${amount} ${currency}`;
+export const formatPrice = (amount: number, currency: string = 'BDT'): string => {
+  return `৳${amount.toLocaleString()}`;
 };
 
-// City coordinates for Saudi Arabia
-export const SAUDI_CITIES = {
-  Riyadh: { lat: 24.7136, lng: 46.6753 },
-  Jeddah: { lat: 21.5433, lng: 39.1728 },
-  Dammam: { lat: 26.4207, lng: 50.0888 },
-  Mecca: { lat: 21.4225, lng: 39.8262 },
+// City coordinates for Bangladesh
+export const BANGLADESH_CITIES = {
+  Dhaka: { lat: 23.8103, lng: 90.4125 },
+  Chittagong: { lat: 22.3569, lng: 91.7832 },
+  Sylhet: { lat: 24.8949, lng: 91.8687 },
+  Rajshahi: { lat: 24.3636, lng: 88.6241 },
+  Khulna: { lat: 22.8456, lng: 89.5403 },
+  Barisal: { lat: 22.7010, lng: 90.3535 },
+  Rangpur: { lat: 25.7439, lng: 89.2752 },
+  Mymensingh: { lat: 24.7471, lng: 90.4203 },
+  Comilla: { lat: 23.4607, lng: 91.1809 },
+  Gazipur: { lat: 23.9999, lng: 90.4203 },
+  Narayanganj: { lat: 23.6238, lng: 90.5000 },
+  Cox_Bazar: { lat: 21.4272, lng: 92.0058 },
 };
 
-export type CityName = keyof typeof SAUDI_CITIES;
+// Alias for backward compatibility
+export const SAUDI_CITIES = BANGLADESH_CITIES;
+
+export type CityName = keyof typeof BANGLADESH_CITIES;
+
+// Booking steps for progress indicator
+export const BOOKING_STEPS = [
+  { id: 'location', label: 'Location', path: '/booking/location' },
+  { id: 'type', label: 'Service Type', path: '/booking/type' },
+  { id: 'providers', label: 'Select Provider', path: '/booking/providers' },
+  { id: 'schedule', label: 'Select Date', path: '/booking/schedule' },
+  { id: 'time', label: 'Select Time', path: '/booking/time' },
+  { id: 'review', label: 'Review & Confirm', path: '/booking/review' },
+];
+
+export const getCurrentStep = (pathname: string): number => {
+  if (pathname.includes('/booking/location') || pathname === '/booking') return 0;
+  if (pathname.includes('/booking/type')) return 1;
+  if (pathname.includes('/booking/providers')) return 2;
+  if (pathname.includes('/booking/provider/')) return 2;
+  if (pathname.includes('/booking/schedule/')) return 3;
+  if (pathname.includes('/booking/time/')) return 4;
+  if (pathname.includes('/booking/review')) return 5;
+  return 0;
+};

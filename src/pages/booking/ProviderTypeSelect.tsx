@@ -1,11 +1,19 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stethoscope, Building2, UserCog } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useBooking } from '@/contexts/BookingContext';
+import { BookingProgress } from '@/components/booking/BookingProgress';
 
 export default function ProviderTypeSelect() {
   const navigate = useNavigate();
   const { setProviderType, city } = useBooking();
+
+  useEffect(() => {
+    if (!city) {
+      navigate('/booking/location');
+    }
+  }, [city, navigate]);
 
   const handleTypeSelect = (type: 'doctor' | 'hospital' | 'nurse') => {
     setProviderType(type);
@@ -13,7 +21,6 @@ export default function ProviderTypeSelect() {
   };
 
   if (!city) {
-    navigate('/booking/location');
     return null;
   }
 
@@ -39,7 +46,8 @@ export default function ProviderTypeSelect() {
   ];
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <BookingProgress />
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
