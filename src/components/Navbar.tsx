@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus, Search } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -14,6 +15,7 @@ export const Navbar = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { profile } = useRoleBasedAuth();
+  const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -67,16 +69,16 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/" className={`text-foreground hover:text-primary transition-colors ${isActive('/') ? 'text-primary' : ''}`}>
-              Home
+              {t('nav.home')}
             </Link>
             <Link to="/chat" className={`text-foreground hover:text-primary transition-colors ${isActive('/chat') ? 'text-primary' : ''}`}>
-              AI Health Assistant
+              {t('nav.aiHealthAssistant')}
             </Link>
             <Link to="/doctors" className={`text-foreground hover:text-primary transition-colors ${isActive('/doctors') ? 'text-primary' : ''}`}>
-              Find Doctors
+              {t('nav.findDoctors')}
             </Link>
             <Link to="/medicine" className={`text-foreground hover:text-primary transition-colors ${isActive('/medicine') ? 'text-primary' : ''}`}>
-              Search Medicine
+              {t('nav.searchMedicine')}
             </Link>
             
             
@@ -84,16 +86,16 @@ export const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className={`flex items-center space-x-1 ${isBlogActive ? 'text-primary' : ''}`}>
-                  <span>Health Blog</span>
+                  <span>{t('nav.healthBlog')}</span>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-background border z-50">
                 <DropdownMenuItem asChild>
-                  <Link to="/blog" className="w-full">All Blogs</Link>
+                  <Link to="/blog" className="w-full">{t('nav.allBlogs')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/health-tips" className="w-full">Health Tips</Link>
+                  <Link to="/health-tips" className="w-full">{t('nav.healthTips')}</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -101,7 +103,7 @@ export const Navbar = () => {
             {/* Dashboard link for authenticated users */}
             {user && profile && (
               <Link to={getDashboardPath()} className={`text-foreground hover:text-primary transition-colors ${location.pathname.startsWith('/dashboard') ? 'text-primary' : ''}`}>
-                Dashboard
+                {t('nav.dashboard')}
               </Link>
             )}
           </div>
@@ -128,27 +130,27 @@ export const Navbar = () => {
           {isOpen && <div className="absolute top-16 left-0 right-0 bg-background border-b md:hidden z-50">
               <div className="container py-4 space-y-4">
                 <Link to="/" className="block text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
-                  Home
+                  {t('nav.home')}
                 </Link>
                 <Link to="/chat" className="block text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
-                  AI Health Assistant
+                  {t('nav.aiHealthAssistant')}
                 </Link>
                 <Link to="/doctors" className="block text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
-                  Find Doctors
+                  {t('nav.findDoctors')}
                 </Link>
                 <Link to="/medicine" className="block text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
-                  Search Medicine
+                  {t('nav.searchMedicine')}
                 </Link>
                 
                 
                 {/* Mobile Health Blog Section */}
                 <div className="py-2">
-                  <p className="text-foreground font-medium mb-2">Health Blog</p>
+                  <p className="text-foreground font-medium mb-2">{t('nav.healthBlog')}</p>
                   <Link to="/blog" className="block text-foreground hover:text-primary transition-colors py-1 pl-4" onClick={() => setIsOpen(false)}>
-                    All Blogs
+                    {t('nav.allBlogs')}
                   </Link>
                   <Link to="/health-tips" className="block text-foreground hover:text-primary transition-colors py-1 pl-4" onClick={() => setIsOpen(false)}>
-                    Health Tips
+                    {t('nav.healthTips')}
                   </Link>
                 </div>
                 
@@ -156,7 +158,7 @@ export const Navbar = () => {
                 {/* Dashboard link for mobile */}
                 {user && profile && (
                   <Link to={getDashboardPath()} className="block text-foreground hover:text-primary transition-colors py-2" onClick={() => setIsOpen(false)}>
-                    Dashboard
+                    {t('nav.dashboard')}
                   </Link>
                 )}
                 
@@ -184,7 +186,7 @@ export const Navbar = () => {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search doctors, blogs, health tips, medicine..."
+              placeholder={t('nav.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full rounded-full border-primary/20 focus:border-primary"
