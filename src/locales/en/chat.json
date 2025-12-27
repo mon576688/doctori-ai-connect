@@ -1,0 +1,22 @@
+{
+  "title": "Chat with Doctori AI",
+  "subtitle": "Your personal AI health assistant - Always here to help",
+  "placeholder": "Describe your symptoms in detail...",
+  "placeholderAuthenticated": "Describe your symptoms in detail (Premium account)...",
+  "placeholderGuest": "Describe your symptoms in detail...",
+  "send": "Send",
+  "emergency": "Emergency? Need immediate help?",
+  "call911": "Call 911",
+  "disclaimer": "⚠️ This AI assistant provides general information only and is not a substitute for professional medical advice.",
+  "disclaimerTitle": "Medical Disclaimer",
+  "disclaimerText": "This AI provides general health information only and is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for personal health concerns.",
+  "welcome": "Hello! I'm Doctori AI, your personal health assistant. I'm here to help you understand your symptoms and connect you with the right healthcare providers. Please describe your symptoms or health concerns in detail.\n\n⚠️ Remember: This is not medical advice and should not replace professional medical care. In case of emergency, please call 911 immediately.",
+  "thinking": "Doctor AI is thinking...",
+  "urgentTitle": "URGENT MEDICAL ATTENTION NEEDED",
+  "urgentMessage": "Based on your symptoms, please seek immediate medical care. Call 911 or go to the nearest emergency room.",
+  "callEmergency": "Call 911 Emergency",
+  "viewSummary": "View Your Health Summary & Recommended Doctors",
+  "loading": "Loading chat...",
+  "headerTitle": "Doctori AI Health Assistant",
+  "premium": "Premium"
+}
