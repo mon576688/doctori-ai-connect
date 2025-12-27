@@ -509,6 +509,48 @@ export type Database = {
         }
         Relationships: []
       }
+      hospitals: {
+        Row: {
+          address: string | null
+          city: string
+          created_at: string | null
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean | null
+          logo_url: string | null
+          name: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       medical_assessments: {
         Row: {
           assessment_data: Json | null
@@ -822,6 +864,45 @@ export type Database = {
           {
             foreignKeyName: "provider_documents_reviewed_by_fkey"
             columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_hospital_assignments: {
+        Row: {
+          created_at: string | null
+          hospital_id: string
+          id: string
+          is_primary: boolean | null
+          provider_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          hospital_id: string
+          id?: string
+          is_primary?: boolean | null
+          provider_id: string
+        }
+        Update: {
+          created_at?: string | null
+          hospital_id?: string
+          id?: string
+          is_primary?: boolean | null
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_hospital_assignments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_hospital_assignments_provider_id_fkey"
+            columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
