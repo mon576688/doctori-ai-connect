@@ -4,23 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, Globe } from "lucide-react";
+import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useGuestChat } from "@/hooks/useGuestChat";
 import { useAuth } from "@/hooks/useAuth";
 import { isHealthRelated } from '@/hooks/useHealthTopicFilter';
-import { VoiceChatInterface } from "@/components/VoiceChatInterface";
-import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 
 const Chat = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { t, i18n } = useTranslation('chat');
   const [messageInput, setMessageInput] = useState("");
-  const [chatLanguage, setChatLanguage] = useState(i18n.language || 'en');
-  const { speak } = useTextToSpeech();
 
   // Use guest chat by default, authenticated chat when logged in
   const authenticatedChat = useChatSession();
@@ -35,13 +30,6 @@ const Chat = () => {
       chat.initializeChat(welcomeMessage);
     }
   }, [loading, chat.initializeChat, t]);
-
-  // Sync chat language with i18n
-  useEffect(() => {
-    if (chatLanguage !== i18n.language) {
-      i18n.changeLanguage(chatLanguage);
-    }
-  }, [chatLanguage, i18n]);
 
   const handleSendMessage = () => {
     const content = messageInput.trim();
@@ -71,16 +59,6 @@ const Chat = () => {
     navigate('/chat-summary');
   };
 
-  const handleVoiceMessage = async (transcript: string) => {
-    if (transcript.trim()) {
-      await chat.sendMessage(transcript);
-    }
-  };
-
-  const handleSpeakText = (text: string) => {
-    speak(text);
-  };
-
   const getPlaceholder = () => {
     return isAuthenticated 
       ? t('placeholderAuthenticated')
@@ -97,7 +75,7 @@ const Chat = () => {
   };
 
   const getEmergencyNumber = () => {
-    return chatLanguage === 'bn' ? '999' : '911';
+    return i18n.language === 'bn' ? '999' : '911';
   };
 
   if (loading) {
@@ -186,17 +164,6 @@ const Chat = () => {
 
           {/* Input Area - Always Visible */}
             <div className="p-4 md:p-6 border-t space-y-4">
-              {/* Voice Chat Interface for Premium Users */}
-              {isAuthenticated && (
-                <div className="mb-4">
-                  <VoiceChatInterface 
-                    onVoiceMessage={handleVoiceMessage}
-                    onSpeakText={handleSpeakText}
-                    disabled={chat.sessionState.isLoading}
-                  />
-                </div>
-              )}
-
               {/* Emergency Alert */}
               {(chat.sessionState.urgencyLevel === "high" || chat.sessionState.urgencyLevel === "emergency") && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -213,23 +180,6 @@ const Chat = () => {
                   </Button>
                 </div>
               )}
-
-              {/* Language Selector */}
-              <div className="flex items-center space-x-2 mb-2">
-                <Globe className="h-4 w-4 text-muted-foreground" />
-                <Select value={chatLanguage} onValueChange={(value: string) => setChatLanguage(value)}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="bn">বাংলা</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="ar">العربية</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
 
               {/* Text Input + Send */}
               <div className="flex space-x-2">
