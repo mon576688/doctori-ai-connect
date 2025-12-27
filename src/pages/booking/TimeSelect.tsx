@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { groupTimeSlots } from '@/lib/bookingUtils';
+import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -24,8 +25,11 @@ export default function TimeSelect() {
   useEffect(() => {
     if (!providerId || providerId !== id || !selectedDate) {
       navigate('/booking/providers');
-      return;
     }
+  }, [providerId, id, selectedDate, navigate]);
+
+  useEffect(() => {
+    if (!providerId || providerId !== id || !selectedDate) return;
 
     const fetchTimeSlots = async () => {
       try {
@@ -82,7 +86,8 @@ export default function TimeSelect() {
     timeSlots.morning.length > 0 || timeSlots.afternoon.length > 0 || timeSlots.evening.length > 0;
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <BookingProgress />
       <div className="max-w-3xl mx-auto">
         <Card>
           <CardHeader>

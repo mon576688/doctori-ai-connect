@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, DollarSign, User } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -8,12 +8,13 @@ import { useBooking } from '@/contexts/BookingContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { formatPrice } from '@/lib/bookingUtils';
+import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 export default function ReviewConfirm() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const {
     city,
     providerData,
@@ -25,13 +26,19 @@ export default function ReviewConfirm() {
   } = useBooking();
   const [confirming, setConfirming] = useState(false);
 
-  if (!providerData || !selectedDate || !selectedTime) {
-    navigate('/booking/location');
-    return null;
-  }
+  useEffect(() => {
+    if (!providerData || !selectedDate || !selectedTime) {
+      navigate('/booking/location');
+    }
+  }, [providerData, selectedDate, selectedTime, navigate]);
 
-  if (!user) {
-    navigate(`/login?redirect=/booking/review`);
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate(`/login?redirect=/booking/review`);
+    }
+  }, [user, authLoading, navigate]);
+
+  if (!providerData || !selectedDate || !selectedTime || !user) {
     return null;
   }
 
@@ -74,7 +81,8 @@ export default function ReviewConfirm() {
   };
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <BookingProgress />
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>

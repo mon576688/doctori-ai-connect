@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
+import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -19,8 +20,11 @@ export default function DateSelect() {
   useEffect(() => {
     if (!providerId || providerId !== id) {
       navigate('/booking/providers');
-      return;
     }
+  }, [providerId, id, navigate]);
+
+  useEffect(() => {
+    if (!providerId || providerId !== id) return;
 
     const fetchAvailability = async () => {
       try {
@@ -69,7 +73,8 @@ export default function DateSelect() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-background py-8 px-4">
+      <BookingProgress />
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>

@@ -94,6 +94,7 @@ const App = () => (
                     <Route path="dashboard" element={<Dashboard />} />
                     
                     {/* Booking Routes */}
+                    <Route path="booking" element={<LocationSelect />} />
                     <Route path="booking/location" element={<LocationSelect />} />
                     <Route path="booking/type" element={<ProviderTypeSelect />} />
                     <Route path="booking/providers" element={<ProviderList />} />
