@@ -1242,6 +1242,24 @@ export type Database = {
       }
     }
     Functions: {
+      admin_create_provider: {
+        Args: {
+          _address?: string
+          _auto_approve?: boolean
+          _bio?: string
+          _city?: string
+          _email: string
+          _experience?: number
+          _first_name: string
+          _hospital_id?: string
+          _last_name: string
+          _license_number?: string
+          _phone?: string
+          _provider_type?: string
+          _specialty?: string
+        }
+        Returns: string
+      }
       admin_delete_user: { Args: { _user_id: string }; Returns: undefined }
       admin_get_all_users: {
         Args: never

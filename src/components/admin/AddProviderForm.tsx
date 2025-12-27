@@ -115,73 +115,24 @@ export default function AddProviderForm() {
     setSubmitting(true);
 
     try {
-      // First, create the user in auth.users via signUp
-      // Note: In a real scenario, you'd use an admin API or edge function
-      // For now, we'll create the profile directly
-      
-      const providerId = crypto.randomUUID();
-      
-      // Create profile
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: providerId,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email,
-        phone: formData.phone || null,
-        role: 'provider',
-        provider_type: formData.provider_type || null,
-        city: formData.city || null,
-        address: formData.address || null,
-        bio: formData.bio || null,
-        approval_status: formData.auto_approve ? 'approved' : 'pending',
+      // Use the admin RPC function to create provider
+      const { data: providerId, error } = await supabase.rpc('admin_create_provider', {
+        _email: formData.email,
+        _first_name: formData.first_name,
+        _last_name: formData.last_name,
+        _phone: formData.phone || null,
+        _specialty: formData.specialty || 'General Practice',
+        _provider_type: formData.provider_type || 'Doctor',
+        _license_number: formData.license_number || null,
+        _experience: formData.experience ? parseInt(formData.experience) : 0,
+        _bio: formData.bio || null,
+        _city: formData.city || null,
+        _address: formData.address || null,
+        _auto_approve: formData.auto_approve,
+        _hospital_id: formData.hospital_id || null,
       });
 
-      if (profileError) throw profileError;
-
-      // Create user role
-      const { error: roleError } = await supabase.from('user_roles').insert({
-        user_id: providerId,
-        role: 'provider',
-      });
-
-      if (roleError) {
-        // Rollback profile creation
-        await supabase.from('profiles').delete().eq('id', providerId);
-        throw roleError;
-      }
-
-      // Create doctor entry
-      const { error: doctorError } = await supabase.from('doctors').insert({
-        user_id: providerId,
-        specialty: formData.specialty || 'General Practice',
-        license_number: formData.license_number || null,
-        experience: formData.experience ? parseInt(formData.experience) : null,
-        bio: formData.bio || null,
-        approved: formData.auto_approve,
-      });
-
-      if (doctorError) {
-        // Rollback
-        await supabase.from('user_roles').delete().eq('user_id', providerId);
-        await supabase.from('profiles').delete().eq('id', providerId);
-        throw doctorError;
-      }
-
-      // Assign to hospital if selected
-      if (formData.hospital_id) {
-        const { error: assignError } = await supabase
-          .from('provider_hospital_assignments')
-          .insert({
-            provider_id: providerId,
-            hospital_id: formData.hospital_id,
-            is_primary: true,
-          });
-
-        if (assignError) {
-          console.error('Error assigning hospital:', assignError);
-          // Don't throw - provider is created, just hospital assignment failed
-        }
-      }
+      if (error) throw error;
 
       toast({
         title: 'Success',
