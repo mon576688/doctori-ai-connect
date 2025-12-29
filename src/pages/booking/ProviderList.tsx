@@ -21,6 +21,7 @@ interface Provider {
   bio: string;
   provider_type: string;
   address: string;
+  city: string;
   services: Array<{ price: number; service_name: string }>;
 }
 
@@ -47,20 +48,36 @@ export default function ProviderList() {
     }
   }, [city, providerType, navigate]);
 
+  const [showingAllLocations, setShowingAllLocations] = useState(false);
+
   useEffect(() => {
     if (!city || !providerType) return;
 
     const fetchData = async () => {
       try {
         if (providerType === 'hospital') {
-          // Fetch hospitals instead of providers
-          const { data, error } = await supabase
+          // First try to fetch hospitals in selected city
+          let { data, error } = await supabase
             .from('hospitals')
             .select('*')
             .eq('is_active', true)
             .ilike('city', `%${city}%`);
 
           if (error) throw error;
+
+          // If no hospitals found, fetch all hospitals
+          if (!data || data.length === 0) {
+            const { data: allData, error: allError } = await supabase
+              .from('hospitals')
+              .select('*')
+              .eq('is_active', true);
+
+            if (allError) throw allError;
+            data = allData;
+            setShowingAllLocations(true);
+          } else {
+            setShowingAllLocations(false);
+          }
 
           setHospitals((data || []).map((h: any) => ({
             id: h.id,
@@ -72,8 +89,8 @@ export default function ProviderList() {
             logo_url: h.logo_url || '/placeholder.svg',
           })));
         } else {
-          // Fetch providers for doctor/nurse
-          const { data, error } = await supabase
+          // First try to fetch providers in selected city
+          let { data, error } = await supabase
             .from('profiles')
             .select(`
               id,
@@ -98,6 +115,37 @@ export default function ProviderList() {
 
           if (error) throw error;
 
+          // If no providers found, fetch all providers
+          if (!data || data.length === 0) {
+            const { data: allData, error: allError } = await supabase
+              .from('profiles')
+              .select(`
+                id,
+                name,
+                first_name,
+                last_name,
+                bio,
+                photo_url,
+                latitude,
+                longitude,
+                address,
+                provider_type,
+                city,
+                provider_services (
+                  price,
+                  service_name
+                )
+              `)
+              .eq('role', 'provider')
+              .eq('approval_status', 'approved');
+
+            if (allError) throw allError;
+            data = allData;
+            setShowingAllLocations(true);
+          } else {
+            setShowingAllLocations(false);
+          }
+
           const formattedProviders: Provider[] = (data || []).map((p: any) => ({
             id: p.id,
             name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
@@ -109,6 +157,7 @@ export default function ProviderList() {
             bio: p.bio || '',
             provider_type: p.provider_type || providerType,
             address: p.address || '',
+            city: p.city || '',
             services: p.provider_services || [],
           }));
 
@@ -160,10 +209,13 @@ export default function ProviderList() {
       <div className="max-w-5xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
-            {providerType === 'hospital' ? 'Available Hospitals' : 'Available Providers'} in {city}
+            {providerType === 'hospital' ? 'Available Hospitals' : 'Available Providers'}
+            {showingAllLocations ? ' - All Locations' : ` in ${city}`}
           </h1>
           <p className="text-muted-foreground">
-            Found {itemCount} {itemLabel}{itemCount !== 1 ? 's' : ''} near you
+            {showingAllLocations 
+              ? `No ${itemLabel}s found in ${city}. Showing all ${itemCount} available ${itemLabel}${itemCount !== 1 ? 's' : ''}.`
+              : `Found ${itemCount} ${itemLabel}${itemCount !== 1 ? 's' : ''} near you`}
           </p>
         </div>
 
