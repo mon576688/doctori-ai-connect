@@ -52,6 +52,7 @@ import { DataExport } from '@/components/admin/DataExport';
 import BloodDonorManagement from '@/components/admin/BloodDonorManagement';
 import HospitalManagement from '@/components/admin/HospitalManagement';
 import AddProviderForm from '@/components/admin/AddProviderForm';
+import ProviderServiceManagement from '@/components/admin/ProviderServiceManagement';
 
 interface User {
   id: string;
@@ -565,6 +566,9 @@ export default function AdminDashboard() {
 
       case 'add-provider':
         return <AddProviderForm />;
+
+      case 'provider-services':
+        return <ProviderServiceManagement />;
 
       default:
         return null;
