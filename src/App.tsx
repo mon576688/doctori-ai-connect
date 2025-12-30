@@ -38,6 +38,7 @@ import LocationSelect from "./pages/booking/LocationSelect";
 import ProviderTypeSelect from "./pages/booking/ProviderTypeSelect";
 import ProviderList from "./pages/booking/ProviderList";
 import ProviderProfile from "./pages/booking/ProviderProfile";
+import HospitalProfile from "./pages/booking/HospitalProfile";
 import DateSelect from "./pages/booking/DateSelect";
 import TimeSelect from "./pages/booking/TimeSelect";
 import ReviewConfirm from "./pages/booking/ReviewConfirm";
@@ -99,6 +100,7 @@ const App = () => (
                     <Route path="booking/type" element={<ProviderTypeSelect />} />
                     <Route path="booking/providers" element={<ProviderList />} />
                     <Route path="booking/provider/:id" element={<ProviderProfile />} />
+                    <Route path="booking/hospital/:id" element={<HospitalProfile />} />
                     <Route path="booking/schedule/:id" element={<DateSelect />} />
                     <Route path="booking/time/:id" element={<TimeSelect />} />
                     <Route path="booking/review" element={<ReviewConfirm />} />

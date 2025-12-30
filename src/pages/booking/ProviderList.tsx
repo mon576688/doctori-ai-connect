@@ -267,7 +267,7 @@ export default function ProviderList() {
                 </CardContent>
                 <CardFooter>
                   <Button
-                    onClick={() => navigate(`/booking/provider/${hospital.id}?type=hospital`)}
+                    onClick={() => navigate(`/booking/hospital/${hospital.id}`)}
                     variant="medical"
                     className="w-full"
                   >
