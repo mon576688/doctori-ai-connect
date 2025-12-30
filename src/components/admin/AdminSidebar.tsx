@@ -19,7 +19,8 @@ import {
   Menu,
   X,
   Heart,
-  ExternalLink
+  ExternalLink,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -119,6 +120,7 @@ export default function AdminSidebar({ pendingCount, activeTab, onTabChange }: A
     { id: 'bookings', icon: Calendar, label: 'Bookings', badge: 0 },
     { id: 'pending', icon: Clock, label: 'Pending Approvals', badge: pendingCount },
     { id: 'providers', icon: Stethoscope, label: 'Healthcare Providers' },
+    { id: 'provider-services', icon: Package, label: 'Provider Services' },
     { id: 'add-provider', icon: UserCog, label: 'Add Provider' },
     { id: 'hospitals', icon: FolderKanban, label: 'Hospitals & Clinics' },
     { id: 'users', icon: Users, label: 'All Users' },

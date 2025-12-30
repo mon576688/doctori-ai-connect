@@ -10,13 +10,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Stethoscope, Users, FileText, User, MessageSquare, Calendar as CalendarIcon, Video } from 'lucide-react';
+import { Stethoscope, Users, FileText, User, MessageSquare, Calendar as CalendarIcon, Video, Package } from 'lucide-react';
 import { ProviderAvailability } from '@/components/ProviderAvailability';
 import { AppointmentsList } from '@/components/AppointmentsList';
 import { DocumentUpload } from '@/components/provider/DocumentUpload';
 import { Inbox } from '@/components/messaging/Inbox';
 import ConsultationAppointments from '@/components/provider/ConsultationAppointments';
 import { ProfilePhotoUpload } from '@/components/provider/ProfilePhotoUpload';
+import { ServiceManagement } from '@/components/provider/ServiceManagement';
 
 const PROVIDER_TYPES = [
   { value: 'doctor', label: 'Doctor' },
@@ -210,10 +211,14 @@ export default function ProviderDashboard() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
+            </TabsTrigger>
+            <TabsTrigger value="services">
+              <Package className="w-4 h-4 mr-2" />
+              Services
             </TabsTrigger>
             <TabsTrigger value="availability">
               <CalendarIcon className="w-4 h-4 mr-2" />
@@ -394,6 +399,10 @@ export default function ProviderDashboard() {
                 </form>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="services">
+            {profile?.id && <ServiceManagement providerId={profile.id} />}
           </TabsContent>
 
           <TabsContent value="consultations">
