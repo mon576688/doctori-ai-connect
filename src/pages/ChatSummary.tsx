@@ -1,12 +1,11 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   FileText, 
-  User, 
   Calendar, 
   Phone, 
   MapPin, 
@@ -15,9 +14,16 @@ import {
   AlertTriangle,
   Heart,
   Download,
-  Share2
+  Share2,
+  Building2,
+  Navigation,
+  Stethoscope
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { getCurrentLocation } from "@/lib/locationUtils";
+import { formatDistance } from "@/lib/locationUtils";
 
 interface SummaryData {
   symptoms: string[];
@@ -27,58 +33,40 @@ interface SummaryData {
   conversation: any[];
 }
 
-interface Doctor {
-  id: number;
+interface Provider {
+  id: string;
   name: string;
+  photo_url: string | null;
   specialty: string;
-  rating: number;
-  reviews: number;
-  location: string;
-  availability: string;
-  phone: string;
-  image: string;
+  consultation_fee: number | null;
+  experience: number | null;
+  city: string | null;
+  address: string | null;
+  phone: string | null;
+  distance: number | null;
+  rating: number | null;
+  reviewCount: number;
+  verified: boolean;
 }
 
-const doctors: Doctor[] = [
-  {
-    id: 1,
-    name: "Dr. Sarah Johnson",
-    specialty: "Cardiologist",
-    rating: 4.8,
-    reviews: 127,
-    location: "Medical Center Downtown",
-    availability: "Available Today",
-    phone: "+1 (555) 123-4567",
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 2,
-    name: "Dr. Michael Chen",
-    specialty: "General Practice",
-    rating: 4.9,
-    reviews: 203,
-    location: "Community Health Clinic",
-    availability: "Next Available: Tomorrow",
-    phone: "+1 (555) 234-5678",
-    image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop&crop=face",
-  },
-  {
-    id: 3,
-    name: "Dr. Emily Rodriguez",
-    specialty: "Pediatrics",
-    rating: 4.7,
-    reviews: 89,
-    location: "Children's Medical Center",
-    availability: "Available Today",
-    phone: "+1 (555) 345-6789",
-    image: "https://images.unsplash.com/photo-1594824797147-5cd0b4cf9e67?w=400&h=400&fit=crop&crop=face",
-  },
-];
+interface Hospital {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  city: string | null;
+  address: string | null;
+  phone: string | null;
+  distance: number | null;
+}
 
 const ChatSummary = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [summaryData, setSummaryData] = useState<SummaryData | null>(null);
-  const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchLocation, setSearchLocation] = useState("");
 
   useEffect(() => {
     const stored = sessionStorage.getItem("chatSummary");
@@ -89,14 +77,61 @@ const ChatSummary = () => {
 
     const data: SummaryData = JSON.parse(stored);
     setSummaryData(data);
-
-    // Filter doctors based on specialty
-    const filtered = doctors.filter(doctor => 
-      doctor.specialty === data.specialty || 
-      data.specialty === "General Practice"
-    );
-    setRecommendedDoctors(filtered.length > 0 ? filtered : doctors.slice(0, 2));
+    
+    // Fetch real providers from database
+    fetchProviders(data.specialty);
   }, [navigate]);
+
+  const fetchProviders = async (specialty: string) => {
+    setLoading(true);
+    try {
+      // Try to get user's location
+      const locationResult = await getCurrentLocation();
+      
+      let searchParams: any = {
+        specialty: specialty || 'General Practice',
+        limit: 6
+      };
+
+      if (locationResult.coordinates) {
+        searchParams.latitude = locationResult.coordinates.latitude;
+        searchParams.longitude = locationResult.coordinates.longitude;
+        setSearchLocation('Your Location');
+      } else if (user) {
+        // Fall back to user's profile city
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('city')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.city) {
+          searchParams.city = profile.city;
+          setSearchLocation(profile.city);
+        }
+      }
+
+      // Call the search-providers edge function
+      const { data, error } = await supabase.functions.invoke('search-providers', {
+        body: searchParams
+      });
+
+      if (error) {
+        console.error('Error fetching providers:', error);
+        return;
+      }
+
+      setProviders(data.providers || []);
+      setHospitals(data.hospitals || []);
+      if (data.searchLocation) {
+        setSearchLocation(data.searchLocation);
+      }
+    } catch (error) {
+      console.error('Error in fetchProviders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
@@ -244,78 +279,180 @@ const ChatSummary = () => {
           </CardContent>
         </Card>
 
-        {/* Recommended Doctors */}
+        {/* Recommended Doctors from Database */}
         <Card className="shadow-card">
           <CardHeader>
-            <CardTitle>Recommended Healthcare Providers</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Stethoscope className="h-5 w-5" />
+              Recommended Healthcare Providers
+            </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Based on your symptoms, these doctors are best suited to help you
+              {searchLocation 
+                ? `Based on your symptoms, nearby ${searchLocation}`
+                : 'Based on your symptoms'}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recommendedDoctors.map((doctor) => (
-              <Card key={doctor.id} className="shadow-card">
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <img
-                      src={doctor.image}
-                      alt={doctor.name}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                    
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h4 className="font-semibold">{doctor.name}</h4>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="secondary">{doctor.specialty}</Badge>
-                            {doctor.availability === "Available Today" && (
-                              <Badge className="bg-green-100 text-green-700">
-                                🟢 Available Today
-                              </Badge>
-                            )}
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-32" />
+                ))}
+              </div>
+            ) : providers.length > 0 ? (
+              providers.map((provider) => (
+                <Card key={provider.id} className="shadow-card">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <img
+                        src={provider.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(provider.name)}&background=3b82f6&color=fff`}
+                        alt={provider.name}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                      
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h4 className="font-semibold">Dr. {provider.name}</h4>
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <Badge variant="secondary">{provider.specialty}</Badge>
+                              {provider.verified && (
+                                <Badge className="bg-green-100 text-green-700">
+                                  ✓ Verified
+                                </Badge>
+                              )}
+                              {provider.distance !== null && (
+                                <Badge variant="outline">
+                                  <Navigation className="h-3 w-3 mr-1" />
+                                  {formatDistance(provider.distance)}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
+                          
+                          {provider.rating && (
+                            <div className="flex items-center space-x-1">
+                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                              <span className="text-sm font-medium">{provider.rating}</span>
+                              <span className="text-sm text-muted-foreground">
+                                ({provider.reviewCount} reviews)
+                              </span>
+                            </div>
+                          )}
                         </div>
                         
-                        <div className="flex items-center space-x-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">{doctor.rating}</span>
-                          <span className="text-sm text-muted-foreground">
-                            ({doctor.reviews} reviews)
-                          </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground mb-3">
+                          {provider.city && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              {provider.address || provider.city}
+                            </div>
+                          )}
+                          {provider.experience && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-4 w-4" />
+                              {provider.experience} years experience
+                            </div>
+                          )}
                         </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-muted-foreground mb-3">
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-4 w-4" />
-                          {doctor.location}
+                        
+                        <div className="flex gap-2">
+                          <Link to={`/booking/provider/${provider.id}`}>
+                            <Button variant="default" size="sm">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              Book Appointment
+                            </Button>
+                          </Link>
+                          {provider.phone && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.open(`tel:${provider.phone}`)}
+                            >
+                              <Phone className="h-4 w-4 mr-1" />
+                              Call
+                            </Button>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          {doctor.availability}
-                        </div>
-                      </div>
-                      
-                      <div className="flex gap-2">
-                        <Link to={`/doctor/${doctor.id}`}>
-                          <Button variant="medical" size="sm">
-                            <Calendar className="h-4 w-4 mr-1" />
-                            View Profile
-                          </Button>
-                        </Link>
-                        <Button variant="outline" size="sm">
-                          <Phone className="h-4 w-4 mr-1" />
-                          Call {doctor.phone}
-                        </Button>
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <Stethoscope className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <p className="text-muted-foreground mb-4">
+                  No providers found matching your criteria.
+                </p>
+                <Link to="/doctors">
+                  <Button variant="outline">Browse All Doctors</Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
+
+        {/* Nearby Hospitals */}
+        {hospitals.length > 0 && (
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Nearby Hospitals
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {hospitals.slice(0, 3).map((hospital) => (
+                <Card key={hospital.id} className="shadow-card">
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      {hospital.logo_url ? (
+                        <img
+                          src={hospital.logo_url}
+                          alt={hospital.name}
+                          className="w-12 h-12 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded bg-muted flex items-center justify-center">
+                          <Building2 className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1">
+                        <h4 className="font-semibold">{hospital.name}</h4>
+                        {hospital.city && (
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <MapPin className="h-3 w-3" />
+                            {hospital.address || hospital.city}
+                          </p>
+                        )}
+                        
+                        <div className="flex gap-2 mt-3">
+                          <Link to={`/booking/hospital/${hospital.id}`}>
+                            <Button size="sm" variant="outline">
+                              View Hospital
+                            </Button>
+                          </Link>
+                          {hospital.phone && (
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => window.open(`tel:${hospital.phone}`)}
+                            >
+                              <Phone className="h-4 w-4 mr-1" />
+                              Call
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Actions */}
         <Card className="shadow-card">
@@ -333,11 +470,11 @@ const ChatSummary = () => {
               </div>
               
               <div className="flex gap-2">
-                <Button variant="healing" onClick={handleStartNewChat}>
+                <Button variant="secondary" onClick={handleStartNewChat}>
                   Start New Chat
                 </Button>
                 <Link to="/doctors">
-                  <Button variant="medical">
+                  <Button variant="default">
                     Browse All Doctors
                   </Button>
                 </Link>
