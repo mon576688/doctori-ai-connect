@@ -89,8 +89,10 @@ export const getCurrentStep = (pathname: string): number => {
   if (pathname.includes('/booking/type')) return 1;
   if (pathname.includes('/booking/providers')) return 2;
   if (pathname.includes('/booking/provider/')) return 2;
+  if (pathname.includes('/booking/hospital/')) return 2;
   if (pathname.includes('/booking/schedule/')) return 3;
   if (pathname.includes('/booking/time/')) return 4;
   if (pathname.includes('/booking/review')) return 5;
+  if (pathname.includes('/booking/confirmed')) return 5;
   return 0;
 };

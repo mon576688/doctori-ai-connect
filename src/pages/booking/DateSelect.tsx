@@ -12,19 +12,72 @@ import { format } from 'date-fns';
 export default function DateSelect() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { providerId, providerData, setSelectedDate } = useBooking();
+  const { providerId, providerData, setSelectedDate, setProvider } = useBooking();
   const [date, setDate] = useState<Date | undefined>();
   const [availableDates, setAvailableDates] = useState<Date[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contextReady, setContextReady] = useState(false);
+
+  // Recover context from URL if needed
+  useEffect(() => {
+    const recoverContext = async () => {
+      if (providerId && providerId === id) {
+        setContextReady(true);
+        return;
+      }
+
+      if (!id) {
+        navigate('/booking/providers');
+        return;
+      }
+
+      // Try to fetch provider data and set it in context
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`
+            id, name, first_name, last_name, bio, photo_url,
+            latitude, longitude, address, city, provider_type,
+            provider_services (price, service_name, duration_minutes)
+          `)
+          .eq('id', id)
+          .single();
+
+        if (error || !data) {
+          toast.error('Provider not found');
+          navigate('/booking/providers');
+          return;
+        }
+
+        const providerInfo = {
+          id: data.id,
+          name: data.name || `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Provider',
+          specialty: data.provider_services?.[0]?.service_name || 'General Practice',
+          rating: 4.8,
+          experience: 5,
+          price: data.provider_services?.[0]?.price || 0,
+          photo_url: data.photo_url || '/placeholder.svg',
+          latitude: data.latitude ? parseFloat(String(data.latitude)) : 0,
+          longitude: data.longitude ? parseFloat(String(data.longitude)) : 0,
+          address: data.address || '',
+          bio: data.bio || '',
+          provider_type: (data.provider_type || 'doctor') as 'doctor' | 'hospital' | 'nurse',
+          duration: data.provider_services?.[0]?.duration_minutes || 30,
+        };
+
+        setProvider(id, providerInfo);
+        setContextReady(true);
+      } catch (error) {
+        console.error('Error recovering context:', error);
+        navigate('/booking/providers');
+      }
+    };
+
+    recoverContext();
+  }, [id, providerId, navigate, setProvider]);
 
   useEffect(() => {
-    if (!providerId || providerId !== id) {
-      navigate('/booking/providers');
-    }
-  }, [providerId, id, navigate]);
-
-  useEffect(() => {
-    if (!providerId || providerId !== id) return;
+    if (!contextReady || !id) return;
 
     const fetchAvailability = async () => {
       try {
@@ -38,7 +91,8 @@ export default function DateSelect() {
 
         if (error) throw error;
 
-        const dates = (data || []).map((d) => new Date(d.date));
+        const uniqueDates = [...new Set((data || []).map((d) => d.date))];
+        const dates = uniqueDates.map((d) => new Date(d));
         setAvailableDates(dates);
       } catch (error) {
         console.error('Error fetching availability:', error);
@@ -49,7 +103,7 @@ export default function DateSelect() {
     };
 
     fetchAvailability();
-  }, [id, providerId, navigate]);
+  }, [id, contextReady]);
 
   const handleContinue = () => {
     if (date) {
