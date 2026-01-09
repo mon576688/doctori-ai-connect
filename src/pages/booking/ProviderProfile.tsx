@@ -28,7 +28,6 @@ import { formatPrice } from '@/lib/bookingUtils';
 import { toast } from 'sonner';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
-import { AppointmentBookingForm } from '@/components/AppointmentBookingForm';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ProviderProfile() {
@@ -38,7 +37,6 @@ export default function ProviderProfile() {
   const { user } = useAuth();
   const [provider, setProviderData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [showReviewDialog, setShowReviewDialog] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -419,29 +417,13 @@ export default function ProviderProfile() {
                 <Separator />
                 
                 <div className="space-y-3">
-                  <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-                    <DialogTrigger asChild>
-                      <Button variant="medical" className="w-full">
-                        <Calendar className="h-4 w-4 mr-2" />
-                        Book Appointment
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <AppointmentBookingForm
-                        doctorId={provider.id}
-                        doctorName={provider.name}
-                        onSuccess={() => setShowBookingDialog(false)}
-                      />
-                    </DialogContent>
-                  </Dialog>
-                  
                   <Button 
-                    variant="healing" 
+                    variant="medical" 
                     className="w-full" 
                     onClick={handleBookAppointment}
                   >
                     <Calendar className="h-4 w-4 mr-2" />
-                    Schedule Now
+                    Book Appointment
                   </Button>
                   
                   {provider.phone !== 'Not provided' && (

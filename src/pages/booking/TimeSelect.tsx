@@ -22,9 +22,16 @@ export default function TimeSelect() {
   }>({ morning: [], afternoon: [], evening: [] });
   const [loading, setLoading] = useState(true);
 
+  // Check if we have required context, redirect to date selection if missing date
   useEffect(() => {
-    if (!providerId || providerId !== id || !selectedDate) {
-      navigate('/booking/providers');
+    if (!providerId || providerId !== id) {
+      // If no provider context, go back to date selection which will recover it
+      navigate(`/booking/schedule/${id}`);
+      return;
+    }
+    if (!selectedDate) {
+      // If no date selected, go back to date selection
+      navigate(`/booking/schedule/${id}`);
     }
   }, [providerId, id, selectedDate, navigate]);
 
@@ -55,7 +62,7 @@ export default function TimeSelect() {
     };
 
     fetchTimeSlots();
-  }, [id, providerId, selectedDate, navigate]);
+  }, [id, providerId, selectedDate]);
 
   const handleContinue = () => {
     if (selectedSlot) {
