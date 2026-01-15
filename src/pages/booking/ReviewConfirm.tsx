@@ -42,6 +42,46 @@ export default function ReviewConfirm() {
     return null;
   }
 
+  const sendConfirmationEmail = async () => {
+    try {
+      // Get user email from profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('email, first_name, last_name, name')
+        .eq('id', user.id)
+        .single();
+
+      const userEmail = profile?.email || user.email;
+      const userName = profile?.first_name 
+        ? `${profile.first_name} ${profile.last_name || ''}`.trim()
+        : profile?.name || 'Patient';
+
+      if (!userEmail) {
+        console.log('No email found for user, skipping confirmation email');
+        return;
+      }
+
+      await supabase.functions.invoke('send-email', {
+        body: {
+          to: userEmail,
+          subject: 'Appointment Confirmed - Doctori AI',
+          template: 'appointment_confirmation',
+          data: {
+            patientName: userName,
+            doctorName: providerData.name,
+            date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
+            time: selectedTime,
+            appointmentType: providerData.provider_type,
+          },
+        },
+      });
+      console.log('Confirmation email sent successfully');
+    } catch (emailError) {
+      // Don't fail the booking if email fails
+      console.error('Failed to send confirmation email:', emailError);
+    }
+  };
+
   const handleConfirm = async () => {
     setConfirming(true);
     try {
@@ -70,6 +110,9 @@ export default function ReviewConfirm() {
         }
         throw error;
       }
+
+      // Send confirmation email (non-blocking)
+      sendConfirmationEmail();
 
       toast.success('Appointment confirmed successfully!');
       navigate('/booking/confirmed');
