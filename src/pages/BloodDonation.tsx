@@ -29,10 +29,21 @@ import {
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
+const BloodGroupEnum = {
+  "A+": "A+",
+  "A-": "A-", 
+  "B+": "B+",
+  "B-": "B-",
+  "AB+": "AB+",
+  "AB-": "AB-",
+  "O+": "O+",
+  "O-": "O-",
+} as const;
+
 const formSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters").max(100),
   age: z.coerce.number().min(18, "Must be at least 18 years old").max(65, "Must be 65 or younger"),
-  bloodGroup: z.enum(bloodGroups, { required_error: "Please select your blood group" }),
+  bloodGroup: z.nativeEnum(BloodGroupEnum, { message: "Please select your blood group" }),
   city: z.string().min(2, "City must be at least 2 characters").max(100),
   lastDonatedDate: z.date().optional(),
   availableForDonation: z.boolean().default(true),
