@@ -49,7 +49,7 @@ export default function ResetPassword() {
     // Validate password
     const result = passwordSchema.safeParse(password);
     if (!result.success) {
-      setError(result.error.errors[0].message);
+      setError(result.error.issues[0].message);
       return;
     }
 
