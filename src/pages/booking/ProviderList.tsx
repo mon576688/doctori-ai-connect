@@ -89,55 +89,19 @@ export default function ProviderList() {
             logo_url: h.logo_url || '/placeholder.svg',
           })));
         } else {
-          // First try to fetch providers in selected city
+          // First try to fetch providers in selected city using the secure view
           let { data, error } = await supabase
-            .from('profiles')
-            .select(`
-              id,
-              name,
-              first_name,
-              last_name,
-              bio,
-              photo_url,
-              latitude,
-              longitude,
-              address,
-              provider_type,
-              city,
-              provider_services (
-                price,
-                service_name
-              )
-            `)
-            .eq('role', 'provider')
-            .eq('approval_status', 'approved')
+            .from('providers_public')
+            .select('*')
             .ilike('city', `%${city}%`);
 
           if (error) throw error;
 
-          // If no providers found, fetch all providers
+          // If no providers found in selected city, fetch all providers
           if (!data || data.length === 0) {
             const { data: allData, error: allError } = await supabase
-              .from('profiles')
-              .select(`
-                id,
-                name,
-                first_name,
-                last_name,
-                bio,
-                photo_url,
-                latitude,
-                longitude,
-                address,
-                provider_type,
-                city,
-                provider_services (
-                  price,
-                  service_name
-                )
-              `)
-              .eq('role', 'provider')
-              .eq('approval_status', 'approved');
+              .from('providers_public')
+              .select('*');
 
             if (allError) throw allError;
             data = allData;
@@ -146,20 +110,38 @@ export default function ProviderList() {
             setShowingAllLocations(false);
           }
 
-          const formattedProviders: Provider[] = (data || []).map((p: any) => ({
-            id: p.id,
-            name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
-            specialty: p.provider_services?.[0]?.service_name || 'General Practice',
-            experience: 5,
-            photo_url: p.photo_url || '/placeholder.svg',
-            latitude: p.latitude ? parseFloat(p.latitude) : 0,
-            longitude: p.longitude ? parseFloat(p.longitude) : 0,
-            bio: p.bio || '',
-            provider_type: p.provider_type || providerType,
-            address: p.address || '',
-            city: p.city || '',
-            services: p.provider_services || [],
-          }));
+          // Fetch services for each provider
+          const providerIds = (data || []).map((p: any) => p.id);
+          const { data: servicesData } = await supabase
+            .from('provider_services')
+            .select('provider_id, price, service_name')
+            .in('provider_id', providerIds);
+
+          const servicesMap = new Map<string, Array<{ price: number; service_name: string }>>();
+          (servicesData || []).forEach((s: any) => {
+            if (!servicesMap.has(s.provider_id)) {
+              servicesMap.set(s.provider_id, []);
+            }
+            servicesMap.get(s.provider_id)!.push({ price: s.price, service_name: s.service_name });
+          });
+
+          const formattedProviders: Provider[] = (data || []).map((p: any) => {
+            const services = servicesMap.get(p.id) || [];
+            return {
+              id: p.id,
+              name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim(),
+              specialty: p.specialty || services[0]?.service_name || 'General Practice',
+              experience: p.experience || p.years_experience || 5,
+              photo_url: p.photo_url || '/placeholder.svg',
+              latitude: 0,
+              longitude: 0,
+              bio: p.bio || '',
+              provider_type: p.provider_type || providerType,
+              address: '',
+              city: p.city || '',
+              services: services,
+            };
+          });
 
           // Calculate distances and sort if coordinates available
           if (userLatitude && userLongitude) {
