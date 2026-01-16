@@ -102,13 +102,15 @@ const ChartTooltip = RechartsPrimitive.Tooltip
 
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+  Omit<React.ComponentProps<typeof RechartsPrimitive.Tooltip>, 'payload' | 'label'> &
     React.ComponentProps<"div"> & {
       hideLabel?: boolean
       hideIndicator?: boolean
       indicator?: "line" | "dot" | "dashed"
       nameKey?: string
       labelKey?: string
+      payload?: Array<{ dataKey?: string; value?: unknown; name?: string; color?: string; payload?: Record<string, unknown> }>
+      label?: string
     }
 >(
   (
@@ -147,7 +149,7 @@ const ChartTooltipContent = React.forwardRef<
       if (labelFormatter) {
         return (
           <div className={cn("font-medium", labelClassName)}>
-            {labelFormatter(value, payload)}
+            {labelFormatter(value, payload as any)}
           </div>
         )
       }
@@ -197,7 +199,7 @@ const ChartTooltipContent = React.forwardRef<
                 )}
               >
                 {formatter && item?.value !== undefined && item.name ? (
-                  formatter(item.value, item.name, item, index, item.payload)
+                  formatter(item.value as any, item.name, item as any, index, item.payload as any)
                 ) : (
                   <>
                     {itemConfig?.icon ? (
@@ -259,9 +261,11 @@ const ChartLegend = RechartsPrimitive.Legend
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    Omit<RechartsPrimitive.LegendProps, 'payload'> & {
       hideIcon?: boolean
       nameKey?: string
+      payload?: Array<{ value?: string; dataKey?: string; color?: string }>
+      verticalAlign?: 'top' | 'bottom'
     }
 >(
   (
