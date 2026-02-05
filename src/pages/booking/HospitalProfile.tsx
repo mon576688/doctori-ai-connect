@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   MapPin, 
-  Phone, 
-  Mail, 
   Building2,
   Users,
   ArrowLeft,
