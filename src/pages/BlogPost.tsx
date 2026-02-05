@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { blogPosts, BlogPost as BlogPostType } from "@/data/blogs";
 import { useToast } from "@/components/ui/use-toast";
+import { SEO } from "@/components/SEO";
 
 const getSupplementsContent = (): string => {
   return `
