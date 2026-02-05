@@ -71,16 +71,21 @@ export default function LocationSelect() {
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
+      <SEO 
+        title={PAGE_SEO.booking.title}
+        description={PAGE_SEO.booking.description}
+        canonicalPath="/booking/location"
+      />
       <BookingProgress />
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
+        <header className="text-center mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
             Where do you want to receive care?
           </h1>
           <p className="text-muted-foreground">
             Select your location to find nearby healthcare providers
           </p>
-        </div>
+        </header>
 
         <Card className="p-6 mb-4">
           <Button
