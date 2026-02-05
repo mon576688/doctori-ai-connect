@@ -73,9 +73,9 @@ export default function HospitalProfile() {
   useEffect(() => {
     const fetchHospitalData = async () => {
       try {
-        // Fetch hospital details
+        // Fetch hospital details using secure public view
         const { data: hospitalData, error: hospitalError } = await supabase
-          .from('hospitals')
+          .from('hospitals_public')
           .select('*')
           .eq('id', id)
           .maybeSingle();
