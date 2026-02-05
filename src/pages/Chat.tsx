@@ -207,6 +207,11 @@ const Chat = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4 md:p-6">
+      <SEO 
+        title={PAGE_SEO.chat.title}
+        description={PAGE_SEO.chat.description}
+        canonicalPath={PAGE_SEO.chat.canonicalPath}
+      />
       <div className="max-w-4xl mx-auto">
         <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
           <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">

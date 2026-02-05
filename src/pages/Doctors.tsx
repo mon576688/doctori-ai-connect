@@ -184,14 +184,19 @@ export default function Doctors() {
 
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.doctors.title}
+        description={PAGE_SEO.doctors.description}
+        canonicalPath={PAGE_SEO.doctors.canonicalPath}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <header className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Find Your Healthcare Provider</h1>
           <p className="text-muted-foreground text-lg mb-6">
             Connect with trusted healthcare professionals near you
           </p>
-        </div>
+        </header>
 
         {/* Search and Filters */}
         <Card className="shadow-card mb-8">

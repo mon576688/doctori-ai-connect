@@ -36,10 +36,17 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <SEO 
+        title={PAGE_SEO.home.title}
+        description={PAGE_SEO.home.description}
+        canonicalPath={PAGE_SEO.home.canonicalPath}
+      />
       {/* Hero Section */}
       <section className="relative bg-gradient-hero py-20 px-4 overflow-hidden">
         {/* Floating decorations */}
