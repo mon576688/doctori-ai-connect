@@ -333,22 +333,6 @@ export default function HospitalProfile() {
                       <span>{hospital.address}, {hospital.city}</span>
                     </div>
                   )}
-                  {hospital.phone && (
-                    <div className="flex items-center gap-2 justify-center md:justify-start">
-                      <Phone className="h-4 w-4 text-secondary" />
-                      <a href={`tel:${hospital.phone}`} className="hover:text-primary">
-                        {hospital.phone}
-                      </a>
-                    </div>
-                  )}
-                  {hospital.email && (
-                    <div className="flex items-center gap-2 justify-center md:justify-start">
-                      <Mail className="h-4 w-4 text-accent" />
-                      <a href={`mailto:${hospital.email}`} className="hover:text-primary">
-                        {hospital.email}
-                      </a>
-                    </div>
-                  )}
                   <div className="flex items-center gap-2 justify-center md:justify-start">
                     <Clock className="h-4 w-4 text-primary" />
                     <span>Open 24/7</span>
