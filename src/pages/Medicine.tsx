@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import { AlertTriangle, Search, Loader2, Info } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
+import { SEO } from '@/components/SEO';
+import { PAGE_SEO } from '@/lib/seo';
 
 interface MedicineInfo {
   name: string;
