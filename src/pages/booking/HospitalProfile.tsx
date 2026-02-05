@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   MapPin, 
-  Phone, 
-  Mail, 
   Building2,
   Users,
   ArrowLeft,
@@ -30,8 +28,6 @@ interface Hospital {
   name: string;
   address: string;
   city: string;
-  phone: string;
-  email: string;
   description: string;
   logo_url: string;
 }
@@ -73,9 +69,9 @@ export default function HospitalProfile() {
   useEffect(() => {
     const fetchHospitalData = async () => {
       try {
-        // Fetch hospital details
+        // Fetch hospital details using secure public view (cast to bypass type generation lag)
         const { data: hospitalData, error: hospitalError } = await supabase
-          .from('hospitals')
+          .from('hospitals_public' as any)
           .select('*')
           .eq('id', id)
           .maybeSingle();
@@ -88,15 +84,14 @@ export default function HospitalProfile() {
           return;
         }
 
+        const h = hospitalData as any;
         setHospital({
-          id: hospitalData.id,
-          name: hospitalData.name,
-          address: hospitalData.address || '',
-          city: hospitalData.city,
-          phone: hospitalData.phone || '',
-          email: hospitalData.email || '',
-          description: hospitalData.description || '',
-          logo_url: hospitalData.logo_url || '/placeholder.svg',
+          id: h.id,
+          name: h.name,
+          address: h.address || '',
+          city: h.city,
+          description: h.description || '',
+          logo_url: h.logo_url || '/placeholder.svg',
         });
 
         // Fetch assigned providers
@@ -336,22 +331,6 @@ export default function HospitalProfile() {
                       <span>{hospital.address}, {hospital.city}</span>
                     </div>
                   )}
-                  {hospital.phone && (
-                    <div className="flex items-center gap-2 justify-center md:justify-start">
-                      <Phone className="h-4 w-4 text-secondary" />
-                      <a href={`tel:${hospital.phone}`} className="hover:text-primary">
-                        {hospital.phone}
-                      </a>
-                    </div>
-                  )}
-                  {hospital.email && (
-                    <div className="flex items-center gap-2 justify-center md:justify-start">
-                      <Mail className="h-4 w-4 text-accent" />
-                      <a href={`mailto:${hospital.email}`} className="hover:text-primary">
-                        {hospital.email}
-                      </a>
-                    </div>
-                  )}
                   <div className="flex items-center gap-2 justify-center md:justify-start">
                     <Clock className="h-4 w-4 text-primary" />
                     <span>Open 24/7</span>
@@ -560,14 +539,9 @@ export default function HospitalProfile() {
                 <h3 className="text-lg font-semibold">Ready to book an appointment?</h3>
                 <p className="text-muted-foreground">Choose a doctor from our medical staff above</p>
               </div>
-              {hospital.phone && (
-                <Button variant="medical" size="lg" asChild>
-                  <a href={`tel:${hospital.phone}`}>
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Hospital
-                  </a>
-                </Button>
-              )}
+              <Button variant="medical" size="lg" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                View Medical Staff
+              </Button>
             </div>
           </CardContent>
         </Card>

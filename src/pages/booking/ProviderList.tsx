@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Star, Briefcase, DollarSign, Building2, Phone } from 'lucide-react';
+import { MapPin, Star, Briefcase, DollarSign, Building2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +30,6 @@ interface Hospital {
   name: string;
   address: string;
   city: string;
-  phone: string;
   description: string;
   logo_url: string;
 }
@@ -56,11 +55,10 @@ export default function ProviderList() {
     const fetchData = async () => {
       try {
         if (providerType === 'hospital') {
-          // First try to fetch hospitals in selected city
+          // First try to fetch hospitals in selected city using secure public view (cast to bypass type generation lag)
           let { data, error } = await supabase
-            .from('hospitals')
+            .from('hospitals_public' as any)
             .select('*')
-            .eq('is_active', true)
             .ilike('city', `%${city}%`);
 
           if (error) throw error;
@@ -68,9 +66,8 @@ export default function ProviderList() {
           // If no hospitals found, fetch all hospitals
           if (!data || data.length === 0) {
             const { data: allData, error: allError } = await supabase
-              .from('hospitals')
-              .select('*')
-              .eq('is_active', true);
+              .from('hospitals_public' as any)
+              .select('*');
 
             if (allError) throw allError;
             data = allData;
@@ -84,7 +81,6 @@ export default function ProviderList() {
             name: h.name,
             address: h.address || '',
             city: h.city,
-            phone: h.phone || '',
             description: h.description || '',
             logo_url: h.logo_url || '/placeholder.svg',
           })));
@@ -232,12 +228,6 @@ export default function ProviderList() {
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <MapPin size={16} />
                         <span>{hospital.address}</span>
-                      </div>
-                    )}
-                    {hospital.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone size={16} />
-                        <span>{hospital.phone}</span>
                       </div>
                     )}
                     {hospital.description && (
