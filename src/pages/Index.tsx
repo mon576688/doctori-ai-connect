@@ -118,8 +118,9 @@ const Index = () => {
             <div className="relative">
               <img
                 src={heroImage}
-                alt="Doctori AI Health Assistant"
+                alt="Doctori AI virtual health assistant interface showing doctor consultation"
                 className="rounded-2xl shadow-float w-full animate-float"
+                loading="eager"
               />
             </div>
           </div>

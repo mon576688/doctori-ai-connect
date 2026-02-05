@@ -303,8 +303,9 @@ export default function ProviderList() {
                   <div className="flex gap-4">
                     <img
                       src={provider.photo_url}
-                      alt={provider.name}
+                      alt={`${provider.name} - Healthcare provider`}
                       className="w-20 h-20 rounded-full object-cover"
+                      loading="lazy"
                     />
                     <div className="flex-1">
                       <CardTitle className="text-xl">{provider.name}</CardTitle>
