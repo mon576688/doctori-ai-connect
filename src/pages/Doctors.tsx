@@ -10,6 +10,9 @@ import { MapPin, Star, Clock, Phone, Calendar, Heart, Search, Loader2 } from "lu
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProviderWithServices {
   id: string;
