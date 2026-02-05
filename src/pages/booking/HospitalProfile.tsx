@@ -539,14 +539,9 @@ export default function HospitalProfile() {
                 <h3 className="text-lg font-semibold">Ready to book an appointment?</h3>
                 <p className="text-muted-foreground">Choose a doctor from our medical staff above</p>
               </div>
-              {hospital.phone && (
-                <Button variant="medical" size="lg" asChild>
-                  <a href={`tel:${hospital.phone}`}>
-                    <Phone className="h-4 w-4 mr-2" />
-                    Call Hospital
-                  </a>
-                </Button>
-              )}
+              <Button variant="medical" size="lg" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                View Medical Staff
+              </Button>
             </div>
           </CardContent>
         </Card>

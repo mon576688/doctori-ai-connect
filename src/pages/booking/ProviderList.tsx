@@ -233,11 +233,6 @@ export default function ProviderList() {
                     {hospital.description && (
                       <p className="text-muted-foreground mt-2 line-clamp-2">
                         {hospital.description}
-                      </div>
-                    )}
-                    {hospital.description && (
-                      <p className="text-muted-foreground mt-2 line-clamp-2">
-                        {hospital.description}
                       </p>
                     )}
                   </div>
