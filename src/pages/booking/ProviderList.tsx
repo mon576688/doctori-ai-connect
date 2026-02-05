@@ -4,11 +4,14 @@ import { MapPin, Star, Briefcase, DollarSign, Building2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateDistance, formatPrice } from '@/lib/bookingUtils';
 import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
+import { SEO } from '@/components/SEO';
+import { PAGE_SEO } from '@/lib/seo';
 
 interface Provider {
   id: string;
