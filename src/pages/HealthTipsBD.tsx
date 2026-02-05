@@ -1,26 +1,17 @@
-import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { healthTipsBD } from "@/data/healthTipsBD";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function HealthTipsBD() {
-  // SEO
-  useEffect(() => {
-    document.title = "Bangladesh Health Tips | Doctori AI";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc)
-      metaDesc.setAttribute(
-        "content",
-        "Bangladesh-specific health tips: dengue prevention, safe water, heatwave safety, air pollution, maternal & child health, and more.",
-      );
-    const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement("link");
-    linkCanonical.setAttribute("rel", "canonical");
-    linkCanonical.setAttribute("href", window.location.href);
-    if (!linkCanonical.parentNode) document.head.appendChild(linkCanonical);
-  }, []);
-
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.healthTips.title}
+        description={PAGE_SEO.healthTips.description}
+        canonicalPath={PAGE_SEO.healthTips.canonicalPath}
+      />
       <div className="max-w-5xl mx-auto">
         <header className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-2">Health Tips</h1>

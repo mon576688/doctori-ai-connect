@@ -29,13 +29,18 @@ export default function Blog() {
 
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.blog.title}
+        description={PAGE_SEO.blog.description}
+        canonicalPath={PAGE_SEO.blog.canonicalPath}
+      />
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+        <header className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Health & Wellness Blog</h1>
           <p className="text-muted-foreground text-lg">
             Stay informed with expert health advice and wellness tips
           </p>
-        </div>
+        </header>
 
         {/* Search and Filter */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">

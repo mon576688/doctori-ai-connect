@@ -178,6 +178,11 @@ export default function BlogPost() {
   if (!post) {
     return (
       <div className="container py-8">
+        <SEO 
+          title="Article Not Found"
+          description="The article you're looking for doesn't exist or has been moved."
+          noIndex
+        />
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Article Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -198,6 +203,17 @@ export default function BlogPost() {
 
   return (
     <div className="container py-8">
+      <SEO 
+        title={post.title}
+        description={post.excerpt}
+        canonicalPath={`/blog/${post.slug}`}
+        ogImage={post.image}
+        ogType="article"
+        article={{
+          publishedTime: post.date,
+          section: post.category
+        }}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
