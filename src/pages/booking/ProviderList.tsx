@@ -230,10 +230,9 @@ export default function ProviderList() {
                         <span>{hospital.address}</span>
                       </div>
                     )}
-                    {hospital.phone && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Phone size={16} />
-                        <span>{hospital.phone}</span>
+                    {hospital.description && (
+                      <p className="text-muted-foreground mt-2 line-clamp-2">
+                        {hospital.description}
                       </div>
                     )}
                     {hospital.description && (
