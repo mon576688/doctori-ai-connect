@@ -56,11 +56,10 @@ export default function ProviderList() {
     const fetchData = async () => {
       try {
         if (providerType === 'hospital') {
-          // First try to fetch hospitals in selected city
+          // First try to fetch hospitals in selected city using secure public view
           let { data, error } = await supabase
-            .from('hospitals')
+            .from('hospitals_public')
             .select('*')
-            .eq('is_active', true)
             .ilike('city', `%${city}%`);
 
           if (error) throw error;
@@ -68,9 +67,8 @@ export default function ProviderList() {
           // If no hospitals found, fetch all hospitals
           if (!data || data.length === 0) {
             const { data: allData, error: allError } = await supabase
-              .from('hospitals')
-              .select('*')
-              .eq('is_active', true);
+              .from('hospitals_public')
+              .select('*');
 
             if (allError) throw allError;
             data = allData;
