@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SEO } from '@/components/SEO';
+import { PAGE_SEO } from '@/lib/seo';
 
 interface Reminder {
   id: number;
