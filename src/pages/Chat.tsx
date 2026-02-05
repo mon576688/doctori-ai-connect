@@ -14,6 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getCurrentLocation } from "@/lib/locationUtils";
 import { useToast } from "@/components/ui/use-toast";
 import ProviderRecommendations from "@/components/chat/ProviderRecommendations";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 interface Provider {
   id: string;
