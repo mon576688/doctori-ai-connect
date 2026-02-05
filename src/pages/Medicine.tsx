@@ -81,12 +81,17 @@ export default function Medicine() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="mb-8">
+      <SEO 
+        title={PAGE_SEO.medicine.title}
+        description={PAGE_SEO.medicine.description}
+        canonicalPath={PAGE_SEO.medicine.canonicalPath}
+      />
+      <header className="mb-8">
         <h1 className="text-3xl font-bold mb-4">Medicine Information</h1>
         <p className="text-muted-foreground">
           Search for detailed information about medicines, including uses, dosage, side effects, and precautions.
         </p>
-      </div>
+      </header>
 
       {/* Disclaimer */}
       <Alert className="mb-6">

@@ -8,6 +8,8 @@ import { useBooking } from '@/contexts/BookingContext';
 import { BANGLADESH_CITIES, CityName } from '@/lib/bookingUtils';
 import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
+import { SEO } from '@/components/SEO';
+import { PAGE_SEO } from '@/lib/seo';
 
 export default function LocationSelect() {
   const navigate = useNavigate();
