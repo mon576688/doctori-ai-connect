@@ -71,9 +71,9 @@ export default function HospitalProfile() {
   useEffect(() => {
     const fetchHospitalData = async () => {
       try {
-        // Fetch hospital details using secure public view
+        // Fetch hospital details using secure public view (cast to bypass type generation lag)
         const { data: hospitalData, error: hospitalError } = await supabase
-          .from('hospitals_public')
+          .from('hospitals_public' as any)
           .select('*')
           .eq('id', id)
           .maybeSingle();
@@ -86,15 +86,14 @@ export default function HospitalProfile() {
           return;
         }
 
+        const h = hospitalData as any;
         setHospital({
-          id: hospitalData.id,
-          name: hospitalData.name,
-          address: hospitalData.address || '',
-          city: hospitalData.city,
-          phone: hospitalData.phone || '',
-          email: hospitalData.email || '',
-          description: hospitalData.description || '',
-          logo_url: hospitalData.logo_url || '/placeholder.svg',
+          id: h.id,
+          name: h.name,
+          address: h.address || '',
+          city: h.city,
+          description: h.description || '',
+          logo_url: h.logo_url || '/placeholder.svg',
         });
 
         // Fetch assigned providers
