@@ -156,18 +156,6 @@ export default function BlogPost() {
     if (slug) {
       const foundPost = blogPosts.find(p => p.slug === slug);
       setPost(foundPost || null);
-      
-      if (foundPost) {
-        // SEO
-        document.title = `${foundPost.title} | Doctori AI Health Blog`;
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc) metaDesc.setAttribute('content', foundPost.excerpt);
-        
-        const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement('link');
-        linkCanonical.setAttribute('rel', 'canonical');
-        linkCanonical.setAttribute('href', window.location.href);
-        if (!linkCanonical.parentNode) document.head.appendChild(linkCanonical);
-      }
     }
   }, [slug]);
 
