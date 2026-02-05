@@ -314,8 +314,9 @@ const Index = () => {
                     <div className="relative inline-block mb-4">
                       <img
                         src={doctor.image}
-                        alt={doctor.name}
+                        alt={`${doctor.name} - ${doctor.specialty} at Doctori AI`}
                         className="w-20 h-20 rounded-full mx-auto object-cover ring-4 ring-primary/20"
+                        loading="lazy"
                       />
                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
                         <CheckCircle className="h-4 w-4 text-secondary-foreground" />

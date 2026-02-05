@@ -282,6 +282,7 @@ export default function BlogPost() {
                       src={relatedPost.image}
                       alt={relatedPost.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                   

@@ -286,8 +286,9 @@ export default function Doctors() {
                       <div className="flex gap-6">
                         <img
                           src={doctor.image}
-                          alt={doctor.name}
+                          alt={`${doctor.name} - ${doctor.specialty} healthcare provider`}
                           className="w-24 h-24 rounded-full object-cover"
+                          loading="lazy"
                         />
                         
                         <div className="flex-1">
