@@ -36,10 +36,17 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <SEO 
+        title={PAGE_SEO.home.title}
+        description={PAGE_SEO.home.description}
+        canonicalPath={PAGE_SEO.home.canonicalPath}
+      />
       {/* Hero Section */}
       <section className="relative bg-gradient-hero py-20 px-4 overflow-hidden">
         {/* Floating decorations */}
@@ -111,8 +118,9 @@ const Index = () => {
             <div className="relative">
               <img
                 src={heroImage}
-                alt="Doctori AI Health Assistant"
+                alt="Doctori AI virtual health assistant interface showing doctor consultation"
                 className="rounded-2xl shadow-float w-full animate-float"
+                loading="eager"
               />
             </div>
           </div>
@@ -306,8 +314,9 @@ const Index = () => {
                     <div className="relative inline-block mb-4">
                       <img
                         src={doctor.image}
-                        alt={doctor.name}
+                        alt={`${doctor.name} - ${doctor.specialty} at Doctori AI`}
                         className="w-20 h-20 rounded-full mx-auto object-cover ring-4 ring-primary/20"
+                        loading="lazy"
                       />
                       <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
                         <CheckCircle className="h-4 w-4 text-secondary-foreground" />

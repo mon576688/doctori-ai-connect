@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Clock, ArrowRight, Search, Share2 } from "lucide-react";
 import { blogPosts as data } from "@/data/blogs";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function Blog() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,26 +27,20 @@ export default function Blog() {
     return matchesSearch && matchesCategory;
   });
 
-  // SEO
-  useEffect(() => {
-    document.title = "Health Blog | Doctori AI";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'Explore 60+ health articles across nutrition, fitness, symptoms, women\'s & men\'s health, and more.');
-    const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement('link');
-    linkCanonical.setAttribute('rel', 'canonical');
-    linkCanonical.setAttribute('href', window.location.href);
-    if (!linkCanonical.parentNode) document.head.appendChild(linkCanonical);
-  }, []);
-
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.blog.title}
+        description={PAGE_SEO.blog.description}
+        canonicalPath={PAGE_SEO.blog.canonicalPath}
+      />
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+        <header className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-4">Health & Wellness Blog</h1>
           <p className="text-muted-foreground text-lg">
             Stay informed with expert health advice and wellness tips
           </p>
-        </div>
+        </header>
 
         {/* Search and Filter */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">

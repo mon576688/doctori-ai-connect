@@ -10,6 +10,9 @@ import { MapPin, Star, Clock, Phone, Calendar, Heart, Search, Loader2 } from "lu
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProviderWithServices {
   id: string;
@@ -132,24 +135,68 @@ export default function Doctors() {
 
   const doctorsList = filteredProviders.map(convertToDoctor);
 
+  // Loading skeleton component
+  const DoctorCardSkeleton = () => (
+    <Card className="shadow-card">
+      <CardContent className="p-6">
+        <div className="flex gap-6">
+          <Skeleton className="w-24 h-24 rounded-full" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-6 w-48" />
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <div className="flex gap-2 pt-2">
+              <Skeleton className="h-9 w-28" />
+              <Skeleton className="h-9 w-20" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
     return (
-      <div className="container py-8 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container py-8">
+        <SEO 
+          title={PAGE_SEO.doctors.title}
+          description={PAGE_SEO.doctors.description}
+          canonicalPath={PAGE_SEO.doctors.canonicalPath}
+        />
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <Skeleton className="h-10 w-80 mx-auto mb-4" />
+            <Skeleton className="h-6 w-96 mx-auto" />
+          </div>
+          <div className="space-y-6">
+            <DoctorCardSkeleton />
+            <DoctorCardSkeleton />
+            <DoctorCardSkeleton />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.doctors.title}
+        description={PAGE_SEO.doctors.description}
+        canonicalPath={PAGE_SEO.doctors.canonicalPath}
+      />
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
+        <header className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">Find Your Healthcare Provider</h1>
           <p className="text-muted-foreground text-lg mb-6">
             Connect with trusted healthcare professionals near you
           </p>
-        </div>
+        </header>
 
         {/* Search and Filters */}
         <Card className="shadow-card mb-8">
@@ -239,8 +286,9 @@ export default function Doctors() {
                       <div className="flex gap-6">
                         <img
                           src={doctor.image}
-                          alt={doctor.name}
+                          alt={`${doctor.name} - ${doctor.specialty} healthcare provider`}
                           className="w-24 h-24 rounded-full object-cover"
+                          loading="lazy"
                         />
                         
                         <div className="flex-1">

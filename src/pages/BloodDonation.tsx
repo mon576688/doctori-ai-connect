@@ -26,6 +26,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"] as const;
 
@@ -110,6 +112,11 @@ const BloodDonation = () => {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-hero py-12 px-4">
+        <SEO 
+          title={PAGE_SEO.bloodDonation.title}
+          description={PAGE_SEO.bloodDonation.description}
+          canonicalPath={PAGE_SEO.bloodDonation.canonicalPath}
+        />
         <div className="container max-w-lg mx-auto">
           <Card className="text-center">
             <CardHeader>
@@ -142,6 +149,11 @@ const BloodDonation = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero py-12 px-4">
+      <SEO 
+        title={PAGE_SEO.bloodDonation.title}
+        description={PAGE_SEO.bloodDonation.description}
+        canonicalPath={PAGE_SEO.bloodDonation.canonicalPath}
+      />
       <div className="container max-w-lg mx-auto">
         <Card>
           <CardHeader className="text-center">

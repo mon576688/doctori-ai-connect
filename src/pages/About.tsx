@@ -11,10 +11,17 @@ import {
   MessageCircle,
   Stethoscope
 } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function About() {
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.about.title}
+        description={PAGE_SEO.about.description}
+        canonicalPath={PAGE_SEO.about.canonicalPath}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-16">

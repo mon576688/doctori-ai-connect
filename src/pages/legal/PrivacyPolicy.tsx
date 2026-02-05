@@ -3,10 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { Shield, Lock, Eye, Database, UserCheck, Mail, AlertCircle } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function PrivacyPolicy() {
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.privacy.title}
+        description={PAGE_SEO.privacy.description}
+        canonicalPath={PAGE_SEO.privacy.canonicalPath}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">

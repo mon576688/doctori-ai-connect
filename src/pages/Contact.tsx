@@ -14,10 +14,17 @@ import {
   Shield,
   Users
 } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function Contact() {
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.contact.title}
+        description={PAGE_SEO.contact.description}
+        canonicalPath={PAGE_SEO.contact.canonicalPath}
+      />
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">

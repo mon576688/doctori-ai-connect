@@ -12,10 +12,17 @@ import {
   Clock,
   UserCheck
 } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function DoctorVerificationPolicy() {
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.doctorVerification.title}
+        description={PAGE_SEO.doctorVerification.description}
+        canonicalPath={PAGE_SEO.doctorVerification.canonicalPath}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">

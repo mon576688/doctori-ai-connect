@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { blogPosts, BlogPost as BlogPostType } from "@/data/blogs";
 import { useToast } from "@/components/ui/use-toast";
+import { SEO } from "@/components/SEO";
 
 const getSupplementsContent = (): string => {
   return `
@@ -155,18 +156,6 @@ export default function BlogPost() {
     if (slug) {
       const foundPost = blogPosts.find(p => p.slug === slug);
       setPost(foundPost || null);
-      
-      if (foundPost) {
-        // SEO
-        document.title = `${foundPost.title} | Doctori AI Health Blog`;
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc) metaDesc.setAttribute('content', foundPost.excerpt);
-        
-        const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement('link');
-        linkCanonical.setAttribute('rel', 'canonical');
-        linkCanonical.setAttribute('href', window.location.href);
-        if (!linkCanonical.parentNode) document.head.appendChild(linkCanonical);
-      }
     }
   }, [slug]);
 
@@ -189,6 +178,11 @@ export default function BlogPost() {
   if (!post) {
     return (
       <div className="container py-8">
+        <SEO 
+          title="Article Not Found"
+          description="The article you're looking for doesn't exist or has been moved."
+          noIndex
+        />
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-2xl font-bold mb-4">Article Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -209,6 +203,17 @@ export default function BlogPost() {
 
   return (
     <div className="container py-8">
+      <SEO 
+        title={post.title}
+        description={post.excerpt}
+        canonicalPath={`/blog/${post.slug}`}
+        ogImage={post.image}
+        ogType="article"
+        article={{
+          publishedTime: post.date,
+          section: post.category
+        }}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <div className="mb-6">
@@ -227,6 +232,7 @@ export default function BlogPost() {
               src={post.image}
               alt={post.title}
               className="w-full h-full object-cover"
+              loading="eager"
             />
           </div>
           
@@ -276,6 +282,7 @@ export default function BlogPost() {
                       src={relatedPost.image}
                       alt={relatedPost.title}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                     />
                   </div>
                   

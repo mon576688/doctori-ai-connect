@@ -3,10 +3,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { FileText, AlertTriangle } from "lucide-react";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function TermsAndConditions() {
   return (
     <div className="container py-8">
+      <SEO 
+        title={PAGE_SEO.terms.title}
+        description={PAGE_SEO.terms.description}
+        canonicalPath={PAGE_SEO.terms.canonicalPath}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">
