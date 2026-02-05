@@ -170,12 +170,49 @@ export default function ProviderList() {
     fetchData();
   }, [city, providerType, userLatitude, userLongitude, navigate]);
 
+  // Loading skeleton component
+  const ProviderCardSkeleton = () => (
+    <Card className="shadow-card">
+      <CardHeader>
+        <div className="flex gap-4">
+          <Skeleton className="w-20 h-20 rounded-full" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-32" />
+      </CardContent>
+      <CardFooter>
+        <Skeleton className="h-10 w-full" />
+      </CardFooter>
+    </Card>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading providers...</p>
+      <div className="min-h-screen bg-background py-8 px-4">
+        <SEO 
+          title={PAGE_SEO.booking.title}
+          description={PAGE_SEO.booking.description}
+          canonicalPath="/booking/providers"
+        />
+        <BookingProgress />
+        <div className="max-w-5xl mx-auto">
+          <div className="mb-8">
+            <Skeleton className="h-10 w-80 mb-2" />
+            <Skeleton className="h-5 w-48" />
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <ProviderCardSkeleton />
+            <ProviderCardSkeleton />
+            <ProviderCardSkeleton />
+            <ProviderCardSkeleton />
+          </div>
         </div>
       </div>
     );
@@ -186,9 +223,14 @@ export default function ProviderList() {
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
+      <SEO 
+        title={PAGE_SEO.booking.title}
+        description={PAGE_SEO.booking.description}
+        canonicalPath="/booking/providers"
+      />
       <BookingProgress />
       <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
+        <header className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
             {providerType === 'hospital' ? 'Available Hospitals' : 'Available Providers'}
             {showingAllLocations ? ' - All Locations' : ` in ${city}`}
@@ -198,7 +240,7 @@ export default function ProviderList() {
               ? `No ${itemLabel}s found in ${city}. Showing all ${itemCount} available ${itemLabel}${itemCount !== 1 ? 's' : ''}.`
               : `Found ${itemCount} ${itemLabel}${itemCount !== 1 ? 's' : ''} near you`}
           </p>
-        </div>
+        </header>
 
         {itemCount === 0 ? (
           <Card className="p-12 text-center">
