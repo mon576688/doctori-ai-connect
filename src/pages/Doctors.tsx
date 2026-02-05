@@ -135,10 +135,49 @@ export default function Doctors() {
 
   const doctorsList = filteredProviders.map(convertToDoctor);
 
+  // Loading skeleton component
+  const DoctorCardSkeleton = () => (
+    <Card className="shadow-card">
+      <CardContent className="p-6">
+        <div className="flex gap-6">
+          <Skeleton className="w-24 h-24 rounded-full" />
+          <div className="flex-1 space-y-3">
+            <Skeleton className="h-6 w-48" />
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-20" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <div className="flex gap-2 pt-2">
+              <Skeleton className="h-9 w-28" />
+              <Skeleton className="h-9 w-20" />
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   if (loading) {
     return (
-      <div className="container py-8 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container py-8">
+        <SEO 
+          title={PAGE_SEO.doctors.title}
+          description={PAGE_SEO.doctors.description}
+          canonicalPath={PAGE_SEO.doctors.canonicalPath}
+        />
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <Skeleton className="h-10 w-80 mx-auto mb-4" />
+            <Skeleton className="h-6 w-96 mx-auto" />
+          </div>
+          <div className="space-y-6">
+            <DoctorCardSkeleton />
+            <DoctorCardSkeleton />
+            <DoctorCardSkeleton />
+          </div>
+        </div>
       </div>
     );
   }
