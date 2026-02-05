@@ -1,5 +1,5 @@
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, Clock, ArrowRight, Search, Share2 } from "lucide-react";
 import { blogPosts as data } from "@/data/blogs";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 export default function Blog() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,17 +26,6 @@ export default function Blog() {
     const matchesCategory = selectedCategory === "all" || post.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-
-  // SEO
-  useEffect(() => {
-    document.title = "Health Blog | Doctori AI";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', 'Explore 60+ health articles across nutrition, fitness, symptoms, women\'s & men\'s health, and more.');
-    const linkCanonical = document.querySelector('link[rel="canonical"]') || document.createElement('link');
-    linkCanonical.setAttribute('rel', 'canonical');
-    linkCanonical.setAttribute('href', window.location.href);
-    if (!linkCanonical.parentNode) document.head.appendChild(linkCanonical);
-  }, []);
 
   return (
     <div className="container py-8">
