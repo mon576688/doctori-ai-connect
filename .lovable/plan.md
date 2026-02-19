@@ -1,115 +1,130 @@
 
 
-# Save and Access Chat History for Follow-Up
+# Drug Interaction Checker
 
-## Problem
-Currently, every time a user visits `/chat`, a brand new conversation starts. Even though authenticated users' messages ARE saved to the database (`chat_sessions` and `chat_messages` tables), there is no way to:
-- View past chat sessions
-- Continue or revisit a previous conversation
-- Reference old symptom discussions for follow-up
+## What We're Building
 
-Guest users' messages are stored in localStorage but sanitized and auto-deleted after 24 hours.
+A new "Check Interactions" tab on the Medicine page where users can enter 2-6 medicines and get a safety report showing which drugs may interact with each other, how severe the interaction is, and what to do about it.
+
+We'll also fix the existing medicine lookup which currently uses OpenAI directly (likely hitting quota errors) by migrating it to the Lovable AI Gateway.
 
 ---
 
-## Solution
+## Changes Overview
 
-Add a **Chat History panel** to the chat page that lets authenticated users browse, load, and continue past conversations. Guest users will be prompted to log in to access history.
+### 1. New Edge Function: Drug Interaction Checker
 
----
+**New file: `supabase/functions/drug-interaction-checker/index.ts`**
 
-## Changes
+- Uses the Lovable AI Gateway (`ai.gateway.lovable.dev`) with `google/gemini-3-flash-preview`
+- Accepts 2-6 medicine names
+- Returns structured JSON with:
+  - Pairwise interactions (drug1, drug2, severity, description, recommendation)
+  - General warnings
+  - Overall safety summary (safe/not safe to combine)
+- Severity levels: none, mild, moderate, severe, contraindicated
 
-### 1. Create Chat History Sidebar Component
-**New file: `src/components/chat/ChatHistory.tsx`**
+### 2. Migrate Medicine Lookup to Lovable AI Gateway
 
-A sidebar/panel component that:
-- Fetches all past `chat_sessions` for the logged-in user (ordered by most recent)
-- Shows each session with: title, date, symptom badges, urgency level
-- Highlights the currently active session
-- Has a "New Chat" button to start a fresh conversation
-- Clicking a session loads its messages from `chat_messages` table
-- For guests, shows a "Log in to save chat history" prompt
+**File: `supabase/functions/medicine-lookup/index.ts`**
 
-### 2. Update `useChatSession.tsx` Hook
-- Add a `loadSession(sessionId)` function that fetches messages from `chat_messages` for a given session and restores the session state (phase, symptoms, urgency from `chat_sessions`)
-- Add a `resetSession()` function to start a new conversation (clears current state, sets sessionId to null)
-- Fetch existing sessions list using the `chat_sessions` table
-- On `initializeChat`, check if there's a recent active session to resume instead of always creating a new one
+- Switch from `api.openai.com` to `ai.gateway.lovable.dev`
+- Replace `OPENAI_API_KEY` with `LOVABLE_API_KEY` (from `Deno.env.get`)
+- Change model to `google/gemini-3-flash-preview`
+- Fixes potential quota errors with the current OpenAI setup
 
-### 3. Update `Chat.tsx` Page Layout
-- Add the ChatHistory panel as a collapsible sidebar on the left (desktop) or a dropdown/sheet (mobile)
-- Pass session selection handler to ChatHistory
-- When a session is selected, call `loadSession(sessionId)` to restore that conversation
-- Update `initializeChat` to not overwrite if a session is already loaded
-- Add a "New Chat" button in the header
+### 3. Add Tabbed UI to Medicine Page
 
-### 4. Update `useGuestChat.tsx` Hook
-- Save full message content to localStorage (not sanitized) so guests can at least see their current session if they refresh
-- Extend retention from 24 hours to 7 days
-- Add a prompt suggesting login to save history permanently
+**File: `src/pages/Medicine.tsx`**
+
+Add two tabs using the existing Tabs component:
+
+- **Tab 1: "Medicine Lookup"** -- current search functionality, unchanged
+- **Tab 2: "Interaction Checker"** -- new multi-medicine input with results
+
+The Interaction Checker tab includes:
+- Dynamic list of medicine input fields (starts with 2, add up to 6)
+- Add/remove buttons for each field
+- "Check Interactions" submit button
+- Color-coded result cards by severity:
+  - Green (none): No known interaction
+  - Yellow (mild): Minor interaction, usually safe
+  - Orange (moderate): Use with caution
+  - Red (severe): Significant risk
+  - Dark red (contraindicated): Do not combine
+- Medical disclaimer
+
+### 4. Register New Function
+
+**File: `supabase/config.toml`**
+
+Add `drug-interaction-checker` with `verify_jwt = false` (same as medicine-lookup).
 
 ---
 
 ## Technical Details
 
-### ChatHistory Component
+### Interaction Checker Response Format
+
 ```text
-Props:
-- sessions: ChatSession[] (from chat_sessions table)
-- activeSessionId: string | null
-- onSelectSession: (sessionId: string) => void
-- onNewChat: () => void
-- isAuthenticated: boolean
-- loading: boolean
+{
+  "interactions": [
+    {
+      "drug1": "Aspirin",
+      "drug2": "Warfarin",
+      "severity": "severe",
+      "description": "Both thin the blood, increasing bleeding risk",
+      "recommendation": "Do not combine without doctor supervision"
+    }
+  ],
+  "generalWarnings": ["Always inform your doctor about all medications"],
+  "safeToTakeTogether": false
+}
 ```
 
-### loadSession function (in useChatSession)
-```typescript
-const loadSession = async (sessionId: string) => {
-  // 1. Fetch session metadata from chat_sessions
-  // 2. Fetch all messages from chat_messages where session_id = sessionId
-  // 3. Restore sessionState with messages, phase, symptoms, urgency
-  // 4. Set sessionId in state
-};
-```
+### UI Layout
 
-### Database Query for History
-```sql
--- Already supported by existing RLS policies:
-SELECT * FROM chat_sessions 
-WHERE user_id = auth.uid() 
-ORDER BY updated_at DESC;
-
-SELECT * FROM chat_messages 
-WHERE session_id = ? 
-ORDER BY created_at ASC;
-```
-
-No database migrations needed -- the existing `chat_sessions` and `chat_messages` tables with their RLS policies already support this.
-
-### Chat Page Layout (Desktop)
 ```text
-+------------------+--------------------------------+
-| Chat History     | Active Conversation            |
-| [New Chat]       |                                |
-| - Session 1 (*)  | [Messages area]                |
-| - Session 2      |                                |
-| - Session 3      | [Input area]                   |
-+------------------+--------------------------------+
++------------------------------------------+
+| [Medicine Lookup]  [Interaction Checker]  |
++------------------------------------------+
+| Enter medicines to check interactions:    |
+|                                           |
+| Medicine 1: [Aspirin         ] [X]        |
+| Medicine 2: [Warfarin        ] [X]        |
+|                                           |
+| [+ Add Medicine]  [Check Interactions]    |
++------------------------------------------+
+| RESULTS                                   |
+| [RED] Aspirin + Warfarin                  |
+| Severity: Severe                          |
+| Both drugs thin the blood...              |
+| Recommendation: Do not combine...         |
+|                                           |
+| Overall: NOT safe to take together        |
++------------------------------------------+
 ```
 
-On mobile, the history panel becomes a Sheet (slide-out drawer) triggered by a history icon button.
+### Severity Color Mapping
+
+| Severity        | Color         | Badge Style   |
+|----------------|---------------|---------------|
+| none           | Green         | outline       |
+| mild           | Yellow/Amber  | secondary     |
+| moderate       | Orange        | default       |
+| severe         | Red           | destructive   |
+| contraindicated| Dark red/bold | destructive   |
 
 ---
 
 ## Files to Change
 
-1. **`src/components/chat/ChatHistory.tsx`** -- New component for session list
-2. **`src/hooks/useChatSession.tsx`** -- Add loadSession, resetSession, sessions list
-3. **`src/hooks/useGuestChat.tsx`** -- Improve localStorage persistence
-4. **`src/pages/Chat.tsx`** -- Add history sidebar, session switching UI
+1. **`supabase/functions/drug-interaction-checker/index.ts`** -- New edge function
+2. **`supabase/functions/medicine-lookup/index.ts`** -- Migrate to Lovable AI Gateway
+3. **`supabase/config.toml`** -- Register new function
+4. **`src/pages/Medicine.tsx`** -- Add tabs and interaction checker UI
 
 ## No Database Changes Required
-The existing `chat_sessions` and `chat_messages` tables with their RLS policies already support reading past sessions and messages for the authenticated user.
+
+Interaction results are computed on-the-fly (too many possible combinations to cache). The existing `medicine_cache` table continues to work for individual lookups.
 
