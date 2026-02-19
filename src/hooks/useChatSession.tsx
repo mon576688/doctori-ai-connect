@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { analyzeSymptoms, getMedicalDisclaimer, generateDoctorVisitPreparation } from '@/lib/medicalKnowledge';
@@ -38,12 +38,25 @@ export interface ChatSessionState {
   retryCount: number;
 }
 
+interface ChatSessionListItem {
+  id: string;
+  title: string | null;
+  created_at: string;
+  updated_at: string;
+  urgency_level: string | null;
+  primary_symptoms: string[] | null;
+  status: string | null;
+}
+
 const MAX_RETRIES = 2;
 
 export const useChatSession = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { language } = useLanguage();
+
+  const [sessions, setSessions] = useState<ChatSessionListItem[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
   
   const [sessionState, setSessionState] = useState<ChatSessionState>({
     sessionId: null,
@@ -57,6 +70,111 @@ export const useChatSession = () => {
     isLoading: false,
     retryCount: 0
   });
+
+  // Fetch sessions list
+  const fetchSessions = useCallback(async () => {
+    if (!user) return;
+    setSessionsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('id, title, created_at, updated_at, urgency_level, primary_symptoms, status')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setSessions(data || []);
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+    } finally {
+      setSessionsLoading(false);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user) fetchSessions();
+  }, [user, fetchSessions]);
+
+  // Load a past session
+  const loadSession = useCallback(async (sessionId: string) => {
+    if (!user) return;
+    setSessionState(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      // Fetch session metadata
+      const { data: session, error: sessionError } = await supabase
+        .from('chat_sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .single();
+
+      if (sessionError) throw sessionError;
+
+      // Fetch messages
+      const { data: messages, error: msgError } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('session_id', sessionId)
+        .order('created_at', { ascending: true });
+
+      if (msgError) throw msgError;
+
+      const chatMessages: ChatMessage[] = (messages || []).map((msg) => ({
+        id: msg.id,
+        content: msg.content,
+        role: msg.role as 'user' | 'assistant' | 'system',
+        timestamp: new Date(msg.created_at!),
+        metadata: msg.metadata,
+      }));
+
+      // Determine phase from session data
+      let phase: ChatSessionState['phase'] = 'initial';
+      if (session.primary_symptoms && session.primary_symptoms.length > 0) {
+        phase = 'assessment';
+      }
+      if (session.status === 'completed') {
+        phase = 'summary';
+      }
+
+      setSessionState({
+        sessionId: session.id,
+        messages: chatMessages,
+        phase,
+        symptoms: session.primary_symptoms || [],
+        urgencyLevel: (session.urgency_level as any) || 'low',
+        specialtyRecommendation: session.specialty_recommendation || '',
+        currentQuestionIndex: 0,
+        followupAnswers: {},
+        isLoading: false,
+        retryCount: 0,
+      });
+    } catch (error) {
+      console.error('Error loading session:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load chat session.',
+        variant: 'destructive',
+      });
+      setSessionState(prev => ({ ...prev, isLoading: false }));
+    }
+  }, [user, toast]);
+
+  // Reset to start a new chat
+  const resetSession = useCallback(() => {
+    setSessionState({
+      sessionId: null,
+      messages: [],
+      phase: 'initial',
+      symptoms: [],
+      urgencyLevel: 'low',
+      specialtyRecommendation: '',
+      currentQuestionIndex: 0,
+      followupAnswers: {},
+      isLoading: false,
+      retryCount: 0,
+    });
+  }, []);
 
   const createSession = useCallback(async () => {
     if (!user) return null;
@@ -74,6 +192,8 @@ export const useChatSession = () => {
         .single();
 
       if (error) throw error;
+      // Refresh sessions list
+      fetchSessions();
       return data.id;
     } catch (error) {
       console.error('Error creating session:', error);
@@ -84,7 +204,7 @@ export const useChatSession = () => {
       });
       return null;
     }
-  }, [user, toast]);
+  }, [user, toast, fetchSessions]);
 
   const saveMessage = useCallback(async (content: string, role: 'user' | 'assistant', metadata?: any) => {
     if (!sessionState.sessionId) return;
@@ -173,11 +293,9 @@ export const useChatSession = () => {
     retryCount = 0,
     currentState?: ChatSessionState
   ): Promise<void> => {
-    // Use passed-in state to avoid stale closures
     const state = currentState || sessionState;
     
     try {
-      // Get user profile data
       let userProfile = null;
       if (user) {
         const { data: profile } = await supabase
@@ -188,7 +306,6 @@ export const useChatSession = () => {
         userProfile = profile;
       }
 
-      // Call our secure AI chat assistant
       const { data, error } = await supabase.functions.invoke('ai-chat-assistant', {
         body: {
           userMessage: content,
@@ -219,7 +336,6 @@ export const useChatSession = () => {
       let aiResponse = data.response;
       let newState = { ...state };
 
-      // Basic symptom analysis for urgency detection and database updates
       const analysis = analyzeSymptoms(content);
       if (state.phase === 'initial') {
         newState = {
@@ -231,7 +347,6 @@ export const useChatSession = () => {
           currentQuestionIndex: 0
         };
 
-        // Update session in database
         await supabase
           .from('chat_sessions')
           .update({
@@ -241,13 +356,21 @@ export const useChatSession = () => {
           })
           .eq('id', sessionId);
 
+        // Update title based on first symptom
+        if (analysis.symptoms.length > 0) {
+          await supabase
+            .from('chat_sessions')
+            .update({ title: analysis.symptoms.slice(0, 3).join(', ') })
+            .eq('id', sessionId);
+          fetchSessions();
+        }
+
       } else if (state.phase === 'assessment') {
         newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
         newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
         if (newState.currentQuestionIndex >= 3) {
           newState.phase = 'analysis';
-          // Generate comprehensive assessment after getting enough info
           setTimeout(() => {
             generateAssessment(newState);
           }, 2000);
@@ -267,18 +390,14 @@ export const useChatSession = () => {
         ...newState,
         messages: [...prev.messages, aiMessage],
         isLoading: false,
-        retryCount: 0 // Reset retry count on success
+        retryCount: 0
       }));
 
-      // Save AI message
       await saveMessage(aiResponse, 'assistant', { urgencyLevel: newState.urgencyLevel });
-
-      // Removed detailed logging for privacy
 
     } catch (error: any) {
       console.error('Error sending message:', error);
       
-      // Check if it's a rate limit error and we can retry
       if ((error.message?.includes('rate limit') || error.message?.includes('Rate limit')) && retryCount < MAX_RETRIES) {
         console.log(`Rate limit hit, retrying in ${(retryCount + 1) * 3} seconds...`);
         
@@ -288,7 +407,6 @@ export const useChatSession = () => {
           variant: "default"
         });
 
-        // Wait with exponential backoff
         setTimeout(() => {
           sendMessageWithRetry(content, sessionId, retryCount + 1);
         }, (retryCount + 1) * 3000);
@@ -296,27 +414,14 @@ export const useChatSession = () => {
         return;
       }
       
-      // Fallback response
       const emergencyNumber = language === 'bn' ? '999' : '911';
       const isRateLimit = error.message?.includes('rate limit') || error.message?.includes('Rate limit');
       
       const fallbackMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         content: isRateLimit 
-          ? `I'm experiencing high demand right now. Please try again in a moment.
-
-⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.
-
-ℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.
-
-This is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`
-          : `I'm sorry, I'm having trouble processing your request right now.
-
-⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.
-
-ℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.
-
-This is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`,
+          ? `I'm experiencing high demand right now. Please try again in a moment.\n\n⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.\n\nℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.\n\nThis is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`
+          : `I'm sorry, I'm having trouble processing your request right now.\n\n⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.\n\nℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.\n\nThis is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`,
         role: 'assistant',
         timestamp: new Date(),
         isUrgent: false
@@ -337,7 +442,7 @@ This is not medical advice. Always consult with a qualified healthcare provider 
         variant: "destructive"
       });
     }
-  }, [saveMessage, toast, language, user, generateAssessment]);
+  }, [saveMessage, toast, language, user, generateAssessment, fetchSessions]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!user) {
@@ -349,7 +454,6 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       return;
     }
 
-    // Create session if it doesn't exist
     let sessionId = sessionState.sessionId;
     if (!sessionId) {
       sessionId = await createSession();
@@ -383,6 +487,9 @@ This is not medical advice. Always consult with a qualified healthcare provider 
   }, [user, sessionState.sessionId, createSession, saveMessage, sendMessageWithRetry, toast]);
 
   const initializeChat = useCallback(() => {
+    // Don't overwrite if a session is already loaded
+    if (sessionState.messages.length > 0 && sessionState.sessionId) return;
+
     const emergencyNumber = language === 'bn' ? '999' : '911';
     const professionalWelcome = `Hello! I'm Doctor AI, your caring virtual health assistant. 🩺
 
@@ -405,11 +512,16 @@ As a registered user, I'll be able to save our conversation and provide you with
       ...prev,
       messages: [welcomeMessage]
     }));
-  }, [language]);
+  }, [language, sessionState.messages.length, sessionState.sessionId]);
 
   return {
     sessionState,
     sendMessage,
-    initializeChat
+    initializeChat,
+    sessions,
+    sessionsLoading,
+    loadSession,
+    resetSession,
+    fetchSessions,
   };
 };
