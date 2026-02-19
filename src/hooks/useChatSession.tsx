@@ -103,6 +103,70 @@ export const useChatSession = () => {
     }
   }, [sessionState.sessionId]);
 
+  const generateAssessment = useCallback(async (state: ChatSessionState) => {
+    if (!state.sessionId) return;
+
+    try {
+      const assessmentData = {
+        symptoms: state.symptoms,
+        urgency_level: state.urgencyLevel,
+        specialty_recommendation: state.specialtyRecommendation,
+        responses: state.followupAnswers
+      };
+
+      await supabase
+        .from('medical_assessments')
+        .insert([{
+          session_id: state.sessionId,
+          symptoms: { detected: state.symptoms },
+          assessment_data: assessmentData,
+          urgency_score: state.urgencyLevel === 'emergency' ? 100 : 
+                        state.urgencyLevel === 'high' ? 80 :
+                        state.urgencyLevel === 'medium' ? 50 : 20
+        }]);
+
+      const preparation = generateDoctorVisitPreparation(
+        state.symptoms, 
+        state.followupAnswers, 
+        state.urgencyLevel
+      );
+
+      await supabase
+        .from('visit_preparations')
+        .insert([{
+          user_id: user?.id,
+          session_id: state.sessionId,
+          summary: preparation.summary,
+          questions: preparation.questionsForDoctor,
+          symptoms_timeline: preparation.symptomsTimeline,
+          medications_to_discuss: preparation.medicationsToDiscuss
+        }]);
+
+      const summaryMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        content: `Based on our conversation, I've prepared a comprehensive health summary and doctor visit preparation guide. This includes your symptom analysis, recommended specialty (${state.specialtyRecommendation}), and questions to ask your healthcare provider.`,
+        role: 'assistant',
+        timestamp: new Date()
+      };
+
+      setSessionState(prev => ({
+        ...prev,
+        messages: [...prev.messages, summaryMessage],
+        phase: 'summary'
+      }));
+
+      await saveMessage(summaryMessage.content, 'assistant');
+
+    } catch (error) {
+      console.error('Error generating assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate assessment. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [user, toast, saveMessage]);
+
   const sendMessageWithRetry = useCallback(async (
     content: string, 
     sessionId: string, 
