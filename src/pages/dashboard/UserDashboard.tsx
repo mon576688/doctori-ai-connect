@@ -59,7 +59,7 @@ export default function UserDashboard() {
         height: profile.height?.toString() || '',
         blood_group: profile.blood_group || '',
         bio: profile.bio || '',
-        health_info: (profile.health_info as Record<string, unknown>) || {}
+        health_info: {}
       });
       fetchReminders();
       fetchAppointmentCount();
