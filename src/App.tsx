@@ -89,6 +89,7 @@ const App = () => (
                     <Route path="doctor-verification" element={<DoctorVerificationPolicy />} />
                     <Route path="profile" element={<UserProfile />} />
                     <Route path="bmi-calculator" element={<BMICalculator />} />
+                    <Route path="install" element={<Install />} />
                     <Route path="reminders" element={<Reminders />} />
                     <Route path="blood-donation" element={<BloodDonation />} />
                     

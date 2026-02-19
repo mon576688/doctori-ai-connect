@@ -18,6 +18,18 @@ export const Navbar = () => {
   const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || (navigator as any).standalone === true;
+    if (isStandalone) return;
+    const dismissed = localStorage.getItem("pwa-install-dismissed");
+    if (dismissed) return;
+    // Show install button on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) setShowInstallBtn(true);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
