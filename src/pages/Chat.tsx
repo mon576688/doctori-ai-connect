@@ -147,8 +147,13 @@ const Chat = () => {
 
     console.log('Sending message:', content);
 
-    if (!isHealthRelated(content)) {
+    // Only apply health filter on the very first message (initial phase)
+    if (chat.sessionState.phase === 'initial' && !isHealthRelated(content)) {
       console.log('Message not health-related, showing filter response');
+      toast({
+        title: "Health Topics Only",
+        description: "Please describe a health symptom or medical concern to get started.",
+      });
       return;
     }
 

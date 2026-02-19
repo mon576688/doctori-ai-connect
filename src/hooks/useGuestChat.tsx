@@ -167,22 +167,22 @@ export const useGuestChat = () => {
       }
 
       let aiResponse = data.response;
-      let newState = { ...sessionState };
+      let newState = { ...state };
 
       // Basic symptom analysis for urgency detection
       const analysis = analyzeSymptoms(content);
-      if (sessionState.phase === 'initial') {
+      if (state.phase === 'initial') {
         newState = {
-          ...sessionState,
+          ...state,
           phase: 'assessment',
           symptoms: analysis.symptoms,
           urgencyLevel: analysis.urgencyLevel,
           specialtyRecommendation: analysis.specialtyRecommendation,
           currentQuestionIndex: 0
         };
-      } else if (sessionState.phase === 'assessment') {
-        newState.followupAnswers[sessionState.currentQuestionIndex.toString()] = content;
-        newState.currentQuestionIndex = sessionState.currentQuestionIndex + 1;
+      } else if (state.phase === 'assessment') {
+        newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
+        newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
         if (newState.currentQuestionIndex >= 3) {
           newState.phase = 'summary';
@@ -203,7 +203,7 @@ export const useGuestChat = () => {
         ...newState,
         messages: [...prev.messages, aiMessage],
         isLoading: false,
-        retryCount: 0 // Reset retry count on success
+        retryCount: 0
       }));
 
       // Removed detailed logging for privacy
