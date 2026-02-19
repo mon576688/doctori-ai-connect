@@ -137,9 +137,10 @@ const Chat = () => {
 
   useEffect(() => {
     if (!loading) {
-      chat.initializeChat();
+      (chat as any).initializeChat();
     }
-  }, [loading, chat.initializeChat]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   const handleSelectSession = useCallback((sessionId: string) => {
     if ('loadSession' in authenticatedChat) {
