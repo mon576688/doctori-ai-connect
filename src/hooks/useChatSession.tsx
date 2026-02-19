@@ -349,20 +349,15 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       return;
     }
 
-    setSessionState(prev => ({ ...prev, isLoading: true }));
-
     // Create session if it doesn't exist
     let sessionId = sessionState.sessionId;
     if (!sessionId) {
       sessionId = await createSession();
       if (!sessionId) {
-        setSessionState(prev => ({ ...prev, isLoading: false }));
         return;
       }
-      setSessionState(prev => ({ ...prev, sessionId }));
     }
 
-    // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
@@ -370,16 +365,22 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       timestamp: new Date()
     };
 
-    setSessionState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage]
-    }));
+    let latestState: ChatSessionState | undefined;
+    setSessionState(prev => {
+      const updated = {
+        ...prev,
+        isLoading: true,
+        sessionId: sessionId,
+        messages: [...prev.messages, userMessage]
+      };
+      latestState = updated;
+      return updated;
+    });
 
-    // Save user message
     await saveMessage(content, 'user');
-
-    await sendMessageWithRetry(content, sessionId, 0);
-  }, [user, sessionState, createSession, saveMessage, sendMessageWithRetry]);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await sendMessageWithRetry(content, sessionId!, 0, latestState);
+  }, [user, sessionState.sessionId, createSession, saveMessage, sendMessageWithRetry, toast]);
 
   const generateAssessment = useCallback(async (state: ChatSessionState) => {
     if (!state.sessionId) return;
