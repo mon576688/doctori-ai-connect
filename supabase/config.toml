@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.search-providers]
 verify_jwt = false
+
+[functions.drug-interaction-checker]
+verify_jwt = false
