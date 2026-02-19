@@ -174,6 +174,13 @@ export const Navbar = () => {
                   </Link>
                 )}
                 
+                {/* Install App link for mobile */}
+                {showInstallBtn && (
+                  <Link to="/install" className="flex items-center gap-2 text-primary font-medium py-2" onClick={() => setIsOpen(false)}>
+                    <Download className="h-4 w-4" /> Install App
+                  </Link>
+                )}
+
                 <div className="pt-4 border-t">
                   <LanguageSelector />
                   <div className="mt-3 space-y-2">
