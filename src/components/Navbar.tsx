@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus, Search } from "lucide-react";
+import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus, Search, Download } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoleBasedAuth } from "@/hooks/useRoleBasedAuth";
@@ -18,6 +18,18 @@ export const Navbar = () => {
   const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+  useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches
+      || (navigator as any).standalone === true;
+    if (isStandalone) return;
+    const dismissed = localStorage.getItem("pwa-install-dismissed");
+    if (dismissed) return;
+    // Show install button on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) setShowInstallBtn(true);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +174,13 @@ export const Navbar = () => {
                   </Link>
                 )}
                 
+                {/* Install App link for mobile */}
+                {showInstallBtn && (
+                  <Link to="/install" className="flex items-center gap-2 text-primary font-medium py-2" onClick={() => setIsOpen(false)}>
+                    <Download className="h-4 w-4" /> Install App
+                  </Link>
+                )}
+
                 <div className="pt-4 border-t">
                   <LanguageSelector />
                   <div className="mt-3 space-y-2">

@@ -55,6 +55,7 @@ const queryClient = new QueryClient();
 const HealthTipsBD = lazy(() => import('./pages/HealthTipsBD'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const Search = lazy(() => import('./pages/Search'));
+const Install = lazy(() => import('./pages/Install'));
 
 const App = () => (
   <I18nextProvider i18n={i18n}>
@@ -88,6 +89,7 @@ const App = () => (
                     <Route path="doctor-verification" element={<DoctorVerificationPolicy />} />
                     <Route path="profile" element={<UserProfile />} />
                     <Route path="bmi-calculator" element={<BMICalculator />} />
+                    <Route path="install" element={<Install />} />
                     <Route path="reminders" element={<Reminders />} />
                     <Route path="blood-donation" element={<BloodDonation />} />
                     
