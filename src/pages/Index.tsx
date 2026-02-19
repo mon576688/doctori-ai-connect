@@ -42,7 +42,7 @@ import { PAGE_SEO } from "@/lib/seo";
 const Index = () => {
   return (
     <div className="min-h-screen">
-      <SEO 
+      <SEO
         title={PAGE_SEO.home.title}
         description={PAGE_SEO.home.description}
         canonicalPath={PAGE_SEO.home.canonicalPath}
@@ -388,7 +388,7 @@ const Index = () => {
               <div className="flex flex-wrap justify-center gap-8 items-center text-primary-foreground/90">
                 <div className="flex items-center gap-2">
                   <Shield className="h-6 w-6" />
-                  <span>HIPAA Compliant</span>
+                  <span>Data Secured & Confidential</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Activity className="h-6 w-6" />
