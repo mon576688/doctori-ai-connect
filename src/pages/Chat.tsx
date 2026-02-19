@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, MapPin } from "lucide-react";
+import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import { useNavigate } from "react-router-dom";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useGuestChat } from "@/hooks/useGuestChat";
