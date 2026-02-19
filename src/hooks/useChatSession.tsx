@@ -273,7 +273,7 @@ This is not medical advice. Always consult with a qualified healthcare provider 
         variant: "destructive"
       });
     }
-  }, [sessionState, saveMessage, toast, language]);
+  }, [saveMessage, toast, language, user, generateAssessment]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!user) {

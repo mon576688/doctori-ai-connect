@@ -295,9 +295,7 @@ This is not medical advice. Always consult with a qualified healthcare provider 
   }, [toast, language]);
 
   const sendMessage = useCallback(async (content: string) => {
-    setSessionState(prev => ({ ...prev, isLoading: true }));
-
-    // Add user message
+    // Add user message and get the latest state
     const userMessage: GuestMessage = {
       id: Date.now().toString(),
       content,
@@ -305,12 +303,22 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       timestamp: new Date()
     };
 
-    setSessionState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage]
-    }));
+    // Use a state updater to capture the latest state and pass it to sendMessageWithRetry
+    let latestState: GuestChatState | undefined;
+    setSessionState(prev => {
+      const updated = {
+        ...prev,
+        isLoading: true,
+        messages: [...prev.messages, userMessage]
+      };
+      latestState = updated;
+      return updated;
+    });
 
-    await sendMessageWithRetry(content, 0);
+    // Small delay to ensure state is captured
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    await sendMessageWithRetry(content, 0, latestState);
   }, [sendMessageWithRetry]);
 
   const initializeChat = useCallback((welcomeMessage: string) => {
