@@ -56,9 +56,9 @@ const Install = () => {
         </div>
 
         {isInstalled ? (
-          <Card className="border-green-500/50 bg-green-500/10">
+          <Card className="border-primary/50 bg-primary/10">
             <CardContent className="flex items-center gap-3 pt-6">
-              <CheckCircle className="h-8 w-8 text-green-500 shrink-0" />
+              <CheckCircle className="h-8 w-8 text-primary shrink-0" />
               <div>
                 <p className="font-semibold text-lg">Already Installed!</p>
                 <p className="text-muted-foreground text-sm">Doctori AI is on your home screen. You're all set.</p>
