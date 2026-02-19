@@ -12,6 +12,16 @@ export interface GuestMessage {
   timestamp: Date;
   isUrgent?: boolean;
   metadata?: any;
+  suggestedProviders?: Array<{
+    id: string;
+    name: string;
+    specialty: string;
+    city: string;
+    photo_url?: string | null;
+    consultation_fee?: number | null;
+    experience?: number | null;
+    verified?: boolean;
+  }>;
 }
 
 export interface GuestChatState {
