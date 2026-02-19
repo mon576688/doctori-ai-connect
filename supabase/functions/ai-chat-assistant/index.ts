@@ -2,31 +2,89 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
-// Initialize Supabase client for database operations
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Allowed origins for CORS (replace with your actual domains)
-const allowedOrigins = [
-  'https://lhamshhjmmruybdcfivr.supabase.co',
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://preview.lovable.app',
-  'https://lovable.app',
-  'https://id-preview--02361553-c49e-4d16-8814-4c57887faba8.lovable.app',
-  '*' // Allow all origins for testing
-];
-
-const getCorsHeaders = (origin: string | null) => {
-  // For now, allow all origins to fix connection issues
-  return {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Max-Age': '86400',
-  };
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+
+// Specialty keywords to detect in AI responses
+const SPECIALTY_KEYWORDS: Record<string, string[]> = {
+  'Cardiology': ['cardiologist', 'heart specialist', 'cardiac', 'heart doctor'],
+  'Neurology': ['neurologist', 'brain specialist', 'nerve specialist', 'neuro'],
+  'Dermatology': ['dermatologist', 'skin specialist', 'skin doctor'],
+  'Orthopedics': ['orthopedic', 'bone specialist', 'joint specialist', 'orthopedist'],
+  'Gastroenterology': ['gastroenterologist', 'stomach specialist', 'digestive specialist', 'GI specialist'],
+  'Pulmonology': ['pulmonologist', 'lung specialist', 'respiratory specialist'],
+  'ENT': ['ENT specialist', 'ear nose throat', 'otolaryngologist'],
+  'Ophthalmology': ['ophthalmologist', 'eye specialist', 'eye doctor'],
+  'Psychiatry': ['psychiatrist', 'mental health specialist'],
+  'Endocrinology': ['endocrinologist', 'hormone specialist', 'diabetes specialist'],
+  'Urology': ['urologist', 'kidney specialist'],
+  'Gynecology': ['gynecologist', 'women\'s health specialist', 'OB/GYN'],
+  'Pediatrics': ['pediatrician', 'child specialist', 'children\'s doctor'],
+  'General Practice': ['general practitioner', 'GP', 'family doctor', 'primary care'],
+  'Oncology': ['oncologist', 'cancer specialist'],
+  'Rheumatology': ['rheumatologist', 'arthritis specialist'],
+  'Nephrology': ['nephrologist', 'kidney doctor'],
+  'Allergy': ['allergist', 'allergy specialist', 'immunologist'],
+};
+
+function detectSpecialties(text: string): string[] {
+  const lowerText = text.toLowerCase();
+  const detected: string[] = [];
+  for (const [specialty, keywords] of Object.entries(SPECIALTY_KEYWORDS)) {
+    for (const keyword of keywords) {
+      if (lowerText.includes(keyword.toLowerCase())) {
+        detected.push(specialty);
+        break;
+      }
+    }
+  }
+  return detected;
+}
+
+async function findMatchingProviders(specialties: string[]) {
+  try {
+    // Query providers_public view for matching providers
+    let query = supabase
+      .from('providers_public')
+      .select('id, first_name, last_name, name, specialty, city, photo_url, consultation_fee, experience, verified, provider_type');
+
+    // If we have specific specialties, filter by them; otherwise get all
+    if (specialties.length > 0) {
+      // Use ilike for flexible matching
+      const conditions = specialties.map(s => `specialty.ilike.%${s}%`);
+      query = query.or(conditions.join(','));
+    }
+
+    const { data, error } = await query.limit(5);
+
+    if (error) {
+      console.error('Error querying providers:', error);
+      return [];
+    }
+
+    return (data || []).map((p: any) => ({
+      id: p.id,
+      name: p.name || `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Doctor',
+      specialty: p.specialty || 'General Practice',
+      city: p.city || 'Not specified',
+      photo_url: p.photo_url,
+      consultation_fee: p.consultation_fee,
+      experience: p.experience,
+      verified: p.verified,
+      provider_type: p.provider_type,
+    }));
+  } catch (err) {
+    console.error('Error finding providers:', err);
+    return [];
+  }
+}
 
 const getSystemPrompt = (language: string = 'en') => {
   const emergencyNumber = language === 'bn' ? '999' : '911';
@@ -34,7 +92,7 @@ const getSystemPrompt = (language: string = 'en') => {
     ? 'Respond in Bengali (বাংলা) when the user writes in Bengali, but keep medical terms clear and understandable.' 
     : 'Respond in English when the user writes in English.';
 
-  return `You are Doctori AI, an intelligent health assistant and virtual medical interviewer. Your goal is to gather accurate health information from users using a systematic 12-step doctor questioning approach and provide comprehensive health guidance.
+  return `You are Doctori AI, an intelligent health assistant and virtual medical interviewer. Your goal is to gather accurate health information from users using a systematic doctor questioning approach and provide comprehensive health guidance.
 
 🩺 CORE BEHAVIOR:
 - Be friendly, professional, and empathetic throughout all interactions
@@ -45,61 +103,59 @@ const getSystemPrompt = (language: string = 'en') => {
 
 👤 USER CHECK:
 - If the user is registered, do NOT ask for age or gender
-- If the user is not registered, politely ask for gender and age first to help make better recommendations
+- If the user is not registered, politely ask for gender and age first
 
-❗ DOCTOR-STYLE QUESTIONING FLOW (Follow these 12 steps systematically):
-1. **Chief Complaint**: "What is your main problem today?" (pain, fever, cough, headache, other)
-2. **Location**: "Where exactly is the problem?" (if applicable - head, chest, stomach, back, etc.)
+❗ DOCTOR-STYLE QUESTIONING FLOW (Follow these steps systematically):
+1. **Chief Complaint**: "What is your main problem today?"
+2. **Location**: "Where exactly is the problem?"
 3. **Onset & Duration**: "When did this problem start?" "Has it been getting better, worse, or the same?"
-4. **Severity**: "On a scale of 1 to 10, how severe is it?" "Is it mild, moderate, or severe?"
-5. **Nature of Symptom**: "How would you describe it?" (sharp, dull, throbbing, burning, pressure, etc.)
-6. **Associated Symptoms**: "Do you have any other symptoms with this?" (fever, nausea, vomiting, cough, dizziness, etc.)
-7. **Past Medical History**: "Do you have any long-term health problems?" (diabetes, high blood pressure, asthma, heart disease, none)
-8. **Medication History**: "Are you taking any regular medicines?" "Have you tried anything for this problem already?"
-9. **Allergies**: "Do you have any known allergies to medicines or food?"
-10. **Social & Lifestyle**: "Do you smoke, drink alcohol, or use tobacco?" "What is your work/lifestyle like?"
+4. **Severity**: "On a scale of 1 to 10, how severe is it?"
+5. **Nature of Symptom**: "How would you describe it?" (sharp, dull, throbbing, burning, etc.)
+6. **Associated Symptoms**: "Do you have any other symptoms with this?"
+7. **Past Medical History**: "Do you have any long-term health problems?"
+8. **Medication History**: "Are you taking any regular medicines?"
+9. **Allergies**: "Do you have any known allergies?"
+10. **Social & Lifestyle**: "Do you smoke, drink alcohol, or use tobacco?"
 11. **Red-Flag Questions**: "Are you experiencing chest pain, severe shortness of breath, sudden weakness, or loss of consciousness?" → If yes, recommend emergency care immediately
 12. **Summary & Next Step**: Generate structured summary with recommendations
 
-Ask ONLY ONE question at a time. Wait for the user's answer before proceeding to the next question. Guide them through this medical interview systematically.
+Ask ONLY ONE question at a time. Wait for the user's answer before proceeding.
+
+🏥 DOCTOR RECOMMENDATIONS:
+- When you identify a likely specialty need based on symptoms, mention the type of specialist the user should see (e.g., "I recommend consulting a cardiologist").
+- The system will automatically find and display matching healthcare providers from the Doctori AI platform below your response.
+- Do NOT fabricate doctor names. Simply recommend the specialty type.
+- Inform the user: "I'll show you available doctors from our platform that match your needs."
 
 📋 END OF CONVERSATION / SUMMARY:
-When sufficient information is collected, provide a structured summary with these headings:
+When sufficient information is collected, provide a structured summary with:
 - Age and Gender (if collected)
 - Main Symptoms
 - Relevant History  
 - Lifestyle Notes
-- Suggested Doctor(s) from our database
+- Recommended Specialist Type
 - Optional safe home remedies for temporary relief
 - Inform the user that this summary can be exported as a PDF
 
 🚨 SAFETY RULES:
-- For medical emergencies (chest pain, difficulty breathing, severe bleeding), IMMEDIATELY direct to call ${emergencyNumber}
+- For medical emergencies, IMMEDIATELY direct to call ${emergencyNumber}
 - Always include: "⚠️ EMERGENCY: If experiencing a medical emergency, call ${emergencyNumber} immediately"
-- Always include: "ℹ️ This is not medical advice. Always consult a qualified healthcare provider for personal health concerns"
+- Always include: "ℹ️ This is not medical advice. Always consult a qualified healthcare provider"
 
 💬 CONVERSATION RULES:
-- Ask one question at a time until sufficient info is collected
-- Ignore non-health queries and guide user back to relevant questions
-- Be understanding and empathetic: "I understand this can be concerning"
+- Ask one question at a time
+- Ignore non-health queries and guide user back
+- Be understanding and empathetic
 - Use clear, easy-to-understand language
-- Keep responses concise and focused
-
-Remember: You are a virtual medical interviewer collecting health information to recommend the right doctor and provide helpful guidance. Always ask one question at a time and ignore non-health topics.`;
+- Keep responses concise`;
 };
 
-// Function to summarize conversation history when it gets too long
 const summarizeConversation = (messages: any[]) => {
-  // Keep only the last 4 messages (2 exchanges) plus system prompt for better token management
   if (messages.length <= 5) return messages;
-  
   const systemMessage = messages[0];
   const recentMessages = messages.slice(-4);
-  
-  // Create a summary of the older messages
   const olderMessages = messages.slice(1, -4);
   const summaryContent = `Previous conversation summary: The user discussed ${olderMessages.length > 0 ? 'various health concerns' : 'initial health questions'}. Recent context continues below.`;
-  
   return [
     systemMessage,
     { role: "system", content: summaryContent },
@@ -107,48 +163,10 @@ const summarizeConversation = (messages: any[]) => {
   ];
 };
 
-// Enhanced retry function with better backoff strategy
-const retryWithBackoff = async (fn: () => Promise<any>, maxRetries = 3, baseDelay = 2000) => {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error: any) {
-      console.log(`Attempt ${attempt} failed:`, error.message);
-      
-      if (attempt === maxRetries) {
-        throw error;
-      }
-      
-      // Check if it's a rate limit error
-      if (error.message && (error.message.includes('rate limit') || error.message.includes('Rate limit'))) {
-        // For rate limits, use longer delays
-        const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 2000; // 2-6 seconds range
-        console.log(`Rate limit hit, waiting ${Math.round(delay)}ms before retry ${attempt + 1}`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      } else {
-        // For other errors, shorter delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-  }
-};
-
 serve(async (req) => {
-  console.log('AI Chat Assistant function called');
-  console.log('Request method:', req.method);
-  console.log('Request headers:', Object.fromEntries(req.headers.entries()));
-  
-  const origin = req.headers.get('Origin');
-  console.log('Request origin:', origin);
-  const corsHeaders = getCorsHeaders(origin);
-  
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS request');
     return new Response(null, { headers: corsHeaders });
   }
-
-  console.log('Processing POST request');
 
   try {
     // Rate limiting
@@ -161,15 +179,14 @@ serve(async (req) => {
       .rpc('check_rate_limit', {
         _ip_address: clientIP,
         _endpoint: 'ai-chat-assistant',
-        _max_requests: 15, // 15 requests per 15 minutes
+        _max_requests: 15,
         _window_minutes: 15
       });
 
     if (rateLimitError || !rateLimitCheck) {
-      console.log('Rate limit exceeded for IP:', clientIP);
       return new Response(JSON.stringify({ 
         error: 'Rate limit exceeded',
-        retryAfter: 900 // 15 minutes
+        retryAfter: 900
       }), {
         status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -177,24 +194,17 @@ serve(async (req) => {
     }
 
     const { messages, userMessage, sessionContext } = await req.json();
-    console.log('Request body parsed successfully');
-    console.log('User message length:', userMessage?.length || 0);
-    console.log('Messages count:', messages?.length || 0);
     
-    // Input validation
     if (!userMessage || typeof userMessage !== 'string') {
       throw new Error('Invalid message content');
     }
-    
     if (userMessage.length > 2000) {
       throw new Error('Message too long (max 2000 characters)');
     }
-    
     if (messages && messages.length > 50) {
       throw new Error('Too many messages in conversation');
     }
 
-    // Enhanced user context for better AI responses
     const isRegisteredUser = sessionContext?.isRegisteredUser || false;
     const userProfile = sessionContext?.userProfile;
     
@@ -211,7 +221,6 @@ serve(async (req) => {
 Since this user is registered, you already have their basic information. DO NOT ask for age or gender again.`;
     }
 
-    // Log activity safely
     if (sessionContext?.sessionId) {
       await supabase.rpc('log_activity_safe', {
         _action: 'ai_chat_request',
@@ -219,31 +228,18 @@ Since this user is registered, you already have their basic information. DO NOT 
           session_id: sessionContext.sessionId,
           message_length: userMessage.length,
           ip: clientIP,
-          user_agent: req.headers.get('user-agent')?.substring(0, 200) || 'unknown'
         }
       });
     }
-    
-    if (!userMessage) {
-      throw new Error('Message content is required');
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    console.log('OpenAI API Key present:', !!OPENAI_API_KEY);
-    console.log('OpenAI API Key length:', OPENAI_API_KEY?.length || 0);
-    
-    if (!OPENAI_API_KEY) {
-      console.error('OpenAI API key not found in environment variables');
-      throw new Error('OpenAI API key not configured');
-    }
-
-    console.log('Processing chat request with message length:', userMessage.length);
-
-    // Get language from session context
     const language = sessionContext?.language || 'en';
     const systemPrompt = getSystemPrompt(language) + userContextInfo;
 
-    // Prepare conversation context with system prompt
     let conversationMessages = [
       { role: "system", content: systemPrompt },
       ...messages.map((msg: any) => ({
@@ -253,120 +249,86 @@ Since this user is registered, you already have their basic information. DO NOT 
       { role: "user", content: userMessage }
     ];
 
-    // Summarize conversation if it's getting too long
     conversationMessages = summarizeConversation(conversationMessages);
 
-    console.log('Sending request to OpenAI with', conversationMessages.length, 'messages using gpt-4o-mini model');
+    console.log('Sending request to Lovable AI Gateway with', conversationMessages.length, 'messages');
 
-    // Call OpenAI API with retry logic - using gpt-4o-mini as requested
-    const data = await retryWithBackoff(async () => {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini', // Using gpt-4o-mini as requested
-          messages: conversationMessages,
-          max_tokens: 500, // Using max_tokens for gpt-4o-mini (legacy model)
-          temperature: 0.7, // gpt-4o-mini supports temperature
-          presence_penalty: 0.1,
-          frequency_penalty: 0.1
-        }),
-      });
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-3-flash-preview',
+        messages: conversationMessages,
+        max_tokens: 600,
+        temperature: 0.7,
+      }),
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: { message: errorText } };
-        }
-        
-        console.error('OpenAI API error:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('AI Gateway error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
-        
-        // Handle specific error types
-        if (response.status === 429) {
-          throw new Error('Rate limit exceeded');
-        } else if (response.status === 401) {
-          throw new Error('Invalid API key or insufficient quota');
-        } else if (response.status === 400) {
-          throw new Error(`Invalid request: ${errorData.error?.message || 'Bad request'}`);
-        }
-        
-        throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
       }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: 'AI service credits exhausted. Please try again later.' }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      throw new Error(`AI Gateway error: ${response.status}`);
+    }
 
-      return await response.json();
-    }, 3, 3000); // 3 retries with 3 second base delay
-
-    const aiResponse = data.choices[0]?.message?.content;
+    const data = await response.json();
+    const aiResponse = data.choices?.[0]?.message?.content;
 
     if (!aiResponse) {
       throw new Error('No response from AI');
     }
 
     console.log('AI response generated successfully');
-    console.log('Token usage:', data.usage);
+
+    // Detect specialties in the AI response and find matching providers
+    const detectedSpecialties = detectSpecialties(aiResponse);
+    let suggestedProviders: any[] = [];
+
+    if (detectedSpecialties.length > 0) {
+      console.log('Detected specialties:', detectedSpecialties);
+      suggestedProviders = await findMatchingProviders(detectedSpecialties);
+      console.log('Found providers:', suggestedProviders.length);
+    }
 
     return new Response(JSON.stringify({ 
       response: aiResponse,
       usage: data.usage,
-      messageCount: conversationMessages.length
+      messageCount: conversationMessages.length,
+      suggestedProviders: suggestedProviders.length > 0 ? suggestedProviders : undefined,
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error: any) {
-    console.error('Error in ai-chat-assistant function:', error);
+    console.error('Error in ai-chat-assistant:', error);
     
-    // Different fallback messages based on error type
-    let fallbackResponse;
-    const emergencyNumber = '911'; // Default to 911, will be overridden by language context if needed
-    
-    if (error.message && (error.message.includes('rate limit') || error.message.includes('Rate limit'))) {
-      fallbackResponse = `I'm experiencing high demand right now and need a moment to respond. Please try again in a few seconds.
+    const emergencyNumber = '911';
+    const fallbackResponse = `I'm sorry, I'm having trouble processing your request right now. Please try again in a moment.
 
 ⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.
 
-ℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.
-
-This is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`;
-    } else if (error.message && error.message.includes('API key')) {
-      fallbackResponse = `I'm having trouble connecting to my AI services right now. Please try again in a moment.
-
-⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.
-
-ℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.
-
-This is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`;
-    } else {
-      fallbackResponse = `I'm sorry, I'm having trouble processing your request right now. Let me try to help you anyway.
-
-⚠️ EMERGENCY: If you're experiencing a medical emergency, call ${emergencyNumber} immediately.
-
-ℹ️ For non-emergency health concerns, please contact your healthcare provider or visit an urgent care center.
-
-This is not medical advice. Always consult with a qualified healthcare provider for personal health concerns.`;
-    }
-
-    const statusCode = error.message?.includes('rate limit') ? 429 : 
-                      error.message?.includes('API key') ? 401 : 500;
+ℹ️ This is not medical advice. Always consult a qualified healthcare provider.`;
 
     return new Response(JSON.stringify({ 
       response: fallbackResponse,
-      error: error.message.includes('rate limit') ? "Rate limit exceeded" : 
-             error.message.includes('API key') ? "API authentication error" :
-             "AI service temporarily unavailable",
-      retryAfter: error.message.includes('rate limit') ? 15 : 5
+      error: error.message || 'AI service temporarily unavailable',
     }), {
-      status: statusCode,
+      status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
