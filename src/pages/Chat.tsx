@@ -258,6 +258,9 @@ const Chat = () => {
                     <div className="text-sm md:text-base whitespace-pre-wrap">
                       {formatMessage(message.content)}
                     </div>
+                    {message.role === 'assistant' && message.suggestedProviders && message.suggestedProviders.length > 0 && (
+                      <InlineProviderCards providers={message.suggestedProviders} />
+                    )}
                     <div className={`text-xs mt-2 ${
                       message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
                     }`}>
