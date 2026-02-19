@@ -13,6 +13,16 @@ export interface ChatMessage {
   timestamp: Date;
   isUrgent?: boolean;
   metadata?: any;
+  suggestedProviders?: Array<{
+    id: string;
+    name: string;
+    specialty: string;
+    city: string;
+    photo_url?: string | null;
+    consultation_fee?: number | null;
+    experience?: number | null;
+    verified?: boolean;
+  }>;
 }
 
 export interface ChatSessionState {
@@ -177,7 +187,8 @@ export const useChatSession = () => {
         content: aiResponse,
         role: 'assistant',
         timestamp: new Date(),
-        isUrgent: newState.urgencyLevel === 'emergency' || newState.urgencyLevel === 'high'
+        isUrgent: newState.urgencyLevel === 'emergency' || newState.urgencyLevel === 'high',
+        suggestedProviders: data.suggestedProviders || undefined,
       };
 
       setSessionState(prev => ({

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, MapPin } from "lucide-react";
+import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import { useNavigate } from "react-router-dom";
 import { useChatSession } from "@/hooks/useChatSession";
 import { useGuestChat } from "@/hooks/useGuestChat";
@@ -257,6 +258,9 @@ const Chat = () => {
                     <div className="text-sm md:text-base whitespace-pre-wrap">
                       {formatMessage(message.content)}
                     </div>
+                    {message.role === 'assistant' && message.suggestedProviders && message.suggestedProviders.length > 0 && (
+                      <InlineProviderCards providers={message.suggestedProviders} />
+                    )}
                     <div className={`text-xs mt-2 ${
                       message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
                     }`}>
