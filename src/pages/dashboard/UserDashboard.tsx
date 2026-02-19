@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, User, Heart, Weight, Ruler, MessageSquare, FileText } from 'lucide-react';
+import { Calendar, Clock, Plus, User, Heart, Weight, Ruler, MessageSquare, FileText, Trash2, Droplets, Activity } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AppointmentsList } from '@/components/AppointmentsList';
 import { Inbox } from '@/components/messaging/Inbox';
@@ -27,6 +27,7 @@ interface Reminder {
 export default function UserDashboard() {
   const { profile, refetchProfile } = useRoleBasedAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState({
     name: '',
     age: '',
@@ -38,6 +39,7 @@ export default function UserDashboard() {
     health_info: {}
   });
   const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [appointmentCount, setAppointmentCount] = useState(0);
   const [newReminder, setNewReminder] = useState({
     title: '',
     reminder_time: '',
@@ -53,15 +55,29 @@ export default function UserDashboard() {
         name: profile.name || '',
         age: profile.age?.toString() || '',
         gender: profile.gender || '',
-        weight: '',
-        height: '',
-        blood_group: '',
-        bio: '',
+        weight: profile.weight?.toString() || '',
+        height: profile.height?.toString() || '',
+        blood_group: profile.blood_group || '',
+        bio: profile.bio || '',
         health_info: {}
       });
       fetchReminders();
+      fetchAppointmentCount();
     }
   }, [profile]);
+
+  const fetchAppointmentCount = async () => {
+    try {
+      const { count } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile?.id)
+        .eq('status', 'scheduled');
+      setAppointmentCount(count || 0);
+    } catch (error) {
+      console.error('Error fetching appointment count:', error);
+    }
+  };
 
   const fetchReminders = async () => {
     try {
@@ -80,6 +96,23 @@ export default function UserDashboard() {
         description: "Failed to load reminders",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleDeleteReminder = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('reminders')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setReminders(prev => prev.filter(r => r.id !== id));
+      toast({ title: "Reminder deleted" });
+    } catch (error) {
+      console.error('Error deleting reminder:', error);
+      toast({ title: "Error", description: "Failed to delete reminder", variant: "destructive" });
     }
   };
 
@@ -165,18 +198,53 @@ export default function UserDashboard() {
     }
   };
 
+  const bmi = profileData.weight && profileData.height
+    ? (parseFloat(profileData.weight) / Math.pow(parseFloat(profileData.height) / 100, 2)).toFixed(1)
+    : null;
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Patient Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage your health profile and stay on top of your wellness journey
-          </p>
-        </div>
+        {/* Welcome Card */}
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  Welcome{profileData.name ? `, ${profileData.name}` : ''}! 👋
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Manage your health profile and stay on top of your wellness journey
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
+                <Calendar className="w-3.5 h-3.5" />
+                Upcoming: {appointmentCount}
+              </Badge>
+              <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
+                <Clock className="w-3.5 h-3.5" />
+                Reminders: {reminders.length}
+              </Badge>
+              {profileData.blood_group && (
+                <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
+                  <Droplets className="w-3.5 h-3.5" />
+                  {profileData.blood_group}
+                </Badge>
+              )}
+              {bmi && (
+                <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
+                  <Activity className="w-3.5 h-3.5" />
+                  BMI: {bmi}
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
@@ -184,6 +252,10 @@ export default function UserDashboard() {
             <TabsTrigger value="appointments">
               <Calendar className="w-4 h-4 mr-2" />
               Appointments
+            </TabsTrigger>
+            <TabsTrigger value="prescriptions">
+              <FileText className="w-4 h-4 mr-2" />
+              Prescriptions
             </TabsTrigger>
             <TabsTrigger value="reminders">
               <Clock className="w-4 h-4 mr-2" />
@@ -328,6 +400,25 @@ export default function UserDashboard() {
             <AppointmentsList viewAs="patient" />
           </TabsContent>
 
+          <TabsContent value="prescriptions">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  My Prescriptions
+                </CardTitle>
+                <CardDescription>
+                  View prescriptions shared by your doctors
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button onClick={() => navigate('/patient/prescriptions')} variant="outline">
+                  View All Prescriptions
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="reminders">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -430,7 +521,14 @@ export default function UserDashboard() {
                               <p className="text-sm text-muted-foreground">{reminder.notes}</p>
                             )}
                           </div>
-                          <Clock className="h-5 w-5 text-muted-foreground" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDeleteReminder(reminder.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>

@@ -198,20 +198,42 @@ export default function ProviderDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Provider Dashboard</h1>
-          <p className="text-muted-foreground">
-            Manage your practice and connect with patients
-          </p>
-          {profile?.approval_status === 'approved' && (
-            <Badge variant="default" className="mt-2">
-              ✓ Verified Provider
-            </Badge>
-          )}
-        </div>
+        {/* Overview Card */}
+        <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                  {profileData.provider_type === 'doctor' ? 'Dr. ' : ''}{profileData.first_name} {profileData.last_name}
+                  {profileData.specialty && <span className="text-lg font-normal text-muted-foreground ml-2">— {profileData.specialty}</span>}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Manage your practice and connect with patients
+                </p>
+              </div>
+              {profile?.approval_status === 'approved' ? (
+                <Badge variant="default" className="w-fit">✓ Verified Provider</Badge>
+              ) : (
+                <Badge variant="secondary" className="w-fit">Pending Verification</Badge>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
+                <Users className="w-3.5 h-3.5" />
+                Patients: {patients.length}
+              </Badge>
+              {profileData.experience && (
+                <Badge variant="outline" className="flex items-center gap-1.5 px-3 py-1.5 text-sm">
+                  <Stethoscope className="w-3.5 h-3.5" />
+                  {profileData.experience} yrs experience
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="flex-wrap">
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="profile">
               <User className="w-4 h-4 mr-2" />
               Profile
