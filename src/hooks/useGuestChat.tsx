@@ -108,7 +108,14 @@ export const useGuestChat = () => {
     }
   }, [sessionState]);
 
-  const sendMessageWithRetry = useCallback(async (content: string, retryCount = 0): Promise<void> => {
+  const sendMessageWithRetry = useCallback(async (
+    content: string, 
+    retryCount = 0,
+    currentState?: GuestChatState
+  ): Promise<void> => {
+    // Use passed-in state to avoid stale closures
+    const state = currentState || sessionState;
+    
     try {
       console.log(`Sending message to AI (attempt ${retryCount + 1})`);
       
@@ -126,32 +133,18 @@ export const useGuestChat = () => {
         profileData = profile;
       }
 
-      // First test basic connectivity
-      console.log('Testing connection...');
-      try {
-        const testResponse = await supabase.functions.invoke('test-connection');
-        console.log('Test connection result:', testResponse);
-      } catch (testError) {
-        console.error('Test connection failed:', testError);
-      }
-
       // Call our secure AI chat assistant with language context and user profile
       console.log('Attempting to call ai-chat-assistant function...');
-      console.log('Session context:', {
-        phase: sessionState.phase,
-        language: language,
-        isRegisteredUser
-      });
       
       const { data, error } = await supabase.functions.invoke('ai-chat-assistant', {
         body: {
           userMessage: content,
-          messages: sessionState.messages,
+          messages: state.messages,
           sessionContext: {
-            phase: sessionState.phase,
-            symptoms: sessionState.symptoms,
-            urgencyLevel: sessionState.urgencyLevel,
-            followupAnswers: sessionState.followupAnswers,
+            phase: state.phase,
+            symptoms: state.symptoms,
+            urgencyLevel: state.urgencyLevel,
+            followupAnswers: state.followupAnswers,
             language: language,
             isRegisteredUser,
             userProfile: profileData
@@ -174,22 +167,22 @@ export const useGuestChat = () => {
       }
 
       let aiResponse = data.response;
-      let newState = { ...sessionState };
+      let newState = { ...state };
 
       // Basic symptom analysis for urgency detection
       const analysis = analyzeSymptoms(content);
-      if (sessionState.phase === 'initial') {
+      if (state.phase === 'initial') {
         newState = {
-          ...sessionState,
+          ...state,
           phase: 'assessment',
           symptoms: analysis.symptoms,
           urgencyLevel: analysis.urgencyLevel,
           specialtyRecommendation: analysis.specialtyRecommendation,
           currentQuestionIndex: 0
         };
-      } else if (sessionState.phase === 'assessment') {
-        newState.followupAnswers[sessionState.currentQuestionIndex.toString()] = content;
-        newState.currentQuestionIndex = sessionState.currentQuestionIndex + 1;
+      } else if (state.phase === 'assessment') {
+        newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
+        newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
         if (newState.currentQuestionIndex >= 3) {
           newState.phase = 'summary';
@@ -210,7 +203,7 @@ export const useGuestChat = () => {
         ...newState,
         messages: [...prev.messages, aiMessage],
         isLoading: false,
-        retryCount: 0 // Reset retry count on success
+        retryCount: 0
       }));
 
       // Removed detailed logging for privacy
@@ -299,12 +292,10 @@ This is not medical advice. Always consult with a qualified healthcare provider 
         });
       }
     }
-  }, [sessionState, toast, language]);
+  }, [toast, language]);
 
   const sendMessage = useCallback(async (content: string) => {
-    setSessionState(prev => ({ ...prev, isLoading: true }));
-
-    // Add user message
+    // Add user message and get the latest state
     const userMessage: GuestMessage = {
       id: Date.now().toString(),
       content,
@@ -312,12 +303,22 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       timestamp: new Date()
     };
 
-    setSessionState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage]
-    }));
+    // Use a state updater to capture the latest state and pass it to sendMessageWithRetry
+    let latestState: GuestChatState | undefined;
+    setSessionState(prev => {
+      const updated = {
+        ...prev,
+        isLoading: true,
+        messages: [...prev.messages, userMessage]
+      };
+      latestState = updated;
+      return updated;
+    });
 
-    await sendMessageWithRetry(content, 0);
+    // Small delay to ensure state is captured
+    await new Promise(resolve => setTimeout(resolve, 0));
+    
+    await sendMessageWithRetry(content, 0, latestState);
   }, [sendMessageWithRetry]);
 
   const initializeChat = useCallback((welcomeMessage: string) => {

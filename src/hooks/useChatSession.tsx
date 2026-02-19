@@ -103,7 +103,79 @@ export const useChatSession = () => {
     }
   }, [sessionState.sessionId]);
 
-  const sendMessageWithRetry = useCallback(async (content: string, sessionId: string, retryCount = 0): Promise<void> => {
+  const generateAssessment = useCallback(async (state: ChatSessionState) => {
+    if (!state.sessionId) return;
+
+    try {
+      const assessmentData = {
+        symptoms: state.symptoms,
+        urgency_level: state.urgencyLevel,
+        specialty_recommendation: state.specialtyRecommendation,
+        responses: state.followupAnswers
+      };
+
+      await supabase
+        .from('medical_assessments')
+        .insert([{
+          session_id: state.sessionId,
+          symptoms: { detected: state.symptoms },
+          assessment_data: assessmentData,
+          urgency_score: state.urgencyLevel === 'emergency' ? 100 : 
+                        state.urgencyLevel === 'high' ? 80 :
+                        state.urgencyLevel === 'medium' ? 50 : 20
+        }]);
+
+      const preparation = generateDoctorVisitPreparation(
+        state.symptoms, 
+        state.followupAnswers, 
+        state.urgencyLevel
+      );
+
+      await supabase
+        .from('visit_preparations')
+        .insert([{
+          user_id: user?.id,
+          session_id: state.sessionId,
+          summary: preparation.summary,
+          questions: preparation.questionsForDoctor,
+          symptoms_timeline: preparation.symptomsTimeline,
+          medications_to_discuss: preparation.medicationsToDiscuss
+        }]);
+
+      const summaryMessage: ChatMessage = {
+        id: (Date.now() + 2).toString(),
+        content: `Based on our conversation, I've prepared a comprehensive health summary and doctor visit preparation guide. This includes your symptom analysis, recommended specialty (${state.specialtyRecommendation}), and questions to ask your healthcare provider.`,
+        role: 'assistant',
+        timestamp: new Date()
+      };
+
+      setSessionState(prev => ({
+        ...prev,
+        messages: [...prev.messages, summaryMessage],
+        phase: 'summary'
+      }));
+
+      await saveMessage(summaryMessage.content, 'assistant');
+
+    } catch (error) {
+      console.error('Error generating assessment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate assessment. Please try again.",
+        variant: "destructive"
+      });
+    }
+  }, [user, toast, saveMessage]);
+
+  const sendMessageWithRetry = useCallback(async (
+    content: string, 
+    sessionId: string, 
+    retryCount = 0,
+    currentState?: ChatSessionState
+  ): Promise<void> => {
+    // Use passed-in state to avoid stale closures
+    const state = currentState || sessionState;
+    
     try {
       // Get user profile data
       let userProfile = null;
@@ -120,12 +192,12 @@ export const useChatSession = () => {
       const { data, error } = await supabase.functions.invoke('ai-chat-assistant', {
         body: {
           userMessage: content,
-          messages: sessionState.messages,
+          messages: state.messages,
           sessionContext: {
-            phase: sessionState.phase,
-            symptoms: sessionState.symptoms,
-            urgencyLevel: sessionState.urgencyLevel,
-            followupAnswers: sessionState.followupAnswers,
+            phase: state.phase,
+            symptoms: state.symptoms,
+            urgencyLevel: state.urgencyLevel,
+            followupAnswers: state.followupAnswers,
             sessionId: sessionId,
             language: language,
             isRegisteredUser: true,
@@ -145,13 +217,13 @@ export const useChatSession = () => {
       }
 
       let aiResponse = data.response;
-      let newState = { ...sessionState };
+      let newState = { ...state };
 
       // Basic symptom analysis for urgency detection and database updates
       const analysis = analyzeSymptoms(content);
-      if (sessionState.phase === 'initial') {
+      if (state.phase === 'initial') {
         newState = {
-          ...sessionState,
+          ...state,
           phase: 'assessment',
           symptoms: analysis.symptoms,
           urgencyLevel: analysis.urgencyLevel,
@@ -169,9 +241,9 @@ export const useChatSession = () => {
           })
           .eq('id', sessionId);
 
-      } else if (sessionState.phase === 'assessment') {
-        newState.followupAnswers[sessionState.currentQuestionIndex.toString()] = content;
-        newState.currentQuestionIndex = sessionState.currentQuestionIndex + 1;
+      } else if (state.phase === 'assessment') {
+        newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
+        newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
         if (newState.currentQuestionIndex >= 3) {
           newState.phase = 'analysis';
@@ -265,7 +337,7 @@ This is not medical advice. Always consult with a qualified healthcare provider 
         variant: "destructive"
       });
     }
-  }, [sessionState, saveMessage, toast, language]);
+  }, [saveMessage, toast, language, user, generateAssessment]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!user) {
@@ -277,20 +349,15 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       return;
     }
 
-    setSessionState(prev => ({ ...prev, isLoading: true }));
-
     // Create session if it doesn't exist
     let sessionId = sessionState.sessionId;
     if (!sessionId) {
       sessionId = await createSession();
       if (!sessionId) {
-        setSessionState(prev => ({ ...prev, isLoading: false }));
         return;
       }
-      setSessionState(prev => ({ ...prev, sessionId }));
     }
 
-    // Add user message
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
@@ -298,82 +365,22 @@ This is not medical advice. Always consult with a qualified healthcare provider 
       timestamp: new Date()
     };
 
-    setSessionState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage]
-    }));
-
-    // Save user message
-    await saveMessage(content, 'user');
-
-    await sendMessageWithRetry(content, sessionId, 0);
-  }, [user, sessionState, createSession, saveMessage, sendMessageWithRetry]);
-
-  const generateAssessment = useCallback(async (state: ChatSessionState) => {
-    if (!state.sessionId) return;
-
-    try {
-      // Create medical assessment
-      const assessmentData = {
-        symptoms: state.symptoms,
-        urgency_level: state.urgencyLevel,
-        specialty_recommendation: state.specialtyRecommendation,
-        responses: state.followupAnswers
-      };
-
-      await supabase
-        .from('medical_assessments')
-        .insert([{
-          session_id: state.sessionId,
-          symptoms: { detected: state.symptoms },
-          assessment_data: assessmentData,
-          urgency_score: state.urgencyLevel === 'emergency' ? 100 : 
-                        state.urgencyLevel === 'high' ? 80 :
-                        state.urgencyLevel === 'medium' ? 50 : 20
-        }]);
-
-      // Generate visit preparation
-      const preparation = generateDoctorVisitPreparation(
-        state.symptoms, 
-        state.followupAnswers, 
-        state.urgencyLevel
-      );
-
-      await supabase
-        .from('visit_preparations')
-        .insert([{
-          user_id: user?.id,
-          session_id: state.sessionId,
-          summary: preparation.summary,
-          questions: preparation.questionsForDoctor,
-          symptoms_timeline: preparation.symptomsTimeline,
-          medications_to_discuss: preparation.medicationsToDiscuss
-        }]);
-
-      const summaryMessage: ChatMessage = {
-        id: (Date.now() + 2).toString(),
-        content: `Based on our conversation, I've prepared a comprehensive health summary and doctor visit preparation guide. This includes your symptom analysis, recommended specialty (${state.specialtyRecommendation}), and questions to ask your healthcare provider.`,
-        role: 'assistant',
-        timestamp: new Date()
-      };
-
-      setSessionState(prev => ({
+    let latestState: ChatSessionState | undefined;
+    setSessionState(prev => {
+      const updated = {
         ...prev,
-        messages: [...prev.messages, summaryMessage],
-        phase: 'summary'
-      }));
+        isLoading: true,
+        sessionId: sessionId,
+        messages: [...prev.messages, userMessage]
+      };
+      latestState = updated;
+      return updated;
+    });
 
-      await saveMessage(summaryMessage.content, 'assistant');
-
-    } catch (error) {
-      console.error('Error generating assessment:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate assessment. Please try again.",
-        variant: "destructive"
-      });
-    }
-  }, [user, toast]);
+    await saveMessage(content, 'user');
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await sendMessageWithRetry(content, sessionId!, 0, latestState);
+  }, [user, sessionState.sessionId, createSession, saveMessage, sendMessageWithRetry, toast]);
 
   const initializeChat = useCallback(() => {
     const emergencyNumber = language === 'bn' ? '999' : '911';
