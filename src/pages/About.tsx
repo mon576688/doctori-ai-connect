@@ -1,23 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Shield, 
-  Heart, 
-  Users, 
-  Brain, 
-  Award, 
-  Lock,
-  MessageCircle,
-  Stethoscope
-} from "lucide-react";
+import { Shield, Heart, Users, Brain, Award, Lock, MessageCircle, Stethoscope } from "lucide-react";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 
 export default function About() {
   return (
     <div className="container py-8">
-      <SEO 
+      <SEO
         title={PAGE_SEO.about.title}
         description={PAGE_SEO.about.description}
         canonicalPath={PAGE_SEO.about.canonicalPath}
@@ -25,19 +16,13 @@ export default function About() {
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-16">
-          <Badge className="bg-primary/10 text-primary border-primary/20 mb-4">
-            About Doctori AI
-          </Badge>
+          <Badge className="bg-primary/10 text-primary border-primary/20 mb-4">About Doctori AI</Badge>
           <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-            Your Trusted{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Health Companion
-            </span>
+            Your Trusted <span className="bg-gradient-primary bg-clip-text text-transparent">Health Companion</span>
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto">
-            Doctori AI combines advanced artificial intelligence with medical expertise to provide 
-            accessible, reliable health guidance for everyone. We're here to bridge the gap between 
-            you and quality healthcare.
+            Doctori AI combines advanced artificial intelligence with medical expertise to provide accessible, reliable
+            health guidance for everyone. We're here to bridge the gap between you and quality healthcare.
           </p>
         </div>
 
@@ -50,9 +35,8 @@ export default function About() {
               </div>
               <h2 className="text-2xl font-bold mb-4">Our Mission</h2>
               <p className="text-muted-foreground text-lg">
-                To make healthcare more accessible, understandable, and personal for everyone, 
-                everywhere. We believe that quality health guidance shouldn't be limited by 
-                geography, time, or circumstance.
+                To make healthcare more accessible, understandable, and personal for everyone, everywhere. We believe
+                that quality health guidance shouldn't be limited by geography, time, or circumstance.
               </p>
             </div>
           </CardContent>
@@ -61,7 +45,7 @@ export default function About() {
         {/* How It Works */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">How Doctori AI Works</h2>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="shadow-card text-center">
               <CardContent className="p-6">
@@ -74,7 +58,7 @@ export default function About() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-card text-center">
               <CardContent className="p-6">
                 <div className="bg-gradient-healing p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
@@ -86,16 +70,14 @@ export default function About() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-card text-center">
               <CardContent className="p-6">
                 <div className="bg-gradient-to-br from-accent to-accent/80 p-3 rounded-full w-12 h-12 mx-auto mb-4 flex items-center justify-center">
                   <Stethoscope className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="font-semibold mb-2">3. Get Guidance</h3>
-                <p className="text-sm text-muted-foreground">
-                  Receive personalized advice and doctor recommendations
-                </p>
+                <p className="text-sm text-muted-foreground">Receive personalized advice and doctor recommendations</p>
               </CardContent>
             </Card>
           </div>
@@ -104,7 +86,7 @@ export default function About() {
         {/* Trust & Security */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Trust & Security</h2>
-          
+
           <div className="grid md:grid-cols-2 gap-8">
             <Card className="shadow-card">
               <CardContent className="p-6">
@@ -113,7 +95,7 @@ export default function About() {
                     <Shield className="h-6 w-6 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-2">HIPAA Compliant</h3>
+                    <h3 className="font-semibold mb-2">Medical Grade Security</h3>
                     <p className="text-sm text-muted-foreground">
                       Your health information is protected with medical-grade security and privacy standards.
                     </p>
@@ -121,7 +103,7 @@ export default function About() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-card">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
@@ -137,7 +119,7 @@ export default function About() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-card">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
@@ -153,7 +135,7 @@ export default function About() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-card">
               <CardContent className="p-6">
                 <div className="flex items-start space-x-4">
@@ -181,16 +163,20 @@ export default function About() {
             </h3>
             <div className="space-y-3 text-sm text-muted-foreground">
               <p>
-                <strong className="text-foreground">Doctori AI is a health-tech platform, NOT a medical service provider.</strong> We 
-                connect users with independent healthcare professionals but do not directly provide medical care.
+                <strong className="text-foreground">
+                  Doctori AI is a health-tech platform, NOT a medical service provider.
+                </strong>{" "}
+                We connect users with independent healthcare professionals but do not directly provide medical care.
               </p>
               <p>
-                Our AI chatbot provides <strong className="text-foreground">informational guidance only</strong> — it does NOT 
-                diagnose conditions, prescribe medications, or replace professional medical advice. All medical decisions 
-                must be made by licensed healthcare professionals.
+                Our AI chatbot provides <strong className="text-foreground">informational guidance only</strong> — it
+                does NOT diagnose conditions, prescribe medications, or replace professional medical advice. All medical
+                decisions must be made by licensed healthcare professionals.
               </p>
               <p>
-                <strong className="text-destructive">In case of medical emergencies, contact your local emergency services immediately.</strong>
+                <strong className="text-destructive">
+                  In case of medical emergencies, contact your local emergency services immediately.
+                </strong>
               </p>
             </div>
           </CardContent>
