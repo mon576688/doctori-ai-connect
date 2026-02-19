@@ -153,13 +153,13 @@ export const useChatSession = () => {
       }
 
       let aiResponse = data.response;
-      let newState = { ...sessionState };
+      let newState = { ...state };
 
       // Basic symptom analysis for urgency detection and database updates
       const analysis = analyzeSymptoms(content);
-      if (sessionState.phase === 'initial') {
+      if (state.phase === 'initial') {
         newState = {
-          ...sessionState,
+          ...state,
           phase: 'assessment',
           symptoms: analysis.symptoms,
           urgencyLevel: analysis.urgencyLevel,
@@ -177,9 +177,9 @@ export const useChatSession = () => {
           })
           .eq('id', sessionId);
 
-      } else if (sessionState.phase === 'assessment') {
-        newState.followupAnswers[sessionState.currentQuestionIndex.toString()] = content;
-        newState.currentQuestionIndex = sessionState.currentQuestionIndex + 1;
+      } else if (state.phase === 'assessment') {
+        newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
+        newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
         if (newState.currentQuestionIndex >= 3) {
           newState.phase = 'analysis';
