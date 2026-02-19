@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus, Search } from "lucide-react";
+import { Menu, X, LogOut, User, Stethoscope, ChevronDown, UserPlus, Search, Download } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/hooks/useAuth";
 import { useRoleBasedAuth } from "@/hooks/useRoleBasedAuth";
