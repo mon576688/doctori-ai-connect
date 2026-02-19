@@ -202,7 +202,8 @@ export const useGuestChat = () => {
         content: aiResponse,
         role: 'assistant',
         timestamp: new Date(),
-        isUrgent: newState.urgencyLevel === 'emergency' || newState.urgencyLevel === 'high'
+        isUrgent: newState.urgencyLevel === 'emergency' || newState.urgencyLevel === 'high',
+        suggestedProviders: data.suggestedProviders || undefined,
       };
 
       setSessionState(prev => ({
