@@ -292,7 +292,7 @@ This is not medical advice. Always consult with a qualified healthcare provider 
         });
       }
     }
-  }, [sessionState, toast, language]);
+  }, [toast, language]);
 
   const sendMessage = useCallback(async (content: string) => {
     setSessionState(prev => ({ ...prev, isLoading: true }));
