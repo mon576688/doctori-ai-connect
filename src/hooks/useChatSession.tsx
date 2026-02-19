@@ -103,7 +103,15 @@ export const useChatSession = () => {
     }
   }, [sessionState.sessionId]);
 
-  const sendMessageWithRetry = useCallback(async (content: string, sessionId: string, retryCount = 0): Promise<void> => {
+  const sendMessageWithRetry = useCallback(async (
+    content: string, 
+    sessionId: string, 
+    retryCount = 0,
+    currentState?: ChatSessionState
+  ): Promise<void> => {
+    // Use passed-in state to avoid stale closures
+    const state = currentState || sessionState;
+    
     try {
       // Get user profile data
       let userProfile = null;
@@ -120,12 +128,12 @@ export const useChatSession = () => {
       const { data, error } = await supabase.functions.invoke('ai-chat-assistant', {
         body: {
           userMessage: content,
-          messages: sessionState.messages,
+          messages: state.messages,
           sessionContext: {
-            phase: sessionState.phase,
-            symptoms: sessionState.symptoms,
-            urgencyLevel: sessionState.urgencyLevel,
-            followupAnswers: sessionState.followupAnswers,
+            phase: state.phase,
+            symptoms: state.symptoms,
+            urgencyLevel: state.urgencyLevel,
+            followupAnswers: state.followupAnswers,
             sessionId: sessionId,
             language: language,
             isRegisteredUser: true,
