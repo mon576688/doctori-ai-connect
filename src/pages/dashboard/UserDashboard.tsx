@@ -176,7 +176,7 @@ export default function UserDashboard() {
           user_id: profile?.id,
           title: newReminder.title,
           reminder_time: newReminder.reminder_time,
-          repeat_interval: newReminder.repeat_interval || null,
+          repeat_interval: newReminder.repeat_interval && newReminder.repeat_interval !== 'none' ? newReminder.repeat_interval : null,
           notes: newReminder.notes || null
         });
 
@@ -479,7 +479,7 @@ export default function UserDashboard() {
                             <SelectValue placeholder="Select repeat interval" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No repeat</SelectItem>
+                            <SelectItem value="none">No repeat</SelectItem>
                             <SelectItem value="daily">Daily</SelectItem>
                             <SelectItem value="weekly">Weekly</SelectItem>
                             <SelectItem value="monthly">Monthly</SelectItem>
