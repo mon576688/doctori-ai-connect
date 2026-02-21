@@ -65,6 +65,9 @@ export const Footer = () => {
               <Link to="/doctors" className="block text-muted-foreground hover:text-primary transition-colors">
                 {t('footer.findDoctors')}
               </Link>
+              <Link to="/doctor-directory" className="block text-muted-foreground hover:text-primary transition-colors">
+                {t('footer.doctorDirectory')}
+              </Link>
               <Link to="/blog" className="block text-muted-foreground hover:text-primary transition-colors">
                 {t('footer.healthBlog')}
               </Link>
