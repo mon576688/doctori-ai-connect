@@ -258,6 +258,10 @@ export default function UserDashboard() {
               <FileText className="w-4 h-4 mr-2" />
               Prescriptions
             </TabsTrigger>
+            <TabsTrigger value="records">
+              <FolderOpen className="w-4 h-4 mr-2" />
+              Records
+            </TabsTrigger>
             <TabsTrigger value="reminders">
               <Clock className="w-4 h-4 mr-2" />
               Reminders
