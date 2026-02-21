@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AppointmentsList } from '@/components/AppointmentsList';
 import { Inbox } from '@/components/messaging/Inbox';
 import { useNavigate } from 'react-router-dom';
+import MedicalRecords from '@/components/patient/MedicalRecords';
 
 interface Reminder {
   id: number;
