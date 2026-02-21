@@ -182,6 +182,14 @@ const App = () => (
                     />
                     {/* Patient Prescriptions Route */}
                     <Route 
+                      path="patient/prescriptions" 
+                      element={
+                        <ProtectedRoute requiredRole="user">
+                          <MyPrescriptions />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
                       path="my-prescriptions" 
                       element={
                         <ProtectedRoute requiredRole="user">
