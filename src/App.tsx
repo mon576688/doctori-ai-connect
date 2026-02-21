@@ -93,6 +93,7 @@ const App = () => (
                     <Route path="install" element={<Install />} />
                     <Route path="reminders" element={<Reminders />} />
                     <Route path="blood-donation" element={<BloodDonation />} />
+                    <Route path="doctor-directory" element={<DoctorDirectory />} />
                     
                     {/* Dashboard redirect route */}
                     <Route path="dashboard" element={<Dashboard />} />
