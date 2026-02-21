@@ -35,34 +35,14 @@ serve(async (req) => {
     const { specialty, latitude, longitude, city, limit = 10 } = await req.json();
     console.log('Search params:', { specialty, latitude, longitude, city, limit });
 
-    // Fetch approved providers with their profiles
+    // Fetch approved providers from providers_public view
     let providersQuery = supabase
-      .from('profiles')
-      .select(`
-        id,
-        first_name,
-        last_name,
-        photo_url,
-        city,
-        address,
-        phone,
-        latitude,
-        longitude,
-        provider_type,
-        doctors!inner (
-          specialty,
-          consultation_fee,
-          experience,
-          bio,
-          verified
-        )
-      `)
-      .eq('role', 'provider')
-      .eq('approval_status', 'approved');
+      .from('providers_public')
+      .select('id, first_name, last_name, name, photo_url, city, provider_type, specialty, consultation_fee, experience, bio, verified');
 
     // Filter by specialty if provided
     if (specialty && specialty !== 'General Practice') {
-      providersQuery = providersQuery.ilike('doctors.specialty', `%${specialty}%`);
+      providersQuery = providersQuery.ilike('specialty', `%${specialty}%`);
     }
 
     // Filter by city if no coordinates provided

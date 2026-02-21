@@ -183,11 +183,19 @@ REMINDER: [SUMMARY_READY] must appear at the very end of your assessment respons
 };
 
 const summarizeConversation = (messages: any[]) => {
-  if (messages.length <= 5) return messages;
+  if (messages.length <= 12) return messages;
   const systemMessage = messages[0];
-  const recentMessages = messages.slice(-4);
-  const olderMessages = messages.slice(1, -4);
-  const summaryContent = `Previous conversation summary: The user discussed ${olderMessages.length > 0 ? 'various health concerns' : 'initial health questions'}. Recent context continues below.`;
+  const recentMessages = messages.slice(-10);
+  const olderMessages = messages.slice(1, -10);
+  
+  // Extract key info from older messages
+  const userMessages = olderMessages
+    .filter((m: any) => m.role === 'user')
+    .map((m: any) => m.content)
+    .join('; ');
+  
+  const summaryContent = `Previous conversation summary: The patient has provided the following information so far: ${userMessages}. DO NOT ask these questions again. Continue from where you left off.`;
+  
   return [
     systemMessage,
     { role: "system", content: summaryContent },
