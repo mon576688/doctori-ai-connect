@@ -56,6 +56,7 @@ const HealthTipsBD = lazy(() => import('./pages/HealthTipsBD'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const Search = lazy(() => import('./pages/Search'));
 const Install = lazy(() => import('./pages/Install'));
+const DoctorDirectory = lazy(() => import('./pages/DoctorDirectory'));
 
 const App = () => (
   <I18nextProvider i18n={i18n}>
