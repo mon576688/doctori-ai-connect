@@ -176,7 +176,7 @@ export default function UserDashboard() {
           user_id: profile?.id,
           title: newReminder.title,
           reminder_time: newReminder.reminder_time,
-          repeat_interval: newReminder.repeat_interval || null,
+          repeat_interval: newReminder.repeat_interval && newReminder.repeat_interval !== 'none' ? newReminder.repeat_interval : null,
           notes: newReminder.notes || null
         });
 
