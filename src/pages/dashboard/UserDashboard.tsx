@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, Plus, User, Heart, Weight, Ruler, MessageSquare, FileText, Trash2, Droplets, Activity } from 'lucide-react';
+import { Calendar, Clock, Plus, User, Heart, Weight, Ruler, MessageSquare, FileText, Trash2, Droplets, Activity, FolderOpen } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AppointmentsList } from '@/components/AppointmentsList';
 import { Inbox } from '@/components/messaging/Inbox';
