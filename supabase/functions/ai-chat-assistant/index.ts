@@ -172,15 +172,30 @@ This marker tells the system that your consultation is complete. ONLY add this m
 - Ignore non-health queries and guide user back
 - Be understanding and empathetic
 - Use clear, easy-to-understand language
-- Keep individual questions concise, but make the final assessment comprehensive`;
+- Keep individual questions concise, but make the final assessment comprehensive
+
+CRITICAL INSTRUCTION - QUESTION LIMIT AND SUMMARY:
+After the user has answered your 8th question, you MUST provide the full Phase 2 assessment in your very next response. Do NOT ask more than 8 questions total. Count the user's responses carefully. Once you reach 8 user responses, immediately transition to the full assessment.
+
+You MUST end your Phase 2 assessment response with [SUMMARY_READY] on its own line. This is MANDATORY and non-negotiable. The system depends on this marker to function correctly. If you forget it, the entire consultation will fail.
+
+REMINDER: [SUMMARY_READY] must appear at the very end of your assessment response, on its own line.`;
 };
 
 const summarizeConversation = (messages: any[]) => {
-  if (messages.length <= 5) return messages;
+  if (messages.length <= 12) return messages;
   const systemMessage = messages[0];
-  const recentMessages = messages.slice(-4);
-  const olderMessages = messages.slice(1, -4);
-  const summaryContent = `Previous conversation summary: The user discussed ${olderMessages.length > 0 ? 'various health concerns' : 'initial health questions'}. Recent context continues below.`;
+  const recentMessages = messages.slice(-10);
+  const olderMessages = messages.slice(1, -10);
+  
+  // Extract key info from older messages
+  const userMessages = olderMessages
+    .filter((m: any) => m.role === 'user')
+    .map((m: any) => m.content)
+    .join('; ');
+  
+  const summaryContent = `Previous conversation summary: The patient has provided the following information so far: ${userMessages}. DO NOT ask these questions again. Continue from where you left off.`;
+  
   return [
     systemMessage,
     { role: "system", content: summaryContent },

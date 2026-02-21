@@ -35,34 +35,14 @@ serve(async (req) => {
     const { specialty, latitude, longitude, city, limit = 10 } = await req.json();
     console.log('Search params:', { specialty, latitude, longitude, city, limit });
 
-    // Fetch approved providers with their profiles
+    // Fetch approved providers from providers_public view
     let providersQuery = supabase
-      .from('profiles')
-      .select(`
-        id,
-        first_name,
-        last_name,
-        photo_url,
-        city,
-        address,
-        phone,
-        latitude,
-        longitude,
-        provider_type,
-        doctors!inner (
-          specialty,
-          consultation_fee,
-          experience,
-          bio,
-          verified
-        )
-      `)
-      .eq('role', 'provider')
-      .eq('approval_status', 'approved');
+      .from('providers_public')
+      .select('id, first_name, last_name, name, photo_url, city, provider_type, specialty, consultation_fee, experience, bio, verified');
 
     // Filter by specialty if provided
     if (specialty && specialty !== 'General Practice') {
-      providersQuery = providersQuery.ilike('doctors.specialty', `%${specialty}%`);
+      providersQuery = providersQuery.ilike('specialty', `%${specialty}%`);
     }
 
     // Filter by city if no coordinates provided
@@ -82,24 +62,21 @@ serve(async (req) => {
     // Calculate distance and sort if coordinates provided
     let processedProviders = (providers || []).map((provider: any) => {
       let distance = null;
-      if (latitude && longitude && provider.latitude && provider.longitude) {
-        distance = calculateDistance(latitude, longitude, provider.latitude, provider.longitude);
-      }
+      // providers_public view doesn't have lat/lng, so distance stays null
       
-      const doctor = provider.doctors?.[0] || provider.doctors;
       return {
         id: provider.id,
-        name: `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || 'Doctor',
+        name: provider.name || `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || 'Doctor',
         photo_url: provider.photo_url,
-        specialty: doctor?.specialty || 'General Practice',
-        consultation_fee: doctor?.consultation_fee,
-        experience: doctor?.experience,
-        bio: doctor?.bio,
-        verified: doctor?.verified,
+        specialty: provider.specialty || 'General Practice',
+        consultation_fee: provider.consultation_fee,
+        experience: provider.experience,
+        bio: provider.bio,
+        verified: provider.verified,
         city: provider.city,
-        address: provider.address,
-        phone: provider.phone,
-        distance: distance ? Math.round(distance * 10) / 10 : null,
+        address: null,
+        phone: null,
+        distance: null,
         provider_type: provider.provider_type
       };
     });

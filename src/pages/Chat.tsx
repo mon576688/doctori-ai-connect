@@ -359,7 +359,7 @@ const Chat = () => {
 
                 {/* Input Area */}
                 <div className="p-4 md:p-6 border-t space-y-4">
-                  {(chat.sessionState.urgencyLevel === "high" || chat.sessionState.urgencyLevel === "emergency") && (
+                  {chat.sessionState.urgencyLevel === "emergency" && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-2">
                         <AlertTriangle className="h-5 w-5 text-red-600" />
