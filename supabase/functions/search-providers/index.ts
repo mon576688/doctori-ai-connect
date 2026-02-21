@@ -62,24 +62,21 @@ serve(async (req) => {
     // Calculate distance and sort if coordinates provided
     let processedProviders = (providers || []).map((provider: any) => {
       let distance = null;
-      if (latitude && longitude && provider.latitude && provider.longitude) {
-        distance = calculateDistance(latitude, longitude, provider.latitude, provider.longitude);
-      }
+      // providers_public view doesn't have lat/lng, so distance stays null
       
-      const doctor = provider.doctors?.[0] || provider.doctors;
       return {
         id: provider.id,
-        name: `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || 'Doctor',
+        name: provider.name || `${provider.first_name || ''} ${provider.last_name || ''}`.trim() || 'Doctor',
         photo_url: provider.photo_url,
-        specialty: doctor?.specialty || 'General Practice',
-        consultation_fee: doctor?.consultation_fee,
-        experience: doctor?.experience,
-        bio: doctor?.bio,
-        verified: doctor?.verified,
+        specialty: provider.specialty || 'General Practice',
+        consultation_fee: provider.consultation_fee,
+        experience: provider.experience,
+        bio: provider.bio,
+        verified: provider.verified,
         city: provider.city,
-        address: provider.address,
-        phone: provider.phone,
-        distance: distance ? Math.round(distance * 10) / 10 : null,
+        address: null,
+        phone: null,
+        distance: null,
         provider_type: provider.provider_type
       };
     });
