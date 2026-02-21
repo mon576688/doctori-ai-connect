@@ -260,8 +260,8 @@ export default function MedicalRecords() {
     DOCUMENT_TYPES.find(t => t.value === type)?.label || type;
 
   const getFileIcon = (fileType: string | null) => {
-    if (fileType?.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
-    return <FileText className="w-5 h-5 text-red-500" />;
+    if (fileType?.startsWith('image/')) return <Image className="w-5 h-5 text-primary" />;
+    return <FileText className="w-5 h-5 text-destructive" />;
   };
 
   return (
