@@ -1,92 +1,194 @@
 
 
-# Fix Build Error and Improve All Dashboards
+# Patient Medical Records -- Upload and Share Documents
 
-## Part 1: Fix PWA Build Error (Critical)
+## What We're Building
 
-The build fails because the main JS bundle (4.18MB) exceeds the Workbox default 2MB precache limit.
-
-**File: `vite.config.ts`**
-- Add `maximumFileSizeToCacheInBytes: 5 * 1024 * 1024` (5MB) to the workbox config
-- This allows the larger bundle to be precached by the service worker
+A new "Medical Records" tab in the User Dashboard where patients can upload, view, and manage their own medical documents (lab reports, prescriptions, imaging results, etc.). Patients can also share specific records with their doctors during appointments.
 
 ---
 
-## Part 2: Dashboard Improvements
+## Changes Overview
 
-After reviewing all three dashboards, here are the key UX issues and improvements:
+### 1. Create Storage Bucket for Patient Records
 
-### User Dashboard (Patient)
+**Database migration** to create a `medical-records` storage bucket (private) with RLS policies so patients can only access their own files.
 
-**Current issues:**
-- Profile data (weight, height, blood_group, bio) is not pre-populated from the database -- only name, age, gender load from profile
-- No quick-access health summary or welcome card at the top
-- Tab list is not responsive on mobile (no wrapping)
-- No link to prescriptions page (`/patient/prescriptions`) which exists in the app
-- Reminders don't have delete functionality
+```sql
+INSERT INTO storage.buckets (id, name, public) VALUES ('medical-records', 'medical-records', false);
 
-**Improvements:**
-- Pre-populate ALL profile fields (weight, height, blood_group, bio) from the database on load
-- Add a welcome card at the top showing user's name, upcoming appointment count, and quick health stats
-- Add a "Prescriptions" tab linking to the existing `/patient/prescriptions` page
-- Add delete button on reminder cards
-- Make TabsList responsive with `flex-wrap`
+-- Patients can upload to their own folder
+CREATE POLICY "Patients can upload their records"
+ON storage.objects FOR INSERT TO authenticated
+WITH CHECK (bucket_id = 'medical-records' AND (storage.foldername(name))[1] = auth.uid()::text);
 
-### Provider Dashboard (Doctor)
+-- Patients can view their own files
+CREATE POLICY "Patients can view their records"
+ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id = 'medical-records' AND (storage.foldername(name))[1] = auth.uid()::text);
 
-**Current issues:**
-- 8 tabs in the TabsList -- too many for mobile, hard to navigate
-- No at-a-glance overview showing today's appointments, patient count, etc.
-- Tab list overflows on smaller screens
+-- Patients can delete their own files
+CREATE POLICY "Patients can delete their records"
+ON storage.objects FOR DELETE TO authenticated
+USING (bucket_id = 'medical-records' AND (storage.foldername(name))[1] = auth.uid()::text);
 
-**Improvements:**
-- Add a welcome/overview section above tabs showing: verified status, total patients, today's appointments count
-- Make TabsList responsive with `flex-wrap` and `h-auto`
-- Group related tabs visually (Profile/Services vs Appointments/Consultations vs Patients/Documents/Messages)
+-- Providers can view records shared with them (via shared_medical_records table)
+CREATE POLICY "Providers can view shared records"
+ON storage.objects FOR SELECT TO authenticated
+USING (bucket_id = 'medical-records' AND EXISTS (
+  SELECT 1 FROM public.shared_medical_records smr
+  JOIN public.medical_records mr ON mr.id = smr.record_id
+  WHERE mr.file_path = name AND smr.doctor_id = auth.uid()
+));
+```
 
-### Admin Dashboard
+### 2. Create `medical_records` Table
 
-**Current state:** Already well-structured with sidebar navigation, overview stats, and comprehensive tools. This is the strongest dashboard.
+**Database migration:**
 
-**Minor improvements:**
-- The sidebar uses `Link` components but actually calls `onTabChange` via buttons -- this is fine but the `SidebarItem` component with `Link` is unused dead code at the top of AdminSidebar. Clean it up.
-- Add a search/filter on the providers list table (currently no search)
+```sql
+CREATE TABLE public.medical_records (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  document_type text NOT NULL DEFAULT 'other',
+  title text NOT NULL,
+  description text,
+  file_name text NOT NULL,
+  file_path text NOT NULL,
+  file_size integer,
+  file_type text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 
-### Medicine Page
+ALTER TABLE public.medical_records ENABLE ROW LEVEL SECURITY;
 
-**Current state:** Well implemented with Lookup and Interaction Checker tabs. No changes needed beyond what was just built.
+-- Patients manage their own records
+CREATE POLICY "Users can insert their records" ON public.medical_records
+  FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view their records" ON public.medical_records
+  FOR SELECT TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their records" ON public.medical_records
+  FOR UPDATE TO authenticated USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their records" ON public.medical_records
+  FOR DELETE TO authenticated USING (auth.uid() = user_id);
+
+-- Admins can view all
+CREATE POLICY "Admins can view all records" ON public.medical_records
+  FOR SELECT TO authenticated USING (has_role(auth.uid(), 'admin'::app_role));
+```
+
+### 3. Create `shared_medical_records` Table
+
+For sharing specific records with doctors:
+
+```sql
+CREATE TABLE public.shared_medical_records (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  record_id uuid NOT NULL REFERENCES public.medical_records(id) ON DELETE CASCADE,
+  patient_id uuid NOT NULL,
+  doctor_id uuid NOT NULL,
+  shared_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(record_id, doctor_id)
+);
+
+ALTER TABLE public.shared_medical_records ENABLE ROW LEVEL SECURITY;
+
+-- Patients can share their records
+CREATE POLICY "Patients can share their records" ON public.shared_medical_records
+  FOR INSERT TO authenticated WITH CHECK (auth.uid() = patient_id);
+
+-- Patients can view their shares
+CREATE POLICY "Patients can view their shares" ON public.shared_medical_records
+  FOR SELECT TO authenticated USING (auth.uid() = patient_id);
+
+-- Patients can revoke shares
+CREATE POLICY "Patients can revoke shares" ON public.shared_medical_records
+  FOR DELETE TO authenticated USING (auth.uid() = patient_id);
+
+-- Providers can view records shared with them
+CREATE POLICY "Providers can view shared records" ON public.shared_medical_records
+  FOR SELECT TO authenticated USING (auth.uid() = doctor_id);
+
+-- Providers can also view the medical_records that are shared with them
+CREATE POLICY "Providers can view shared medical records" ON public.medical_records
+  FOR SELECT TO authenticated USING (
+    has_role(auth.uid(), 'provider'::app_role) AND EXISTS (
+      SELECT 1 FROM public.shared_medical_records
+      WHERE record_id = medical_records.id AND doctor_id = auth.uid()
+    )
+  );
+```
+
+### 4. New Component: `MedicalRecords.tsx`
+
+**New file: `src/components/patient/MedicalRecords.tsx`**
+
+Features:
+- Upload area with document type selector (Lab Report, X-Ray/Imaging, Prescription, Vaccination Record, Discharge Summary, Insurance, Other)
+- File list showing all uploaded records with type badge, date, file size
+- View/download buttons for each record
+- Delete button with confirmation
+- Share dialog: select a doctor (from past appointments) to share a record with
+- File size limit: 10MB, accepted formats: PDF, JPG, PNG, DOCX
+
+### 5. Add "Medical Records" Tab to User Dashboard
+
+**File: `src/pages/dashboard/UserDashboard.tsx`**
+
+- Add a new tab "Records" with a folder icon between Prescriptions and Reminders
+- Render the `MedicalRecords` component inside it
 
 ---
 
-## Technical Details
-
-### Files to Change
-
-1. **`vite.config.ts`** -- Add `maximumFileSizeToCacheInBytes` to fix build error
-2. **`src/pages/dashboard/UserDashboard.tsx`** -- Pre-populate all fields, add welcome card, add prescriptions tab, add reminder delete, responsive tabs
-3. **`src/pages/dashboard/ProviderDashboard.tsx`** -- Add overview section, responsive tabs
-4. **`src/components/admin/AdminSidebar.tsx`** -- Remove unused `SidebarItem` component (dead code cleanup)
-
-### User Dashboard Welcome Card
+## UI Layout
 
 ```text
+User Dashboard Tabs:
+[Profile] [Appointments] [Prescriptions] [Records] [Reminders] [Health] [Messages]
+
+Records Tab:
 +--------------------------------------------------+
-| Welcome, [Name]!                                  |
-| [Upcoming Appointments: 2]  [Reminders: 3]       |
-| [Blood Group: B+]  [BMI: 22.4]                   |
+| Upload Medical Records                            |
+| [Document Type: v]  [Choose File]  [Upload]       |
+| Title: [______________________]                   |
+| Accepted: PDF, JPG, PNG, DOCX (Max 10MB)         |
++--------------------------------------------------+
+| My Medical Records                                |
+|                                                    |
+| [PDF] Blood Test Report - Jan 2025       [Share]  |
+|       Lab Report | 1.2 MB | Jan 15, 2025 [Delete] |
+|                                                    |
+| [IMG] Chest X-Ray                        [Share]  |
+|       X-Ray/Imaging | 3.4 MB | Dec 2024  [Delete] |
 +--------------------------------------------------+
 ```
 
-### Provider Dashboard Overview Section
+### Share Dialog
 
 ```text
-+--------------------------------------------------+
-| Dr. [Name] - [Specialty]     [Verified Badge]    |
-| [Patients: 12]  [Today's Appointments: 3]        |
-+--------------------------------------------------+
++----------------------------------+
+| Share Record With Doctor          |
+|                                   |
+| Select a doctor:                  |
+| [Dr. Ahmed - Cardiologist    v]   |
+|                                   |
+| [Share]  [Cancel]                 |
++----------------------------------+
 ```
 
-### Responsive TabsList Fix (both dashboards)
+---
 
-Add `flex-wrap h-auto` classes to TabsList so tabs wrap gracefully on mobile instead of overflowing.
+## Files to Change
+
+1. **Database migration** -- Create `medical_records` table, `shared_medical_records` table, and `medical-records` storage bucket with RLS
+2. **`src/components/patient/MedicalRecords.tsx`** -- New component for upload, list, share functionality
+3. **`src/pages/dashboard/UserDashboard.tsx`** -- Add "Records" tab
+
+## No Edge Functions Required
+
+All operations use the Supabase client directly (storage uploads and database queries), secured by RLS policies.
 
