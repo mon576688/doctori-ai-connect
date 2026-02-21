@@ -479,7 +479,7 @@ export default function UserDashboard() {
                             <SelectValue placeholder="Select repeat interval" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No repeat</SelectItem>
+                            <SelectItem value="none">No repeat</SelectItem>
                             <SelectItem value="daily">Daily</SelectItem>
                             <SelectItem value="weekly">Weekly</SelectItem>
                             <SelectItem value="monthly">Monthly</SelectItem>
