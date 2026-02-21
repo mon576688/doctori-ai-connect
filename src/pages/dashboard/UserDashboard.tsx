@@ -549,24 +549,7 @@ export default function UserDashboard() {
           </TabsContent>
 
           <TabsContent value="health">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5" />
-                  Health Information
-                </CardTitle>
-                <CardDescription>
-                  Manage your health conditions, allergies, and medications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Heart className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-semibold">Health info management</h3>
-                  <p className="text-muted-foreground">Coming soon - Advanced health tracking features</p>
-                </div>
-              </CardContent>
-            </Card>
+            <HealthInfo />
           </TabsContent>
 
           <TabsContent value="messages">
