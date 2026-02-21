@@ -1,87 +1,82 @@
 
 
-# Improve AI Chat Flow -- Full Doctor-Style Consultation
+# Fix AI Chat Flow -- All Identified Errors
 
-## Problem
+## Issues to Fix
 
-The current chat triggers a report/summary after only 3 user replies, interrupting the AI's medical interview. The system prompt also doesn't instruct the AI to provide home remedies or precautions before recommending a doctor.
+1. **Aggressive Urgency Alert**: The red "URGENT MEDICAL ATTENTION" banner shows for both `high` and `emergency` urgency. "Severe headache" triggers `high`, which is too aggressive. Only true emergencies (chest pain, can't breathe, etc.) should show the alert.
 
-## Desired Flow
+2. **Context Loss / AI Repeating Questions**: The `summarizeConversation()` function in the edge function truncates conversation to only the last 4 messages after 5 total. This causes the AI to lose track of what it already asked and repeat questions.
 
-```text
-1. User describes symptoms
-2. AI asks doctor-style questions ONE BY ONE (6-8 questions minimum)
-3. AI provides home remedies for temporary relief
-4. AI tells user what NOT to do (precautions)
-5. AI recommends a doctor specialty/category
-6. System finds and displays matching doctors from the database
-7. AI generates a structured chat summary for showing to a doctor
-8. "View Summary" button appears
-```
+3. **[SUMMARY_READY] Marker Not Firing**: The system prompt needs stronger, more explicit instructions to guarantee the AI outputs the `[SUMMARY_READY]` marker after its final assessment. The current instructions are followed loosely by the model.
+
+4. **search-providers Edge Function Crash**: Logs show `"Could not find a relationship between 'profiles' and 'doctors'"`. The function uses a PostgREST join (`profiles` -> `doctors!inner`) that doesn't work. It should use the `providers_public` view (which already works in the ai-chat-assistant function).
 
 ## Changes
 
-### 1. Update System Prompt (`supabase/functions/ai-chat-assistant/index.ts`)
+### 1. Fix Urgency Alert (Chat.tsx, line 362)
 
-Enhance the system prompt to include explicit phases the AI must follow:
+Change the condition from showing the alert for both `high` and `emergency` to only `emergency`:
 
-- After gathering enough info (at least 6-8 questions), provide:
-  - **Home Remedies**: Safe, temporary relief suggestions
-  - **What NOT to Do**: Precautions and things to avoid
-  - **Doctor Recommendation**: Specialty type to consult
-  - **Structured Summary**: Formatted summary suitable for showing to a doctor
+```tsx
+// Before
+{(chat.sessionState.urgencyLevel === "high" || chat.sessionState.urgencyLevel === "emergency") && (
 
-Add a special marker (e.g., `[SUMMARY_READY]`) at the end of the AI's final summary message so the client can detect when the full consultation is complete.
-
-### 2. Fix Phase Logic (`src/hooks/useChatSession.tsx`)
-
-- Remove the hard-coded `currentQuestionIndex >= 3` trigger that forces early summary generation
-- Instead, let the AI drive the conversation naturally through all its steps
-- Detect the `[SUMMARY_READY]` marker in the AI response to transition to the summary phase
-- Only then trigger `generateAssessment()` and show the "View Summary" button
-- Increase from 3 to 8+ exchanges before allowing summary
-
-### 3. Fix Guest Chat Phase Logic (`src/hooks/useGuestChat.tsx`)
-
-- Same fix: remove the `currentQuestionIndex >= 3` early cutoff
-- Detect `[SUMMARY_READY]` marker to transition to summary phase
-- Allow the full consultation flow for guest users too
-
-### 4. Update Summary Generation
-
-- When `[SUMMARY_READY]` is detected, strip the marker from the displayed message
-- Transition to summary phase which triggers provider recommendations
-- The summary message from AI will already contain the structured format for the doctor
-
-## Technical Details
-
-### System Prompt Additions
-
-The prompt will instruct the AI to follow this exact sequence after gathering symptoms:
-
-1. Ask 6-8 medical questions (one at a time)
-2. Provide "Home Remedies" section with safe temporary relief
-3. Provide "What to Avoid" section with precautions
-4. Recommend specialist type
-5. Output a "Doctor Visit Summary" with all collected info formatted for a doctor
-6. End with `[SUMMARY_READY]` marker
-
-### Phase Detection Logic
-
-```text
-Instead of counting messages:
-- Keep phase as "assessment" throughout the Q&A
-- When AI response contains [SUMMARY_READY]:
-  - Strip marker from display
-  - Set phase to "summary"
-  - Trigger generateAssessment()
-  - Show provider recommendations
-  - Show "View Summary" button
+// After  
+{chat.sessionState.urgencyLevel === "emergency" && (
 ```
+
+### 2. Fix Context Loss (ai-chat-assistant/index.ts, summarizeConversation)
+
+Increase the conversation window from 4 recent messages to 10, and provide a better summary of older messages so the AI retains context:
+
+```typescript
+const summarizeConversation = (messages: any[]) => {
+  if (messages.length <= 12) return messages;
+  const systemMessage = messages[0];
+  const recentMessages = messages.slice(-10);
+  const olderMessages = messages.slice(1, -10);
+  
+  // Extract key info from older messages
+  const userMessages = olderMessages
+    .filter((m: any) => m.role === 'user')
+    .map((m: any) => m.content)
+    .join('; ');
+  
+  const summaryContent = `Previous conversation summary: The patient has provided the following information so far: ${userMessages}. DO NOT ask these questions again. Continue from where you left off.`;
+  
+  return [
+    systemMessage,
+    { role: "system", content: summaryContent },
+    ...recentMessages
+  ];
+};
+```
+
+### 3. Strengthen [SUMMARY_READY] Instruction (ai-chat-assistant/index.ts)
+
+Add a stronger, repeated instruction at the end of the system prompt to ensure the model outputs the marker. Add a "question counter" instruction:
+
+- Add to the prompt: "After your 8th question answer from the user, you MUST provide the full Phase 2 assessment in your next response. You MUST end that response with [SUMMARY_READY] on its own line. This is mandatory."
+- Repeat the marker instruction to increase compliance.
+
+### 4. Fix search-providers Edge Function
+
+Replace the broken `profiles` + `doctors!inner` join with a query to the `providers_public` view (which already exists and works):
+
+```typescript
+let providersQuery = supabase
+  .from('providers_public')
+  .select('id, first_name, last_name, name, photo_url, city, address, phone, latitude, longitude, provider_type, specialty, consultation_fee, experience, bio, verified');
+```
+
+Remove the `.eq('role', 'provider')` and `.eq('approval_status', 'approved')` filters since the view already handles that.
 
 ### Files to Change
 
-1. **`supabase/functions/ai-chat-assistant/index.ts`** -- Enhanced system prompt with home remedies, precautions, and summary marker
-2. **`src/hooks/useChatSession.tsx`** -- Remove early cutoff, add marker detection
-3. **`src/hooks/useGuestChat.tsx`** -- Same marker detection logic
+| File | Change |
+|------|--------|
+| `src/pages/Chat.tsx` (line 362) | Show urgency alert only for `emergency`, not `high` |
+| `supabase/functions/ai-chat-assistant/index.ts` | Fix `summarizeConversation` to keep 10 recent messages; strengthen `[SUMMARY_READY]` instructions |
+| `supabase/functions/search-providers/index.ts` | Use `providers_public` view instead of broken `profiles`+`doctors` join |
 
