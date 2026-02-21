@@ -16,6 +16,7 @@ import { AppointmentsList } from '@/components/AppointmentsList';
 import { Inbox } from '@/components/messaging/Inbox';
 import { useNavigate } from 'react-router-dom';
 import MedicalRecords from '@/components/patient/MedicalRecords';
+import HealthInfo from '@/components/patient/HealthInfo';
 
 interface Reminder {
   id: number;
@@ -548,24 +549,7 @@ export default function UserDashboard() {
           </TabsContent>
 
           <TabsContent value="health">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5" />
-                  Health Information
-                </CardTitle>
-                <CardDescription>
-                  Manage your health conditions, allergies, and medications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Heart className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-semibold">Health info management</h3>
-                  <p className="text-muted-foreground">Coming soon - Advanced health tracking features</p>
-                </div>
-              </CardContent>
-            </Card>
+            <HealthInfo />
           </TabsContent>
 
           <TabsContent value="messages">
