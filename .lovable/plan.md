@@ -1,57 +1,87 @@
 
-# Build the Health Information Tab
 
-Replace the "Coming soon" placeholder in the Health tab with a fully functional health management interface using data already stored in the `profiles` table.
+# Improve AI Chat Flow -- Full Doctor-Style Consultation
 
-## What You'll Get
+## Problem
 
-A comprehensive health dashboard with three sections:
+The current chat triggers a report/summary after only 3 user replies, interrupting the AI's medical interview. The system prompt also doesn't instruct the AI to provide home remedies or precautions before recommending a doctor.
 
-1. **Health Conditions** -- Add/remove chronic conditions (e.g., Diabetes, Hypertension, Asthma) stored in `profiles.medical_conditions`
-2. **Allergies** -- Add/remove allergies (e.g., Penicillin, Peanuts) stored in `profiles.allergies`
-3. **Current Medications** -- Add/remove medications you're taking, stored in `profiles.medications`
-
-Each section will show items as removable badges and have an input field to add new entries. All data saves directly to the existing `profiles` table -- no database changes needed.
-
-## Layout
+## Desired Flow
 
 ```text
-Health Information Tab:
-+--------------------------------------------------+
-| Health Conditions                                 |
-| [Diabetes] [Hypertension] [x]                    |
-| [Add condition...________] [+ Add]               |
-+--------------------------------------------------+
-| Allergies                                         |
-| [Penicillin] [Dust] [x]                          |
-| [Add allergy...________]  [+ Add]                |
-+--------------------------------------------------+
-| Current Medications                               |
-| [Metformin 500mg] [Lisinopril] [x]               |
-| [Add medication..._______] [+ Add]               |
-+--------------------------------------------------+
-| BMI Summary                                       |
-| Weight: 70kg | Height: 170cm | BMI: 24.2 (Normal)|
-+--------------------------------------------------+
+1. User describes symptoms
+2. AI asks doctor-style questions ONE BY ONE (6-8 questions minimum)
+3. AI provides home remedies for temporary relief
+4. AI tells user what NOT to do (precautions)
+5. AI recommends a doctor specialty/category
+6. System finds and displays matching doctors from the database
+7. AI generates a structured chat summary for showing to a doctor
+8. "View Summary" button appears
 ```
 
 ## Changes
 
-### 1. New Component: `src/components/patient/HealthInfo.tsx`
+### 1. Update System Prompt (`supabase/functions/ai-chat-assistant/index.ts`)
 
-- Three card sections for conditions, allergies, medications
-- Each with badge display + input to add/remove items
-- Updates `profiles` table arrays directly via Supabase client
-- BMI summary section using existing weight/height from profile
-- Toast notifications on save
+Enhance the system prompt to include explicit phases the AI must follow:
 
-### 2. Update: `src/pages/dashboard/UserDashboard.tsx`
+- After gathering enough info (at least 6-8 questions), provide:
+  - **Home Remedies**: Safe, temporary relief suggestions
+  - **What NOT to Do**: Precautions and things to avoid
+  - **Doctor Recommendation**: Specialty type to consult
+  - **Structured Summary**: Formatted summary suitable for showing to a doctor
 
-- Import `HealthInfo` component
-- Replace the placeholder content in the `health` TabsContent with `<HealthInfo />`
+Add a special marker (e.g., `[SUMMARY_READY]`) at the end of the AI's final summary message so the client can detect when the full consultation is complete.
+
+### 2. Fix Phase Logic (`src/hooks/useChatSession.tsx`)
+
+- Remove the hard-coded `currentQuestionIndex >= 3` trigger that forces early summary generation
+- Instead, let the AI drive the conversation naturally through all its steps
+- Detect the `[SUMMARY_READY]` marker in the AI response to transition to the summary phase
+- Only then trigger `generateAssessment()` and show the "View Summary" button
+- Increase from 3 to 8+ exchanges before allowing summary
+
+### 3. Fix Guest Chat Phase Logic (`src/hooks/useGuestChat.tsx`)
+
+- Same fix: remove the `currentQuestionIndex >= 3` early cutoff
+- Detect `[SUMMARY_READY]` marker to transition to summary phase
+- Allow the full consultation flow for guest users too
+
+### 4. Update Summary Generation
+
+- When `[SUMMARY_READY]` is detected, strip the marker from the displayed message
+- Transition to summary phase which triggers provider recommendations
+- The summary message from AI will already contain the structured format for the doctor
 
 ## Technical Details
 
-- No database migration needed -- all columns (`medical_conditions`, `allergies`, `medications`) already exist as arrays in `profiles`
-- RLS policies already allow users to update their own profile
-- Uses optimistic UI updates with rollback on error
+### System Prompt Additions
+
+The prompt will instruct the AI to follow this exact sequence after gathering symptoms:
+
+1. Ask 6-8 medical questions (one at a time)
+2. Provide "Home Remedies" section with safe temporary relief
+3. Provide "What to Avoid" section with precautions
+4. Recommend specialist type
+5. Output a "Doctor Visit Summary" with all collected info formatted for a doctor
+6. End with `[SUMMARY_READY]` marker
+
+### Phase Detection Logic
+
+```text
+Instead of counting messages:
+- Keep phase as "assessment" throughout the Q&A
+- When AI response contains [SUMMARY_READY]:
+  - Strip marker from display
+  - Set phase to "summary"
+  - Trigger generateAssessment()
+  - Show provider recommendations
+  - Show "View Summary" button
+```
+
+### Files to Change
+
+1. **`supabase/functions/ai-chat-assistant/index.ts`** -- Enhanced system prompt with home remedies, precautions, and summary marker
+2. **`src/hooks/useChatSession.tsx`** -- Remove early cutoff, add marker detection
+3. **`src/hooks/useGuestChat.tsx`** -- Same marker detection logic
+
