@@ -624,6 +624,48 @@ export type Database = {
           },
         ]
       }
+      medical_records: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_type: string
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_type?: string
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       medicine_cache: {
         Row: {
           created_at: string
@@ -1247,6 +1289,38 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      shared_medical_records: {
+        Row: {
+          doctor_id: string
+          id: string
+          patient_id: string
+          record_id: string
+          shared_at: string
+        }
+        Insert: {
+          doctor_id: string
+          id?: string
+          patient_id: string
+          record_id: string
+          shared_at?: string
+        }
+        Update: {
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+          record_id?: string
+          shared_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_medical_records_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "medical_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
