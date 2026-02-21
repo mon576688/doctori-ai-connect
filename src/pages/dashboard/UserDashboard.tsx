@@ -424,6 +424,10 @@ export default function UserDashboard() {
             </Card>
           </TabsContent>
 
+          <TabsContent value="records">
+            <MedicalRecords />
+          </TabsContent>
+
           <TabsContent value="reminders">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
