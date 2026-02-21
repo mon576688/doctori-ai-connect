@@ -1,73 +1,57 @@
 
+# Build the Health Information Tab
 
-# Improve User Dashboard Messages (Inbox)
+Replace the "Coming soon" placeholder in the Health tab with a fully functional health management interface using data already stored in the `profiles` table.
 
-The current Inbox is functional but basic. Here are the improvements to make it more user-friendly and feature-rich:
+## What You'll Get
 
-## Improvements
+A comprehensive health dashboard with three sections:
 
-### 1. New Conversation Starter
-Currently, patients can only message contacts they've already messaged. Add a "New Message" button that lets patients start a conversation with a doctor from their past appointments -- similar to how the medical records sharing works.
+1. **Health Conditions** -- Add/remove chronic conditions (e.g., Diabetes, Hypertension, Asthma) stored in `profiles.medical_conditions`
+2. **Allergies** -- Add/remove allergies (e.g., Penicillin, Peanuts) stored in `profiles.allergies`
+3. **Current Medications** -- Add/remove medications you're taking, stored in `profiles.medications`
 
-### 2. Online/Offline Status Indicators
-Add a green/gray dot on contact avatars to show if the doctor is currently online, using the existing `usePresence` hook already in the codebase.
+Each section will show items as removable badges and have an input field to add new entries. All data saves directly to the existing `profiles` table -- no database changes needed.
 
-### 3. Message Timestamps with Date Separators
-Messages currently only show time (HH:mm). Add date separator dividers ("Today", "Yesterday", "Jan 15") between message groups so long conversations are easier to follow.
+## Layout
 
-### 4. Empty State with Action
-Replace the plain "No conversations yet" text with a helpful empty state that includes an illustration and a button to start a new conversation with a doctor.
+```text
+Health Information Tab:
++--------------------------------------------------+
+| Health Conditions                                 |
+| [Diabetes] [Hypertension] [x]                    |
+| [Add condition...________] [+ Add]               |
++--------------------------------------------------+
+| Allergies                                         |
+| [Penicillin] [Dust] [x]                          |
+| [Add allergy...________]  [+ Add]                |
++--------------------------------------------------+
+| Current Medications                               |
+| [Metformin 500mg] [Lisinopril] [x]               |
+| [Add medication..._______] [+ Add]               |
++--------------------------------------------------+
+| BMI Summary                                       |
+| Weight: 70kg | Height: 170cm | BMI: 24.2 (Normal)|
++--------------------------------------------------+
+```
 
-### 5. Typing Indicator
-Show "typing..." when the other person is composing a message, using Supabase realtime presence/broadcast.
+## Changes
 
-### 6. Read Receipts
-Add double-check marks on sent messages to show when they've been read by the recipient.
+### 1. New Component: `src/components/patient/HealthInfo.tsx`
 
-### 7. Loading States
-Add skeleton loaders while contacts and messages load instead of showing nothing.
+- Three card sections for conditions, allergies, medications
+- Each with badge display + input to add/remove items
+- Updates `profiles` table arrays directly via Supabase client
+- BMI summary section using existing weight/height from profile
+- Toast notifications on save
 
----
+### 2. Update: `src/pages/dashboard/UserDashboard.tsx`
+
+- Import `HealthInfo` component
+- Replace the placeholder content in the `health` TabsContent with `<HealthInfo />`
 
 ## Technical Details
 
-### File to Change
-
-**`src/components/messaging/Inbox.tsx`** -- All improvements are within this single component.
-
-### New Conversation Flow
-- Add a "New Message" button at the top of the contacts list
-- On click, open a dialog that queries `appointments` table for doctors the patient has seen
-- Selecting a doctor creates a new contact entry and opens the chat
-
-### Presence Integration
-- Import and use the existing `usePresence` hook from `src/hooks/usePresence.tsx`
-- Show a green dot overlay on the avatar for online contacts
-
-### Date Separators
-- Group messages by date
-- Insert a centered label ("Today", "Yesterday", or formatted date) between groups
-
-### Typing Indicator
-- Use Supabase `channel.track()` to broadcast typing state
-- Show an animated "..." bubble when the other user is typing
-
-### Read Receipts
-- Add a `CheckCheck` icon (from lucide) below sent messages
-- Color it blue/primary when `is_read` is true, gray when unread
-
-### Loading Skeletons
-- Show 4-5 skeleton rows in the contacts list while loading
-- Show skeleton bubbles in the chat area while messages load
-
-### Updated Empty State
-```text
-+----------------------------------+
-|     [Message Icon Illustration]  |
-|     No messages yet              |
-|     Start a conversation with    |
-|     your healthcare provider     |
-|     [New Conversation Button]    |
-+----------------------------------+
-```
-
+- No database migration needed -- all columns (`medical_conditions`, `allergies`, `medications`) already exist as arrays in `profiles`
+- RLS policies already allow users to update their own profile
+- Uses optimistic UI updates with rollback on error
