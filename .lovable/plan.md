@@ -1,82 +1,81 @@
 
 
-# Fix AI Chat Flow -- All Identified Errors
+# Add Doctor Directory -- Footer Link Approach
 
-## Issues to Fix
+## Rationale
 
-1. **Aggressive Urgency Alert**: The red "URGENT MEDICAL ATTENTION" banner shows for both `high` and `emergency` urgency. "Severe headache" triggers `high`, which is too aggressive. Only true emergencies (chest pain, can't breathe, etc.) should show the alert.
+The existing `/doctors` page is the primary flow for finding and booking registered platform providers. Adding a separate "Doctor Directory" prominently in the navbar would create confusion. Instead, the directory will be a secondary, informational resource -- accessible from the **footer's Quick Links** section.
 
-2. **Context Loss / AI Repeating Questions**: The `summarizeConversation()` function in the edge function truncates conversation to only the last 4 messages after 5 total. This causes the AI to lose track of what it already asked and repeat questions.
+## What Gets Built
 
-3. **[SUMMARY_READY] Marker Not Firing**: The system prompt needs stronger, more explicit instructions to guarantee the AI outputs the `[SUMMARY_READY]` marker after its final assessment. The current instructions are followed loosely by the model.
-
-4. **search-providers Edge Function Crash**: Logs show `"Could not find a relationship between 'profiles' and 'doctors'"`. The function uses a PostgREST join (`profiles` -> `doctors!inner`) that doesn't work. It should use the `providers_public` view (which already works in the ai-chat-assistant function).
+A new `/doctor-directory` page that serves as a **browsable, public directory** of doctors organized by specialty, city, and hospital. It is informational (like a blog/reference page), not tied to the booking flow.
 
 ## Changes
 
-### 1. Fix Urgency Alert (Chat.tsx, line 362)
+### 1. New File: `src/pages/DoctorDirectory.tsx`
 
-Change the condition from showing the alert for both `high` and `emergency` to only `emergency`:
+A full-page directory with:
+- **Search bar** to filter by name, specialty, or city
+- **Two tabs**: "By Specialty" and "By Hospital"
+- **City filter chips**: Dhaka, Chittagong, Sylhet, Rajshahi, etc.
+- **Specialty grid**: Cardiologist, Neurologist, Dentist, etc.
+- **Doctor cards** showing photo, name, specialty, city, experience, fee
+- **Hospital grouping** (when hospital tab is active)
+- Data pulled from the existing `providers_public` view (no new tables needed)
 
-```tsx
-// Before
-{(chat.sessionState.urgencyLevel === "high" || chat.sessionState.urgencyLevel === "emergency") && (
+### 2. Modified: `src/App.tsx`
 
-// After  
-{chat.sessionState.urgencyLevel === "emergency" && (
+Add route:
+```
+/doctor-directory -> DoctorDirectory component
 ```
 
-### 2. Fix Context Loss (ai-chat-assistant/index.ts, summarizeConversation)
+### 3. Modified: `src/components/Footer.tsx`
 
-Increase the conversation window from 4 recent messages to 10, and provide a better summary of older messages so the AI retains context:
+Add a "Doctor Directory" link in the **Quick Links** section, right after "Find Doctors":
 
-```typescript
-const summarizeConversation = (messages: any[]) => {
-  if (messages.length <= 12) return messages;
-  const systemMessage = messages[0];
-  const recentMessages = messages.slice(-10);
-  const olderMessages = messages.slice(1, -10);
-  
-  // Extract key info from older messages
-  const userMessages = olderMessages
-    .filter((m: any) => m.role === 'user')
-    .map((m: any) => m.content)
-    .join('; ');
-  
-  const summaryContent = `Previous conversation summary: The patient has provided the following information so far: ${userMessages}. DO NOT ask these questions again. Continue from where you left off.`;
-  
-  return [
-    systemMessage,
-    { role: "system", content: summaryContent },
-    ...recentMessages
-  ];
-};
+```
+Home
+Find Doctors
+Doctor Directory    <-- new link
+Health Blog
+About Us
+Contact
 ```
 
-### 3. Strengthen [SUMMARY_READY] Instruction (ai-chat-assistant/index.ts)
+### 4. Modified: `src/locales/en/common.json` (and bn, ar, es, fr)
 
-Add a stronger, repeated instruction at the end of the system prompt to ensure the model outputs the marker. Add a "question counter" instruction:
-
-- Add to the prompt: "After your 8th question answer from the user, you MUST provide the full Phase 2 assessment in your next response. You MUST end that response with [SUMMARY_READY] on its own line. This is mandatory."
-- Repeat the marker instruction to increase compliance.
-
-### 4. Fix search-providers Edge Function
-
-Replace the broken `profiles` + `doctors!inner` join with a query to the `providers_public` view (which already exists and works):
-
-```typescript
-let providersQuery = supabase
-  .from('providers_public')
-  .select('id, first_name, last_name, name, photo_url, city, address, phone, latitude, longitude, provider_type, specialty, consultation_fee, experience, bio, verified');
+Add translation key:
+```
+"footer.doctorDirectory": "Doctor Directory"
 ```
 
-Remove the `.eq('role', 'provider')` and `.eq('approval_status', 'approved')` filters since the view already handles that.
+## What Does NOT Change
 
-### Files to Change
+- The **Navbar** stays unchanged -- no new nav items
+- The existing `/doctors` page (provider search + booking) is untouched
+- No new database tables or migrations
 
-| File | Change |
-|------|--------|
-| `src/pages/Chat.tsx` (line 362) | Show urgency alert only for `emergency`, not `high` |
-| `supabase/functions/ai-chat-assistant/index.ts` | Fix `summarizeConversation` to keep 10 recent messages; strengthen `[SUMMARY_READY]` instructions |
-| `supabase/functions/search-providers/index.ts` | Use `providers_public` view instead of broken `profiles`+`doctors` join |
+## Page Layout
+
+```text
++--------------------------------------------------+
+|  Doctor Directory                                 |
+|  Browse doctors by specialty, city, or hospital   |
++--------------------------------------------------+
+|  [Search by name, specialty, or city...]          |
++--------------------------------------------------+
+|  [By Specialty]  [By Hospital]    (tabs)          |
++--------------------------------------------------+
+|  Cities: [Dhaka] [Chittagong] [Sylhet] [All]      |
++--------------------------------------------------+
+|  Specialty Grid (or Hospital list):               |
+|  [Cardiologist] [Neurologist] [Dentist] ...       |
++--------------------------------------------------+
+|  Doctor Cards Grid:                               |
+|  +----+ +----+ +----+                             |
+|  | Dr | | Dr | | Dr |                             |
+|  +----+ +----+ +----+                             |
++--------------------------------------------------+
+```
 
