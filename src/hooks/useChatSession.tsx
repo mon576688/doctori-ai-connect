@@ -336,6 +336,12 @@ export const useChatSession = () => {
       let aiResponse = data.response;
       let newState = { ...state };
 
+      // Check for [SUMMARY_READY] marker from AI
+      const hasSummaryMarker = aiResponse.includes('[SUMMARY_READY]');
+      if (hasSummaryMarker) {
+        aiResponse = aiResponse.replace(/\[SUMMARY_READY\]/g, '').trim();
+      }
+
       const analysis = analyzeSymptoms(content);
       if (state.phase === 'initial') {
         newState = {
@@ -369,12 +375,23 @@ export const useChatSession = () => {
         newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
         newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
-        if (newState.currentQuestionIndex >= 3) {
+        // Only transition to summary when AI sends the [SUMMARY_READY] marker
+        if (hasSummaryMarker) {
           newState.phase = 'analysis';
+          // Detect specialty from AI response for provider recommendations
+          const detectedSpecialties = data.suggestedProviders ? [] : [];
           setTimeout(() => {
             generateAssessment(newState);
           }, 2000);
         }
+      }
+
+      // If we got SUMMARY_READY marker in any phase, trigger assessment
+      if (hasSummaryMarker && state.phase !== 'initial') {
+        newState.phase = 'analysis';
+        setTimeout(() => {
+          generateAssessment(newState);
+        }, 2000);
       }
 
       const aiMessage: ChatMessage = {

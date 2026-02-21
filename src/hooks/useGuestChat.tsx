@@ -169,6 +169,12 @@ export const useGuestChat = () => {
       let aiResponse = data.response;
       let newState = { ...state };
 
+      // Check for [SUMMARY_READY] marker from AI
+      const hasSummaryMarker = aiResponse.includes('[SUMMARY_READY]');
+      if (hasSummaryMarker) {
+        aiResponse = aiResponse.replace(/\[SUMMARY_READY\]/g, '').trim();
+      }
+
       // Basic symptom analysis for urgency detection
       const analysis = analyzeSymptoms(content);
       if (state.phase === 'initial') {
@@ -184,10 +190,17 @@ export const useGuestChat = () => {
         newState.followupAnswers[state.currentQuestionIndex.toString()] = content;
         newState.currentQuestionIndex = state.currentQuestionIndex + 1;
         
-        if (newState.currentQuestionIndex >= 3) {
+        // Only transition to summary when AI sends the [SUMMARY_READY] marker
+        if (hasSummaryMarker) {
           newState.phase = 'summary';
           newState.requiresAuth = true;
         }
+      }
+
+      // If we got SUMMARY_READY in any non-initial phase, transition to summary
+      if (hasSummaryMarker && state.phase !== 'initial') {
+        newState.phase = 'summary';
+        newState.requiresAuth = true;
       }
 
       const aiMessage: GuestMessage = {
