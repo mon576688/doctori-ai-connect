@@ -287,7 +287,7 @@ Since this user is registered, you already have their basic information. DO NOT 
       body: JSON.stringify({
         model: 'google/gemini-3-flash-preview',
         messages: conversationMessages,
-        max_tokens: 600,
+        max_tokens: 1500,
         temperature: 0.7,
       }),
     });
