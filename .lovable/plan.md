@@ -1,81 +1,46 @@
 
 
-# Add Doctor Directory -- Footer Link Approach
+# Update AI Chat Assistant System Prompt
 
-## Rationale
+## What Changes
 
-The existing `/doctors` page is the primary flow for finding and booking registered platform providers. Adding a separate "Doctor Directory" prominently in the navbar would create confusion. Instead, the directory will be a secondary, informational resource -- accessible from the **footer's Quick Links** section.
+Replace the current system prompt in `supabase/functions/ai-chat-assistant/index.ts` with the new comprehensive prompt the user provided. The new prompt adds:
 
-## What Gets Built
+- **Automatic language detection** (Bangla/English) instead of relying on session context
+- **Stricter medical safety rules** (no diagnoses, no prescriptions, no dosages)
+- **Structured 5-step flow**: Symptom Collection, Health Guidance, Home Care, Doctor Recommendation, Booking CTA
+- **Emergency handling** with country-specific numbers
+- **Platform-focused ending** that always encourages booking on Doctori AI
+- **Bangla example responses** built into the prompt
 
-A new `/doctor-directory` page that serves as a **browsable, public directory** of doctors organized by specialty, city, and hospital. It is informational (like a blog/reference page), not tied to the booking flow.
+## File to Change
 
-## Changes
+| File | Change |
+|------|--------|
+| `supabase/functions/ai-chat-assistant/index.ts` | Replace `getSystemPrompt()` function with the new comprehensive prompt |
 
-### 1. New File: `src/pages/DoctorDirectory.tsx`
+## Technical Details
 
-A full-page directory with:
-- **Search bar** to filter by name, specialty, or city
-- **Two tabs**: "By Specialty" and "By Hospital"
-- **City filter chips**: Dhaka, Chittagong, Sylhet, Rajshahi, etc.
-- **Specialty grid**: Cardiologist, Neurologist, Dentist, etc.
-- **Doctor cards** showing photo, name, specialty, city, experience, fee
-- **Hospital grouping** (when hospital tab is active)
-- Data pulled from the existing `providers_public` view (no new tables needed)
+### Updated `getSystemPrompt()` function
 
-### 2. Modified: `src/App.tsx`
+- Incorporate the full prompt text provided by the user as the system prompt
+- Keep the existing user context injection (registered user info) -- append it after the new prompt
+- Keep the `[SUMMARY_READY]` marker instruction at the end (already in the new prompt's Step 4/5 flow -- will adapt to trigger after the doctor recommendation step)
+- Keep the language parameter but enhance it: the new prompt handles language detection automatically, so the explicit language instruction becomes a fallback
+- Emergency number: use `999` for Bangladesh context (matching the Bangla locale) and `911` as default
 
-Add route:
-```
-/doctor-directory -> DoctorDirectory component
-```
+### What stays the same
 
-### 3. Modified: `src/components/Footer.tsx`
+- Specialty detection logic (`detectSpecialties`, `SPECIALTY_KEYWORDS`)
+- Provider matching logic (`findMatchingProviders`)
+- Conversation summarization (`summarizeConversation`)
+- Rate limiting, CORS, error handling
+- The `[SUMMARY_READY]` marker system (integrated into the new Step 4)
 
-Add a "Doctor Directory" link in the **Quick Links** section, right after "Find Doctors":
+### Key adaptations from the user's prompt
 
-```
-Home
-Find Doctors
-Doctor Directory    <-- new link
-Health Blog
-About Us
-Contact
-```
-
-### 4. Modified: `src/locales/en/common.json` (and bn, ar, es, fr)
-
-Add translation key:
-```
-"footer.doctorDirectory": "Doctor Directory"
-```
-
-## What Does NOT Change
-
-- The **Navbar** stays unchanged -- no new nav items
-- The existing `/doctors` page (provider search + booking) is untouched
-- No new database tables or migrations
-
-## Page Layout
-
-```text
-+--------------------------------------------------+
-|  Doctor Directory                                 |
-|  Browse doctors by specialty, city, or hospital   |
-+--------------------------------------------------+
-|  [Search by name, specialty, or city...]          |
-+--------------------------------------------------+
-|  [By Specialty]  [By Hospital]    (tabs)          |
-+--------------------------------------------------+
-|  Cities: [Dhaka] [Chittagong] [Sylhet] [All]      |
-+--------------------------------------------------+
-|  Specialty Grid (or Hospital list):               |
-|  [Cardiologist] [Neurologist] [Dentist] ...       |
-+--------------------------------------------------+
-|  Doctor Cards Grid:                               |
-|  +----+ +----+ +----+                             |
-|  | Dr | | Dr | | Dr |                             |
-|  +----+ +----+ +----+                             |
-+--------------------------------------------------+
-```
+The raw prompt will be adapted slightly to work within the existing technical flow:
+- The `[SUMMARY_READY]` marker instruction will be added at the end of Step 4 (Doctor Recommendation) since the frontend depends on it
+- The "View Doctors Near Me" / "Book Appointment" buttons mentioned in Step 5 are already handled by the frontend when it detects `[SUMMARY_READY]` and suggested providers
+- The "Data & Reporting" section maps to the existing chat summary/PDF features
 
