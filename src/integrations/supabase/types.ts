@@ -258,6 +258,45 @@ export type Database = {
           },
         ]
       }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          category: string | null
+          content: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blood_donors: {
         Row: {
           age: number
@@ -541,6 +580,42 @@ export type Database = {
           user_id?: string
           verified?: boolean | null
           years_experience?: number | null
+        }
+        Relationships: []
+      }
+      health_tips: {
+        Row: {
+          category: string | null
+          content: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
