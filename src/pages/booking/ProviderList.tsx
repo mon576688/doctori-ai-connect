@@ -107,10 +107,17 @@ export default function ProviderList() {
 
           // If no providers found in selected city, fetch all providers
           if (!data || data.length === 0) {
-            const { data: allData, error: allError } = await supabase
+            let allQuery = supabase
               .from('providers_public')
               .select('*');
 
+            if (providerType === 'nurse') {
+              allQuery = allQuery.eq('provider_type', 'nurse');
+            } else if (providerType === 'doctor') {
+              allQuery = allQuery.or('provider_type.eq.doctor,provider_type.is.null');
+            }
+
+            const { data: allData, error: allError } = await allQuery;
             if (allError) throw allError;
             data = allData;
             setShowingAllLocations(true);
