@@ -390,6 +390,23 @@ const Chat = () => {
 
                 {/* Input Area */}
                 <div className="p-4 md:p-6 border-t space-y-4">
+                  {/* Symptom Tips for New Users */}
+                  {chat.sessionState.phase === 'initial' && !hasUserMessages && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Lightbulb className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-semibold text-amber-800">Tips for describing symptoms</span>
+                      </div>
+                      <ul className="text-xs text-amber-700 space-y-1 list-disc list-inside">
+                        <li>Describe when symptoms started (e.g., "2 days ago")</li>
+                        <li>Mention the location of pain or discomfort</li>
+                        <li>Rate your pain on a scale of 1-10</li>
+                        <li>List any medications you are currently taking</li>
+                        <li>Mention if symptoms worsen at specific times</li>
+                      </ul>
+                    </div>
+                  )}
+
                   {chat.sessionState.urgencyLevel === "emergency" && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-2">
@@ -427,10 +444,16 @@ const Chat = () => {
                   </div>
 
                   {chat.sessionState.phase === "summary" && (
-                    <Button onClick={handleViewSummary} variant="secondary" size="sm" className="w-full">
-                      <Download className="h-4 w-4 mr-2" />
-                      {t('viewSummary')}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={handleViewSummary} variant="secondary" size="sm" className="flex-1">
+                        <Download className="h-4 w-4 mr-2" />
+                        {t('viewSummary')}
+                      </Button>
+                      <Button onClick={handleDownloadPDF} variant="outline" size="sm" className="flex-1">
+                        <FileDown className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </Button>
+                    </div>
                   )}
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">

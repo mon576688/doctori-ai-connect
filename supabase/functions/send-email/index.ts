@@ -10,7 +10,7 @@ const corsHeaders = {
 interface EmailRequest {
   to: string;
   subject: string;
-  template: 'appointment_confirmation' | 'appointment_reminder' | 'provider_approved' | 'provider_rejected' | 'welcome';
+  template: 'appointment_confirmation' | 'appointment_reminder' | 'provider_approved' | 'provider_rejected' | 'welcome' | 'doctor_appointment_notification';
   data: Record<string, unknown>;
 }
 
@@ -26,8 +26,31 @@ const getEmailTemplate = (template: string, data: Record<string, unknown>): stri
           <p><strong>Date:</strong> ${data.date}</p>
           <p><strong>Time:</strong> ${data.time}</p>
           <p><strong>Type:</strong> ${data.appointmentType}</p>
+          <p><strong>Consultation Mode:</strong> ${data.consultationType || 'Not specified'}</p>
+          ${data.consultationType === 'Physical Visit (Chamber)' && data.address ? `<p><strong>Address:</strong> ${data.address}</p>` : ''}
         </div>
-        <p>Please arrive 15 minutes before your scheduled time.</p>
+        ${data.consultationType === 'Physical Visit (Chamber)' 
+          ? '<p>Please arrive 15 minutes before your scheduled time.</p>' 
+          : '<p>The doctor will share a meeting link before your appointment time.</p>'}
+        <p>Best regards,<br>Doctori AI Team</p>
+      `;
+
+    case 'doctor_appointment_notification':
+      return `
+        <h1>New Appointment Booking</h1>
+        <p>Dear Dr. ${data.doctorName},</p>
+        <p>A new appointment has been booked with you.</p>
+        <div style="background: #f4f4f4; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <p><strong>Patient:</strong> ${data.patientName}</p>
+          <p><strong>Patient Email:</strong> ${data.patientEmail || 'N/A'}</p>
+          <p><strong>Date:</strong> ${data.date}</p>
+          <p><strong>Time:</strong> ${data.time}</p>
+          <p><strong>Appointment Type:</strong> ${data.appointmentType}</p>
+          <p><strong>Consultation Mode:</strong> ${data.consultationType || 'Not specified'}</p>
+        </div>
+        ${(data.consultationType as string)?.includes('Online') 
+          ? '<p><strong>Action Required:</strong> Please share a meeting link with the patient before the appointment.</p>' 
+          : '<p>The patient will visit your chamber at the scheduled time.</p>'}
         <p>Best regards,<br>Doctori AI Team</p>
       `;
     

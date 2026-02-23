@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, DollarSign, User } from 'lucide-react';
+import { Calendar, Clock, MapPin, DollarSign, User, Video, Building2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { useBooking } from '@/contexts/BookingContext';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +24,8 @@ export default function ReviewConfirm() {
     selectedTime,
     price,
     providerId,
+    consultationType,
+    setConsultationType,
     resetBooking,
   } = useBooking();
   const [confirming, setConfirming] = useState(false);
@@ -44,7 +48,6 @@ export default function ReviewConfirm() {
 
   const sendConfirmationEmail = async () => {
     try {
-      // Get user email from profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('email, first_name, last_name, name')
@@ -61,6 +64,9 @@ export default function ReviewConfirm() {
         return;
       }
 
+      const consultationLabel = consultationType === 'physical' ? 'Physical Visit (Chamber)' : 'Online Consultation';
+
+      // Send email to patient
       await supabase.functions.invoke('send-email', {
         body: {
           to: userEmail,
@@ -72,25 +78,58 @@ export default function ReviewConfirm() {
             date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
             time: selectedTime,
             appointmentType: providerData.provider_type,
+            consultationType: consultationLabel,
+            address: providerData.address || city || '',
           },
         },
       });
-      console.log('Confirmation email sent successfully');
+      console.log('Patient confirmation email sent successfully');
+
+      // Fetch doctor's email and send notification
+      const { data: doctorProfile } = await supabase
+        .from('profiles')
+        .select('email, first_name, last_name, name')
+        .eq('id', providerId)
+        .single();
+
+      if (doctorProfile?.email) {
+        await supabase.functions.invoke('send-email', {
+          body: {
+            to: doctorProfile.email,
+            subject: 'New Appointment Booking - Doctori AI',
+            template: 'doctor_appointment_notification',
+            data: {
+              doctorName: doctorProfile.first_name
+                ? `${doctorProfile.first_name} ${doctorProfile.last_name || ''}`.trim()
+                : doctorProfile.name || 'Doctor',
+              patientName: userName,
+              patientEmail: userEmail,
+              date: format(selectedDate, 'EEEE, MMMM d, yyyy'),
+              time: selectedTime,
+              consultationType: consultationLabel,
+              appointmentType: providerData.provider_type,
+            },
+          },
+        });
+        console.log('Doctor notification email sent successfully');
+      }
     } catch (emailError) {
-      // Don't fail the booking if email fails
       console.error('Failed to send confirmation email:', emailError);
     }
   };
 
   const handleConfirm = async () => {
+    if (!consultationType) {
+      toast.error('Please select a consultation type (Online or Physical).');
+      return;
+    }
+
     setConfirming(true);
     try {
-      // Combine date and time
       const appointmentDateTime = new Date(selectedDate);
       const [hours, minutes] = selectedTime.split(':');
       appointmentDateTime.setHours(parseInt(hours), parseInt(minutes));
 
-      // Use atomic booking function to prevent race conditions
       const { data: appointmentId, error } = await supabase.rpc('book_appointment_slot', {
         _user_id: user.id,
         _provider_id: providerId,
@@ -102,7 +141,6 @@ export default function ReviewConfirm() {
       });
 
       if (error) {
-        // Handle specific error cases
         if (error.message.includes('no longer available')) {
           toast.error('This time slot is no longer available. Please select another time.');
           navigate(`/booking/time/${providerId}`);
@@ -111,7 +149,15 @@ export default function ReviewConfirm() {
         throw error;
       }
 
-      // Send confirmation email (non-blocking)
+      // Update consultation_type on the appointment
+      if (appointmentId) {
+        await supabase
+          .from('appointments')
+          .update({ consultation_type: consultationType === 'physical' ? 'in_person' : 'video' })
+          .eq('id', appointmentId);
+      }
+
+      // Send confirmation emails (non-blocking)
       sendConfirmationEmail();
 
       toast.success('Appointment confirmed successfully!');
@@ -201,11 +247,50 @@ export default function ReviewConfirm() {
               </div>
             </div>
 
+            {/* Consultation Type Selection */}
+            <div className="space-y-3 p-4 border rounded-lg bg-muted/30">
+              <h4 className="font-semibold text-sm">Select Consultation Type</h4>
+              <RadioGroup
+                value={consultationType || ''}
+                onValueChange={(val) => setConsultationType(val as 'online' | 'physical')}
+                className="space-y-3"
+              >
+                <div className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  consultationType === 'online' ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'
+                }`}>
+                  <RadioGroupItem value="online" id="online" className="mt-0.5" />
+                  <Label htmlFor="online" className="cursor-pointer flex-1">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-4 w-4 text-primary" />
+                      <span className="font-medium">Online Consultation</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Video/audio call — Doctor will share a meeting link before the appointment.
+                    </p>
+                  </Label>
+                </div>
+                <div className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  consultationType === 'physical' ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/50'
+                }`}>
+                  <RadioGroupItem value="physical" id="physical" className="mt-0.5" />
+                  <Label htmlFor="physical" className="cursor-pointer flex-1">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      <span className="font-medium">Physical Visit (Chamber)</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Visit doctor's chamber at: {providerData.address || city || 'Address will be provided'}
+                    </p>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
             {/* Action Buttons */}
             <div className="space-y-3 pt-4">
               <Button
                 onClick={handleConfirm}
-                disabled={confirming}
+                disabled={confirming || !consultationType}
                 variant="medical"
                 size="lg"
                 className="w-full"
