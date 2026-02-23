@@ -20,6 +20,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ProviderRecommendations from "@/components/chat/ProviderRecommendations";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
+import { PDFService } from "@/services/pdfService";
+import { format } from "date-fns";
 
 interface Provider {
   id: string;
