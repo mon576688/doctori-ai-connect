@@ -88,11 +88,20 @@ export default function ProviderList() {
             logo_url: h.logo_url || '/placeholder.svg',
           })));
         } else {
-          // First try to fetch providers in selected city using the secure view
-          let { data, error } = await supabase
+          // First try to fetch providers in selected city using the secure view, filtered by provider_type
+          let query = supabase
             .from('providers_public')
             .select('*')
             .ilike('city', `%${city}%`);
+
+          // Filter by provider_type (doctor vs nurse)
+          if (providerType === 'nurse') {
+            query = query.eq('provider_type', 'nurse');
+          } else if (providerType === 'doctor') {
+            query = query.or('provider_type.eq.doctor,provider_type.is.null');
+          }
+
+          let { data, error } = await query;
 
           if (error) throw error;
 
