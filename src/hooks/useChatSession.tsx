@@ -46,6 +46,8 @@ interface ChatSessionListItem {
   urgency_level: string | null;
   primary_symptoms: string[] | null;
   status: string | null;
+  specialty_recommendation?: string | null;
+  last_assistant_message?: string | null;
 }
 
 const MAX_RETRIES = 2;
