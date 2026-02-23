@@ -50,6 +50,7 @@ const initialState: BookingState = {
   selectedDate: null,
   selectedTime: null,
   price: 0,
+  consultationType: null,
 };
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
