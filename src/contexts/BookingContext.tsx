@@ -82,6 +82,10 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     setState(prev => ({ ...prev, selectedTime: time }));
   };
 
+  const setConsultationType = (type: 'online' | 'physical') => {
+    setState(prev => ({ ...prev, consultationType: type }));
+  };
+
   const resetBooking = () => {
     setState(initialState);
   };
