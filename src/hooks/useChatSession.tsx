@@ -46,6 +46,8 @@ interface ChatSessionListItem {
   urgency_level: string | null;
   primary_symptoms: string[] | null;
   status: string | null;
+  specialty_recommendation?: string | null;
+  last_assistant_message?: string | null;
 }
 
 const MAX_RETRIES = 2;
@@ -78,7 +80,7 @@ export const useChatSession = () => {
     try {
       const { data, error } = await supabase
         .from('chat_sessions')
-        .select('id, title, created_at, updated_at, urgency_level, primary_symptoms, status')
+        .select('id, title, created_at, updated_at, urgency_level, primary_symptoms, status, specialty_recommendation')
         .eq('user_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(50);

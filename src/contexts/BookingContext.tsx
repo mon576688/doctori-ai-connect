@@ -26,6 +26,7 @@ interface BookingState {
   selectedDate: Date | null;
   selectedTime: string | null;
   price: number;
+  consultationType: 'online' | 'physical' | null;
 }
 
 interface BookingContextType extends BookingState {
@@ -35,6 +36,7 @@ interface BookingContextType extends BookingState {
   setProvider: (id: string, data: Provider) => void;
   setSelectedDate: (date: Date) => void;
   setSelectedTime: (time: string) => void;
+  setConsultationType: (type: 'online' | 'physical') => void;
   resetBooking: () => void;
 }
 
@@ -48,6 +50,7 @@ const initialState: BookingState = {
   selectedDate: null,
   selectedTime: null,
   price: 0,
+  consultationType: null,
 };
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
@@ -79,6 +82,10 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
     setState(prev => ({ ...prev, selectedTime: time }));
   };
 
+  const setConsultationType = (type: 'online' | 'physical') => {
+    setState(prev => ({ ...prev, consultationType: type }));
+  };
+
   const resetBooking = () => {
     setState(initialState);
   };
@@ -93,6 +100,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         setProvider,
         setSelectedDate,
         setSelectedTime,
+        setConsultationType,
         resetBooking,
       }}
     >

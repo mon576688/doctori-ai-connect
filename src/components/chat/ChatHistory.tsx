@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Plus, Clock, AlertTriangle, LogIn } from 'lucide-react';
+import { MessageSquare, Plus, Clock, AlertTriangle, LogIn, Stethoscope } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ChatSessionItem {
@@ -13,6 +13,8 @@ interface ChatSessionItem {
   urgency_level: string | null;
   primary_symptoms: string[] | null;
   status: string | null;
+  specialty_recommendation?: string | null;
+  last_assistant_message?: string | null;
 }
 
 interface ChatHistoryProps {
@@ -53,6 +55,9 @@ const ChatHistory = ({
     }
   };
 
+  // Find the active session for the summary card
+  const activeSession = sessions.find(s => s.id === activeSessionId);
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b">
@@ -61,6 +66,34 @@ const ChatHistory = ({
           New Chat
         </Button>
       </div>
+
+      {/* Active Session Summary Card */}
+      {activeSession && (activeSession.primary_symptoms?.length || activeSession.specialty_recommendation) && (
+        <div className="p-3 border-b bg-primary/5">
+          <p className="text-xs font-semibold text-foreground mb-1.5">Session Summary</p>
+          {activeSession.primary_symptoms && activeSession.primary_symptoms.length > 0 && (
+            <div className="flex flex-wrap gap-1 mb-1.5">
+              {activeSession.primary_symptoms.map((s, i) => (
+                <Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0">
+                  {s}
+                </Badge>
+              ))}
+            </div>
+          )}
+          {activeSession.specialty_recommendation && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Stethoscope className="h-3 w-3" />
+              <span>{activeSession.specialty_recommendation}</span>
+            </div>
+          )}
+          {activeSession.urgency_level && activeSession.urgency_level !== 'low' && (
+            <Badge variant={getUrgencyColor(activeSession.urgency_level)} className="text-[10px] mt-1">
+              <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
+              {activeSession.urgency_level}
+            </Badge>
+          )}
+        </div>
+      )}
 
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-1">
@@ -89,6 +122,13 @@ const ChatHistory = ({
                     <p className="font-medium truncate text-foreground">
                       {session.title || 'Health Consultation'}
                     </p>
+                    {/* Summary preview */}
+                    {session.last_assistant_message && (
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                        {session.last_assistant_message.slice(0, 80)}
+                        {session.last_assistant_message.length > 80 ? '…' : ''}
+                      </p>
+                    )}
                     <div className="flex items-center gap-1 mt-1">
                       <Clock className="h-3 w-3 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">

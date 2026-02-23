@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, History, Plus } from "lucide-react";
+import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb } from "lucide-react";
 import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import ChatHistory from "@/components/chat/ChatHistory";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +20,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ProviderRecommendations from "@/components/chat/ProviderRecommendations";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
+import { PDFService } from "@/services/pdfService";
+import { format } from "date-fns";
 
 interface Provider {
   id: string;
@@ -200,6 +202,35 @@ const Chat = () => {
     navigate('/chat-summary');
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const userName = user?.email?.split('@')[0] || 'Patient';
+      const lastAssistantMsg = [...chat.sessionState.messages]
+        .reverse()
+        .find(m => m.role === 'assistant');
+
+      await PDFService.generateHealthReport({
+        patientName: userName,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        symptoms: chat.sessionState.symptoms,
+        aiAssessment: lastAssistantMsg?.content || 'Assessment completed.',
+        recommendations: [
+          `Recommended specialty: ${chat.sessionState.specialtyRecommendation || 'General Practice'}`,
+          'Follow up with a healthcare provider for professional advice.',
+        ],
+        urgencyLevel: chat.sessionState.urgencyLevel,
+        doctorRecommendation: `We recommend consulting a ${chat.sessionState.specialtyRecommendation || 'General Practitioner'}.`,
+      });
+
+      toast({ title: 'PDF Downloaded', description: 'Your health report has been saved.' });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({ title: 'Error', description: 'Failed to generate PDF.', variant: 'destructive' });
+    }
+  };
+
+  const hasUserMessages = chat.sessionState.messages.some(m => m.role === 'user');
+
   const getPlaceholder = () => {
     return isAuthenticated 
       ? t('placeholderAuthenticated')
@@ -359,6 +390,23 @@ const Chat = () => {
 
                 {/* Input Area */}
                 <div className="p-4 md:p-6 border-t space-y-4">
+                  {/* Symptom Tips for New Users */}
+                  {chat.sessionState.phase === 'initial' && !hasUserMessages && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Lightbulb className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-semibold text-amber-800">Tips for describing symptoms</span>
+                      </div>
+                      <ul className="text-xs text-amber-700 space-y-1 list-disc list-inside">
+                        <li>Describe when symptoms started (e.g., "2 days ago")</li>
+                        <li>Mention the location of pain or discomfort</li>
+                        <li>Rate your pain on a scale of 1-10</li>
+                        <li>List any medications you are currently taking</li>
+                        <li>Mention if symptoms worsen at specific times</li>
+                      </ul>
+                    </div>
+                  )}
+
                   {chat.sessionState.urgencyLevel === "emergency" && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-2">
@@ -396,10 +444,16 @@ const Chat = () => {
                   </div>
 
                   {chat.sessionState.phase === "summary" && (
-                    <Button onClick={handleViewSummary} variant="secondary" size="sm" className="w-full">
-                      <Download className="h-4 w-4 mr-2" />
-                      {t('viewSummary')}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={handleViewSummary} variant="secondary" size="sm" className="flex-1">
+                        <Download className="h-4 w-4 mr-2" />
+                        {t('viewSummary')}
+                      </Button>
+                      <Button onClick={handleDownloadPDF} variant="outline" size="sm" className="flex-1">
+                        <FileDown className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </Button>
+                    </div>
                   )}
 
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
