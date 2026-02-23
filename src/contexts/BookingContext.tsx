@@ -100,6 +100,7 @@ export const BookingProvider = ({ children }: { children: ReactNode }) => {
         setProvider,
         setSelectedDate,
         setSelectedTime,
+        setConsultationType,
         resetBooking,
       }}
     >
