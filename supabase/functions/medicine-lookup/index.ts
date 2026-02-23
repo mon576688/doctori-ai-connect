@@ -95,7 +95,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in medicine-lookup function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Medicine lookup service temporarily unavailable. Please try again.' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

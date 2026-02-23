@@ -166,7 +166,7 @@ serve(async (req) => {
   } catch (error: any) {
     console.error('Error in search-providers:', error);
     return new Response(JSON.stringify({ 
-      error: error.message,
+      error: 'Provider search service temporarily unavailable. Please try again.',
       providers: [],
       hospitals: []
     }), {
