@@ -76,7 +76,7 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/chat">
                   <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto shadow-medical">
-                    Start Chat
+                    Start Free Chat
                   </Button>
                 </Link>
                 <Link to="/booking/location">
