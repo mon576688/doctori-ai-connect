@@ -26,6 +26,7 @@ interface BookingState {
   selectedDate: Date | null;
   selectedTime: string | null;
   price: number;
+  consultationType: 'online' | 'physical' | null;
 }
 
 interface BookingContextType extends BookingState {
