@@ -202,6 +202,35 @@ const Chat = () => {
     navigate('/chat-summary');
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const userName = user?.email?.split('@')[0] || 'Patient';
+      const lastAssistantMsg = [...chat.sessionState.messages]
+        .reverse()
+        .find(m => m.role === 'assistant');
+
+      await PDFService.generateHealthReport({
+        patientName: userName,
+        date: format(new Date(), 'yyyy-MM-dd'),
+        symptoms: chat.sessionState.symptoms,
+        aiAssessment: lastAssistantMsg?.content || 'Assessment completed.',
+        recommendations: [
+          `Recommended specialty: ${chat.sessionState.specialtyRecommendation || 'General Practice'}`,
+          'Follow up with a healthcare provider for professional advice.',
+        ],
+        urgencyLevel: chat.sessionState.urgencyLevel,
+        doctorRecommendation: `We recommend consulting a ${chat.sessionState.specialtyRecommendation || 'General Practitioner'}.`,
+      });
+
+      toast({ title: 'PDF Downloaded', description: 'Your health report has been saved.' });
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      toast({ title: 'Error', description: 'Failed to generate PDF.', variant: 'destructive' });
+    }
+  };
+
+  const hasUserMessages = chat.sessionState.messages.some(m => m.role === 'user');
+
   const getPlaceholder = () => {
     return isAuthenticated 
       ? t('placeholderAuthenticated')
