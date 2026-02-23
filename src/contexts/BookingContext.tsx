@@ -36,6 +36,7 @@ interface BookingContextType extends BookingState {
   setProvider: (id: string, data: Provider) => void;
   setSelectedDate: (date: Date) => void;
   setSelectedTime: (time: string) => void;
+  setConsultationType: (type: 'online' | 'physical') => void;
   resetBooking: () => void;
 }
 
