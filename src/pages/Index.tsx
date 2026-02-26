@@ -77,22 +77,22 @@ const Index = () => {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/chat">
-                  <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto shadow-medical">
+                  <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto shadow-medical" aria-label="Chat with AI health assistant">
                     {t('hero.startChat')}
                   </Button>
                 </Link>
                 <Link to="/ai-analysis">
-                  <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Analyze prescriptions and medical reports with AI">
                     {t('hero.aiAnalysis')}
                   </Button>
                 </Link>
                 <Link to="/booking/location">
-                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Book a doctor appointment online">
                     {t('hero.bookAppointment')}
                   </Button>
                 </Link>
                 <Link to="/blood-donation">
-                  <Button variant="destructive" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="destructive" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Register as a blood donor">
                     {t('hero.bloodDonation')}
                   </Button>
                 </Link>
@@ -100,22 +100,22 @@ const Index = () => {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/doctors">
-                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Find and book verified doctors">
                     {t('hero.findDoctors')}
                   </Button>
                 </Link>
                 <Link to="/blog">
-                  <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Read health blog articles">
                     {t('hero.healthBlog')}
                   </Button>
                 </Link>
                 <Link to="/bmi-calculator">
-                  <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Calculate your body mass index">
                     {t('hero.bmiCalculator')}
                   </Button>
                 </Link>
                 <Link to="/reminders">
-                  <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                  <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto" aria-label="Set health and medication reminders">
                     {t('hero.healthReminders')}
                   </Button>
                 </Link>
@@ -203,7 +203,7 @@ const Index = () => {
             </div>
 
             <div className="grid md:grid-cols-3 gap-8">
-              <Link to="/chat">
+              <Link to="/chat" aria-label="Start AI health chat assistant">
                 <Card className="card-glass card-hover-lift cursor-pointer h-full">
                   <CardContent className="p-8 text-center">
                     <div className="bg-gradient-primary p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
@@ -219,7 +219,7 @@ const Index = () => {
                 </Card>
               </Link>
 
-              <Link to="/doctors">
+              <Link to="/doctors" aria-label="Find and book verified doctors near you">
                 <Card className="card-glass card-hover-lift cursor-pointer h-full">
                   <CardContent className="p-8 text-center">
                     <div className="bg-gradient-healing p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
@@ -235,7 +235,7 @@ const Index = () => {
                 </Card>
               </Link>
 
-              <Link to="/blog">
+              <Link to="/blog" aria-label="Read expert health articles and guides">
                 <Card className="card-glass card-hover-lift cursor-pointer h-full">
                   <CardContent className="p-8 text-center">
                     <div className="bg-gradient-to-br from-accent to-accent/80 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">

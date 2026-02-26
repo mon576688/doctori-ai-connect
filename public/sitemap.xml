@@ -70,6 +70,28 @@
     <priority>0.6</priority>
   </url>
   
+  <!-- Tools & Features -->
+  <url>
+    <loc>https://doctoriai.com/ai-analysis</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://doctoriai.com/search</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://doctoriai.com/doctor-directory</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://doctoriai.com/install</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
   <!-- Legal Pages -->
   <url>
     <loc>https://doctoriai.com/privacy</loc>

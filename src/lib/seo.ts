@@ -84,6 +84,21 @@ export const PAGE_SEO = {
     description: 'Calculate your BMI and understand your weight status. Get personalized health recommendations based on your results.',
     canonicalPath: '/bmi-calculator',
   },
+  aiAnalysis: {
+    title: 'AI Health Analysis - Prescription & Report Scanner',
+    description: 'Upload prescriptions or medical reports for instant AI analysis. Get clear explanations of your health documents.',
+    canonicalPath: '/ai-analysis',
+  },
+  search: {
+    title: 'Search Doctors, Medicine & Health Articles',
+    description: 'Search verified doctors, medicine information, and health articles. Find what you need for your health journey.',
+    canonicalPath: '/search',
+  },
+  chatSummary: {
+    title: 'Chat Summary - Health Consultation Report',
+    description: 'View your AI health consultation summary with symptom analysis, recommendations, and nearby doctor suggestions.',
+    canonicalPath: '/chat-summary',
+  },
 } as const;
 
 // Health-related keywords for SEO

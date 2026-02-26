@@ -40,14 +40,14 @@ export const Footer = () => {
               {t('footer.tagline')}
             </p>
             <Link to="/chat">
-              <Button variant="medical" size="sm" className="w-full">
+              <Button variant="medical" size="sm" className="w-full" aria-label="Start AI health chat">
                 <MessageCircle className="mr-2 h-4 w-4" />
                 {t('footer.startChatNow')}
               </Button>
             </Link>
             {!user && (
               <Link to="/register/provider">
-                <Button variant="outline" size="sm" className="w-full mt-2">
+                <Button variant="outline" size="sm" className="w-full mt-2" aria-label="Register as a healthcare provider">
                   <UserPlus className="mr-2 h-4 w-4" />
                   {t('footer.becomeProvider')}
                 </Button>
@@ -140,7 +140,7 @@ export const Footer = () => {
             <h3 className="font-semibold">{t('footer.healthUpdates')}</h3>
             <p className="text-sm text-muted-foreground">{t('footer.weeklyTips')}</p>
             <div className="space-y-2">
-              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" />
+              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" aria-label="Enter email for health updates" />
               <Button variant="healing" size="sm" className="w-full">
                 {t('footer.subscribe')}
               </Button>
@@ -159,16 +159,16 @@ export const Footer = () => {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">{t('footer.followUs')}</span>
             <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Facebook">
                 <Facebook className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Twitter">
                 <Twitter className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Instagram">
                 <Instagram className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on LinkedIn">
                 <Linkedin className="h-4 w-4" />
               </Button>
             </div>

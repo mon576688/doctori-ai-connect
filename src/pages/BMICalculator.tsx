@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Helmet } from 'react-helmet';
+import { SEO } from '@/components/SEO';
+import { PAGE_SEO } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,40 +98,7 @@ export default function BMICalculator() {
 
   return (
     <>
-      <Helmet>
-        <title>BMI Calculator - Check Your Body Mass Index | Doctori AI</title>
-        <meta name="description" content="Free BMI calculator to check your body mass index. Get instant BMI results with health recommendations. Calculate BMI using weight and height." />
-        <meta name="keywords" content="BMI calculator, body mass index, health calculator, weight calculator, BMI check, health assessment" />
-        <link rel="canonical" href="https://yourdomain.com/bmi-calculator" />
-        
-        {/* Open Graph tags */}
-        <meta property="og:title" content="BMI Calculator - Check Your Body Mass Index | Doctori AI" />
-        <meta property="og:description" content="Free BMI calculator to check your body mass index. Get instant BMI results with health recommendations." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://yourdomain.com/bmi-calculator" />
-        
-        {/* Twitter Card tags */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="BMI Calculator - Check Your Body Mass Index" />
-        <meta name="twitter:description" content="Free BMI calculator to check your body mass index. Get instant results." />
-        
-        {/* Schema.org structured data */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "BMI Calculator",
-            "description": "Calculate your Body Mass Index (BMI) and get personalized health recommendations",
-            "url": "https://yourdomain.com/bmi-calculator",
-            "applicationCategory": "HealthApplication",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            }
-          })}
-        </script>
-      </Helmet>
+      <SEO title={PAGE_SEO.bmiCalculator.title} description={PAGE_SEO.bmiCalculator.description} canonicalPath={PAGE_SEO.bmiCalculator.canonicalPath} />
 
       <div className="min-h-screen py-12 px-4">
         <div className="container max-w-4xl mx-auto">

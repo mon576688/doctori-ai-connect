@@ -20,6 +20,8 @@ import {
   Stethoscope
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getCurrentLocation } from "@/lib/locationUtils";
@@ -188,6 +190,7 @@ const ChatSummary = () => {
 
   return (
     <div className="min-h-screen bg-muted/20 py-8">
+      <SEO title={PAGE_SEO.chatSummary.title} description={PAGE_SEO.chatSummary.description} canonicalPath={PAGE_SEO.chatSummary.canonicalPath} noIndex />
       <div className="container max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <Card className="shadow-medical">
