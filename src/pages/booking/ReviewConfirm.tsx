@@ -265,7 +265,7 @@ export default function ReviewConfirm() {
                       <span className="font-medium">Online Consultation</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Video/audio call — Doctor will share a meeting link before the appointment.
+                      Video/audio call — {providerData.provider_type === 'nurse' ? 'Nurse' : 'Doctor'} will share a meeting link before the appointment.
                     </p>
                   </Label>
                 </div>
@@ -276,10 +276,14 @@ export default function ReviewConfirm() {
                   <Label htmlFor="physical" className="cursor-pointer flex-1">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-primary" />
-                      <span className="font-medium">Physical Visit (Chamber)</span>
+                      <span className="font-medium">
+                        {providerData.provider_type === 'nurse' ? 'House Visit' : 'Physical Visit (Chamber)'}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Visit doctor's chamber at: {providerData.address || city || 'Address will be provided'}
+                      {providerData.provider_type === 'nurse'
+                        ? 'Nurse will visit your home at the scheduled time.'
+                        : `Visit doctor's chamber at: ${providerData.address || city || 'Address will be provided'}`}
                     </p>
                   </Label>
                 </div>
