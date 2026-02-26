@@ -1074,6 +1074,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "provider_hospital_assignments_hospital_id_fkey"
+            columns: ["hospital_id"]
+            isOneToOne: false
+            referencedRelation: "hospitals_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "provider_hospital_assignments_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
@@ -1491,6 +1498,42 @@ export type Database = {
           photo_url?: string | null
           specialty?: string | null
           verified?: boolean | null
+        }
+        Relationships: []
+      }
+      hospitals_public: {
+        Row: {
+          address: string | null
+          city: string | null
+          description: string | null
+          email: string | null
+          id: string | null
+          is_active: boolean | null
+          logo_url: string | null
+          name: string | null
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: string | null
         }
         Relationships: []
       }

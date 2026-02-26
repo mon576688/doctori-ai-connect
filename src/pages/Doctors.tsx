@@ -54,42 +54,47 @@ export default function Doctors() {
       if (categoriesError) throw categoriesError;
       setCategories(categoriesData?.map(c => c.name) || []);
 
-      // Fetch approved providers with their services
+      // Fetch approved providers from the public view (bypasses RLS)
       const { data: providersData, error: providersError } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          bio,
-          photo_url,
-          phone,
-          provider_services!provider_services_provider_id_fkey(
-            service_name,
-            service_categories!provider_services_category_id_fkey(
-              name
-            )
-          )
-        `)
-        .eq('role', 'provider')
-        .eq('approval_status', 'approved');
+        .from('providers_public')
+        .select('id, first_name, last_name, name, bio, photo_url, city, provider_type, specialty, experience, consultation_fee, verified, years_experience');
 
       if (providersError) throw providersError;
 
+      // Fetch services for all providers
+      const providerIds = (providersData || []).map(p => p.id).filter(Boolean);
+      let servicesMap: Record<string, Array<{ service_name: string; category: { name: string } }>> = {};
+
+      if (providerIds.length > 0) {
+        const { data: servicesData } = await supabase
+          .from('provider_services')
+          .select(`
+            provider_id,
+            service_name,
+            service_categories!provider_services_category_id_fkey(name)
+          `)
+          .in('provider_id', providerIds)
+          .eq('is_active', true);
+
+        for (const s of servicesData || []) {
+          const pid = s.provider_id;
+          if (!servicesMap[pid]) servicesMap[pid] = [];
+          servicesMap[pid].push({
+            service_name: s.service_name,
+            category: { name: (s.service_categories as any)?.name || 'General' }
+          });
+        }
+      }
+
       const formattedProviders = (providersData || []).map((p: any) => ({
         id: p.id,
-        name: `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Provider',
+        name: `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.name || 'Provider',
         first_name: p.first_name,
         last_name: p.last_name,
         bio: p.bio || 'Healthcare provider',
         photo_url: p.photo_url || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face',
-        phone: p.phone || 'Contact via platform',
-        services: p.provider_services?.map((s: any) => ({
-          service_name: s.service_name,
-          category: {
-            name: s.service_categories?.name || 'General'
-          }
-        })) || []
+        phone: 'Contact via platform',
+        services: servicesMap[p.id] || (p.specialty ? [{ service_name: p.specialty, category: { name: p.specialty } }] : [])
       }));
 
       setProviders(formattedProviders);
