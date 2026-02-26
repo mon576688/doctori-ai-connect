@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslation } from "react-i18next";
 
 interface ProviderWithServices {
   id: string;
@@ -31,6 +32,7 @@ interface ProviderWithServices {
 }
 
 export default function Doctors() {
+  const { t } = useTranslation('common');
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [specialtyFilter, setSpecialtyFilter] = useState("all");
@@ -45,7 +47,6 @@ export default function Doctors() {
 
   const fetchProvidersAndCategories = async () => {
     try {
-      // Fetch all service categories
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('service_categories')
         .select('name')
@@ -54,14 +55,12 @@ export default function Doctors() {
       if (categoriesError) throw categoriesError;
       setCategories(categoriesData?.map(c => c.name) || []);
 
-      // Fetch approved providers from the public view (bypasses RLS)
       const { data: providersData, error: providersError } = await supabase
         .from('providers_public')
         .select('id, first_name, last_name, name, bio, photo_url, city, provider_type, specialty, experience, consultation_fee, verified, years_experience');
 
       if (providersError) throw providersError;
 
-      // Fetch services for all providers
       const providerIds = (providersData || []).map(p => p.id).filter(Boolean);
       let servicesMap: Record<string, Array<{ service_name: string; category: { name: string } }>> = {};
 
@@ -93,7 +92,7 @@ export default function Doctors() {
         last_name: p.last_name,
         bio: p.bio || 'Healthcare provider',
         photo_url: p.photo_url || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop&crop=face',
-        phone: 'Contact via platform',
+        phone: t('doctors.contactForAvailability'),
         services: servicesMap[p.id] || (p.specialty ? [{ service_name: p.specialty, category: { name: p.specialty } }] : [])
       }));
 
@@ -101,8 +100,8 @@ export default function Doctors() {
     } catch (error: any) {
       console.error('Error fetching providers:', error);
       toast({
-        title: "Error",
-        description: "Failed to load providers. Please try again.",
+        title: t('common.error'),
+        description: t('doctors.errorLoading'),
         variant: "destructive",
       });
     } finally {
@@ -132,7 +131,7 @@ export default function Doctors() {
     location: 'Healthcare Center',
     address: 'Medical District',
     coordinates: [-74.006, 40.7128],
-    availability: 'Contact for availability',
+    availability: t('doctors.contactForAvailability'),
     phone: provider.phone,
     image: provider.photo_url,
     bio: provider.bio,
@@ -140,7 +139,6 @@ export default function Doctors() {
 
   const doctorsList = filteredProviders.map(convertToDoctor);
 
-  // Loading skeleton component
   const DoctorCardSkeleton = () => (
     <Card className="shadow-card">
       <CardContent className="p-6">
@@ -195,21 +193,17 @@ export default function Doctors() {
         canonicalPath={PAGE_SEO.doctors.canonicalPath}
       />
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Find Your Healthcare Provider</h1>
-          <p className="text-muted-foreground text-lg mb-6">
-            Connect with trusted healthcare professionals near you
-          </p>
+          <h1 className="text-4xl font-bold mb-4">{t('doctors.title')}</h1>
+          <p className="text-muted-foreground text-lg mb-6">{t('doctors.subtitle')}</p>
         </header>
 
-        {/* Search and Filters */}
         <Card className="shadow-card mb-8">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="md:col-span-2">
                 <Input 
-                  placeholder="Search by name, specialty, service..." 
+                  placeholder={t('doctors.searchPlaceholder')} 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full"
@@ -217,10 +211,10 @@ export default function Doctors() {
               </div>
               <Select value={specialtyFilter} onValueChange={setSpecialtyFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All Specialties" />
+                  <SelectValue placeholder={t('doctors.allSpecialties')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Specialties</SelectItem>
+                  <SelectItem value="all">{t('doctors.allSpecialties')}</SelectItem>
                   {categories.map(category => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -230,23 +224,23 @@ export default function Doctors() {
               </Select>
               <Select defaultValue="all">
                 <SelectTrigger>
-                  <SelectValue placeholder="Availability" />
+                  <SelectValue placeholder={t('doctors.anyTime')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any Time</SelectItem>
-                  <SelectItem value="today">Available Today</SelectItem>
-                  <SelectItem value="tomorrow">Available Tomorrow</SelectItem>
-                  <SelectItem value="week">This Week</SelectItem>
+                  <SelectItem value="all">{t('doctors.anyTime')}</SelectItem>
+                  <SelectItem value="today">{t('doctors.availableToday')}</SelectItem>
+                  <SelectItem value="tomorrow">{t('doctors.availableTomorrow')}</SelectItem>
+                  <SelectItem value="week">{t('doctors.thisWeek')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="flex gap-4 mt-4">
               <Select defaultValue="all">
                 <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Rating" />
+                  <SelectValue placeholder={t('doctors.anyRating')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any Rating</SelectItem>
+                  <SelectItem value="all">{t('doctors.anyRating')}</SelectItem>
                   <SelectItem value="4.5">4.5+ Stars</SelectItem>
                   <SelectItem value="4.0">4.0+ Stars</SelectItem>
                   <SelectItem value="3.5">3.5+ Stars</SelectItem>
@@ -254,32 +248,30 @@ export default function Doctors() {
               </Select>
               <Button variant="medical">
                 <Search className="mr-2 h-4 w-4" />
-                Apply Filters
+                {t('common.applyFilters')}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        {/* Results Count */}
         <div className="mb-6">
           <p className="text-muted-foreground">
-            Showing {filteredProviders.length} provider{filteredProviders.length !== 1 ? 's' : ''} 
-            {searchTerm && ` for "${searchTerm}"`}
+            {t('doctors.showing')} {filteredProviders.length} {t('doctors.providers')} 
+            {searchTerm && ` ${t('doctors.for')} "${searchTerm}"`}
           </p>
         </div>
 
-        {/* Main Content */}
         <Tabs defaultValue="list" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="list">List View</TabsTrigger>
-            <TabsTrigger value="map">Map View</TabsTrigger>
+            <TabsTrigger value="list">{t('doctors.listView')}</TabsTrigger>
+            <TabsTrigger value="map">{t('doctors.mapView')}</TabsTrigger>
           </TabsList>
           
           <TabsContent value="list" className="space-y-6">
             {filteredProviders.length === 0 ? (
               <Card className="shadow-card">
                 <CardContent className="p-12 text-center">
-                  <p className="text-muted-foreground">No providers found matching your criteria.</p>
+                  <p className="text-muted-foreground">{t('doctors.noProviders')}</p>
                 </CardContent>
               </Card>
             ) : (
@@ -308,10 +300,10 @@ export default function Doctors() {
                                 ))}
                                 {provider.services.length > 3 && (
                                   <Badge variant="outline">
-                                    +{provider.services.length - 3} more
+                                    +{provider.services.length - 3} {t('doctors.more')}
                                   </Badge>
                                 )}
-                                <Badge className="bg-purple-100 text-purple-700">✅ Verified</Badge>
+                                <Badge className="bg-purple-100 text-purple-700">✅ {t('common.verified')}</Badge>
                               </div>
                             </div>
                           </div>
@@ -319,7 +311,7 @@ export default function Doctors() {
                           <p className="text-muted-foreground text-sm mb-4">{doctor.bio}</p>
                           
                           <div className="mb-4">
-                            <p className="text-sm font-medium mb-2">Services Offered:</p>
+                            <p className="text-sm font-medium mb-2">{t('doctors.servicesOffered')}:</p>
                             <div className="flex flex-wrap gap-2">
                               {provider.services.map((service, idx) => (
                                 <Badge key={idx} variant="outline" className="text-xs">
@@ -344,12 +336,12 @@ export default function Doctors() {
                             <Link to={`/booking/provider/${provider.id}`}>
                               <Button variant="medical" size="sm">
                                 <Calendar className="h-4 w-4 mr-1" />
-                                View Profile
+                                {t('common.viewProfile')}
                               </Button>
                             </Link>
                             <Button variant="outline" size="sm">
                               <Heart className="h-4 w-4 mr-1" />
-                              Save
+                              {t('common.save')}
                             </Button>
                           </div>
                         </div>
@@ -372,7 +364,7 @@ export default function Doctors() {
               
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">
-                  {selectedDoctor ? 'Selected Provider' : 'Providers in Area'}
+                  {selectedDoctor ? t('doctors.selectedProvider') : t('doctors.providersInArea')}
                 </h3>
                 
                 {selectedDoctor ? (
@@ -410,12 +402,12 @@ export default function Doctors() {
                       <div className="space-y-2">
                         <Link to={`/booking/provider/${providers.find(p => convertToDoctor(p).id === selectedDoctor.id)?.id || ''}`}>
                           <Button variant="medical" size="sm" className="w-full">
-                            View Full Profile
+                            {t('doctors.viewFullProfile')}
                           </Button>
                         </Link>
                         <Button variant="outline" size="sm" className="w-full">
                           <Phone className="h-3 w-3 mr-1" />
-                          Call {selectedDoctor.phone}
+                          {t('doctors.call')} {selectedDoctor.phone}
                         </Button>
                       </div>
                     </CardContent>
@@ -424,16 +416,16 @@ export default function Doctors() {
                   <div className="space-y-2">
                     {doctorsList.slice(0, 3).map(doctor => (
                       <Card key={doctor.id} className="shadow-card hover:shadow-medical transition-shadow cursor-pointer"
-                            onClick={() => setSelectedDoctor(doctor)}>
+                        onClick={() => setSelectedDoctor(doctor)}>
                         <CardContent className="p-3">
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-3">
                             <img
                               src={doctor.image}
                               alt={doctor.name}
-                              className="w-8 h-8 rounded-full object-cover"
+                              className="w-10 h-10 rounded-full object-cover"
                             />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{doctor.name}</p>
+                            <div>
+                              <h4 className="font-medium text-sm">{doctor.name}</h4>
                               <p className="text-xs text-muted-foreground">{doctor.specialty}</p>
                             </div>
                           </div>

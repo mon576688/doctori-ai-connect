@@ -38,8 +38,11 @@ import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
+  const { t } = useTranslation('home');
+
   return (
     <div className="min-h-screen">
       <SEO
@@ -60,38 +63,37 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div className="space-y-6">
               <div className="space-y-4">
-                <Badge className="bg-primary/10 text-primary border-primary/20">🩺 Your AI Health Assistant</Badge>
+                <Badge className="bg-primary/10 text-primary border-primary/20">{t('hero.badge')}</Badge>
                 <h1 className="text-4xl lg:text-6xl font-bold leading-tight">
-                  Meet <span className="bg-gradient-primary bg-clip-text text-transparent">Doctori AI</span>
+                  {t('hero.title')} <span className="bg-gradient-primary bg-clip-text text-transparent">{t('hero.titleHighlight')}</span>
                 </h1>
                 <p className="text-xl text-muted-foreground leading-relaxed">
-                  Chat with our AI to understand your symptoms, receive health suggestions, and connect with nearby
-                  doctors instantly.
+                  {t('hero.subtitle')}
                 </p>
                 <p className="text-lg text-muted-foreground/80 leading-relaxed">
-                  Your trusted virtual health companion, available 24/7 to guide you on your wellness journey.
+                  {t('hero.description')}
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/chat">
                   <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto shadow-medical">
-                    Start Free Chat
+                    {t('hero.startChat')}
                   </Button>
                 </Link>
                 <Link to="/ai-analysis">
                   <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    AI Health Analysis
+                    {t('hero.aiAnalysis')}
                   </Button>
                 </Link>
                 <Link to="/booking/location">
                   <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    Book Appointment
+                    {t('hero.bookAppointment')}
                   </Button>
                 </Link>
                 <Link to="/blood-donation">
                   <Button variant="destructive" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    Register for Blood Donation
+                    {t('hero.bloodDonation')}
                   </Button>
                 </Link>
               </div>
@@ -99,22 +101,22 @@ const Index = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/doctors">
                   <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    Find Doctors
+                    {t('hero.findDoctors')}
                   </Button>
                 </Link>
                 <Link to="/blog">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    Health Blog
+                    {t('hero.healthBlog')}
                   </Button>
                 </Link>
                 <Link to="/bmi-calculator">
                   <Button variant="secondary" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    BMI Calculator
+                    {t('hero.bmiCalculator')}
                   </Button>
                 </Link>
                 <Link to="/reminders">
                   <Button variant="outline" size="lg" className="text-lg px-8 w-full sm:w-auto">
-                    Health Reminders
+                    {t('hero.healthReminders')}
                   </Button>
                 </Link>
               </div>
@@ -137,13 +139,12 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-primary">
             <div className="text-center mb-12">
-              <Badge className="bg-primary/20 text-primary mb-4">Simple Process</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">How It Works</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Get help in just 3 simple steps</p>
+              <Badge className="bg-primary/20 text-primary mb-4">{t('howItWorks.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('howItWorks.title')}</h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{t('howItWorks.subtitle')}</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 relative">
-              {/* Connecting line */}
               <div className="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-primary via-secondary to-accent -translate-y-1/2 z-0" />
 
               <Card className="card-glass card-hover-lift text-center relative z-10">
@@ -154,10 +155,8 @@ const Index = () => {
                   <div className="bg-primary text-primary-foreground w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">
                     1
                   </div>
-                  <h3 className="text-xl font-semibold mb-4">Ask Your Symptoms</h3>
-                  <p className="text-muted-foreground">
-                    Describe your health concerns to our intelligent AI assistant in natural language.
-                  </p>
+                  <h3 className="text-xl font-semibold mb-4">{t('howItWorks.step1Title')}</h3>
+                  <p className="text-muted-foreground">{t('howItWorks.step1Desc')}</p>
                 </CardContent>
               </Card>
 
@@ -169,10 +168,8 @@ const Index = () => {
                   <div className="bg-secondary text-secondary-foreground w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">
                     2
                   </div>
-                  <h3 className="text-xl font-semibold mb-4">Get Instant Advice</h3>
-                  <p className="text-muted-foreground">
-                    Receive personalized health guidance and recommendations based on your symptoms.
-                  </p>
+                  <h3 className="text-xl font-semibold mb-4">{t('howItWorks.step2Title')}</h3>
+                  <p className="text-muted-foreground">{t('howItWorks.step2Desc')}</p>
                 </CardContent>
               </Card>
 
@@ -184,10 +181,8 @@ const Index = () => {
                   <div className="bg-accent text-accent-foreground w-8 h-8 rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-bold">
                     3
                   </div>
-                  <h3 className="text-xl font-semibold mb-4">Connect with a Doctor</h3>
-                  <p className="text-muted-foreground">
-                    Find and book appointments with verified healthcare professionals near you.
-                  </p>
+                  <h3 className="text-xl font-semibold mb-4">{t('howItWorks.step3Title')}</h3>
+                  <p className="text-muted-foreground">{t('howItWorks.step3Desc')}</p>
                 </CardContent>
               </Card>
             </div>
@@ -200,10 +195,10 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-secondary">
             <div className="text-center mb-12">
-              <Badge className="bg-secondary/20 text-secondary mb-4">All-in-One Platform</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Your Complete Health Companion</h2>
+              <Badge className="bg-secondary/20 text-secondary mb-4">{t('healthCompanion.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('healthCompanion.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Get personalized health guidance, connect with doctors, and stay informed about your wellbeing
+                {t('healthCompanion.subtitle')}
               </p>
             </div>
 
@@ -214,12 +209,10 @@ const Index = () => {
                     <div className="bg-gradient-primary p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
                       <Brain className="h-8 w-8 text-primary-foreground" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-4">AI Health Assistant</h3>
-                    <p className="text-muted-foreground">
-                      Chat with our intelligent AI to understand symptoms and get personalized health guidance 24/7.
-                    </p>
+                    <h3 className="text-xl font-semibold mb-4">{t('healthCompanion.aiAssistant')}</h3>
+                    <p className="text-muted-foreground">{t('healthCompanion.aiAssistantDesc')}</p>
                     <div className="mt-4 flex items-center justify-center text-primary">
-                      <span className="text-sm font-medium">Start Chat</span>
+                      <span className="text-sm font-medium">{t('healthCompanion.startChat')}</span>
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </div>
                   </CardContent>
@@ -232,12 +225,10 @@ const Index = () => {
                     <div className="bg-gradient-healing p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
                       <Users className="h-8 w-8 text-secondary-foreground" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-4">Find Doctors</h3>
-                    <p className="text-muted-foreground">
-                      Connect with verified healthcare professionals in your area and book appointments instantly.
-                    </p>
+                    <h3 className="text-xl font-semibold mb-4">{t('healthCompanion.findDoctors')}</h3>
+                    <p className="text-muted-foreground">{t('healthCompanion.findDoctorsDesc')}</p>
                     <div className="mt-4 flex items-center justify-center text-secondary">
-                      <span className="text-sm font-medium">Browse Doctors</span>
+                      <span className="text-sm font-medium">{t('healthCompanion.browseDoctors')}</span>
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </div>
                   </CardContent>
@@ -250,12 +241,10 @@ const Index = () => {
                     <div className="bg-gradient-to-br from-accent to-accent/80 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
                       <BookOpen className="h-8 w-8 text-accent-foreground" />
                     </div>
-                    <h3 className="text-xl font-semibold mb-4">Health Education</h3>
-                    <p className="text-muted-foreground">
-                      Stay informed with expert articles, tips, and resources for better health and wellness.
-                    </p>
+                    <h3 className="text-xl font-semibold mb-4">{t('healthCompanion.healthEducation')}</h3>
+                    <p className="text-muted-foreground">{t('healthCompanion.healthEducationDesc')}</p>
                     <div className="mt-4 flex items-center justify-center text-accent">
-                      <span className="text-sm font-medium">Read Articles</span>
+                      <span className="text-sm font-medium">{t('healthCompanion.readArticles')}</span>
                       <ChevronRight className="h-4 w-4 ml-1" />
                     </div>
                   </CardContent>
@@ -271,10 +260,10 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-gradient">
             <div className="text-center mb-12">
-              <Badge className="bg-accent/20 text-accent mb-4">Top Professionals</Badge>
-              <h2 className="text-3xl font-bold mb-4">Featured Doctors</h2>
+              <Badge className="bg-accent/20 text-accent mb-4">{t('featuredDoctors.badge')}</Badge>
+              <h2 className="text-3xl font-bold mb-4">{t('featuredDoctors.title')}</h2>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Meet some of our trusted healthcare professionals
+                {t('featuredDoctors.subtitle')}
               </p>
             </div>
 
@@ -285,7 +274,7 @@ const Index = () => {
                   specialty: "Cardiologist",
                   rating: "4.8",
                   reviews: 127,
-                  status: "🟢 Available Today",
+                  status: t('featuredDoctors.availableToday'),
                   statusColor: "bg-secondary/20 text-secondary",
                   image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=120&h=120&fit=crop&crop=face",
                   id: 1,
@@ -295,7 +284,7 @@ const Index = () => {
                   specialty: "General Practice",
                   rating: "4.9",
                   reviews: 203,
-                  status: "⭐ Top Rated",
+                  status: t('featuredDoctors.topRated'),
                   statusColor: "bg-primary/20 text-primary",
                   image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=120&h=120&fit=crop&crop=face",
                   id: 2,
@@ -305,7 +294,7 @@ const Index = () => {
                   specialty: "Pediatrics",
                   rating: "4.7",
                   reviews: 89,
-                  status: "✅ Verified",
+                  status: t('featuredDoctors.verified'),
                   statusColor: "bg-accent/20 text-accent",
                   image: "https://images.unsplash.com/photo-1594824797147-5cd0b4cf9e67?w=120&h=120&fit=crop&crop=face",
                   id: 3,
@@ -338,13 +327,13 @@ const Index = () => {
                         ))}
                       </div>
                       <span className="text-sm text-muted-foreground">
-                        {doctor.rating} ({doctor.reviews} reviews)
+                        {doctor.rating} ({doctor.reviews} {t('featuredDoctors.reviews')})
                       </span>
                     </div>
                     <Badge className={`${doctor.statusColor} mb-4`}>{doctor.status}</Badge>
                     <Link to={`/doctor/${doctor.id}`}>
                       <Button variant="medical" size="sm" className="w-full">
-                        View Profile
+                        {t('featuredDoctors.viewProfile')}
                       </Button>
                     </Link>
                   </CardContent>
@@ -355,7 +344,7 @@ const Index = () => {
             <div className="text-center">
               <Link to="/doctors">
                 <Button variant="outline" size="lg" className="bg-background/50">
-                  View All Doctors
+                  {t('featuredDoctors.viewAllDoctors')}
                   <ChevronRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -364,23 +353,22 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Trust Section - Bold gradient */}
+      {/* Trust Section */}
       <section className="py-20 px-4">
         <div className="container max-w-5xl mx-auto">
           <div className="rounded-3xl bg-gradient-primary p-12 lg:p-16 text-center relative overflow-hidden">
-            {/* Decorative elements */}
             <div className="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
             <div className="absolute bottom-0 right-0 w-60 h-60 bg-white/10 rounded-full translate-x-1/4 translate-y-1/4" />
 
             <div className="relative z-10">
-              <h2 className="text-3xl font-bold mb-8 text-primary-foreground">Trusted by Thousands</h2>
+              <h2 className="text-3xl font-bold mb-8 text-primary-foreground">{t('trust.title')}</h2>
 
               <div className="grid md:grid-cols-4 gap-8 mb-12">
                 {[
-                  { value: "10,000+", label: "Happy Users", icon: Users },
-                  { value: "500+", label: "Verified Doctors", icon: Stethoscope },
-                  { value: "24/7", label: "AI Support", icon: Brain },
-                  { value: "100%", label: "Secure", icon: Shield },
+                  { value: "10,000+", label: t('trust.happyUsers'), icon: Users },
+                  { value: "500+", label: t('trust.verifiedDoctors'), icon: Stethoscope },
+                  { value: "24/7", label: t('trust.aiSupport'), icon: Brain },
+                  { value: "100%", label: t('trust.secure'), icon: Shield },
                 ].map((stat, index) => (
                   <div key={index} className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 stat-glow">
                     <stat.icon className="h-8 w-8 text-primary-foreground/80 mx-auto mb-3" />
@@ -393,15 +381,15 @@ const Index = () => {
               <div className="flex flex-wrap justify-center gap-8 items-center text-primary-foreground/90">
                 <div className="flex items-center gap-2">
                   <Shield className="h-6 w-6" />
-                  <span>Data Secured & Confidential</span>
+                  <span>{t('trust.dataSecured')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Activity className="h-6 w-6" />
-                  <span>Medical Grade Security</span>
+                  <span>{t('trust.medicalGradeSecurity')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Heart className="h-6 w-6" />
-                  <span>Trusted Care</span>
+                  <span>{t('trust.trustedCare')}</span>
                 </div>
               </div>
             </div>
@@ -414,10 +402,10 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-accent">
             <div className="text-center mb-12">
-              <Badge className="bg-accent/20 text-accent mb-4">We Can Help</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Common Health Concerns</h2>
+              <Badge className="bg-accent/20 text-accent mb-4">{t('healthConcerns.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('healthConcerns.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Our AI is trained to help with a wide range of health symptoms and conditions
+                {t('healthConcerns.subtitle')}
               </p>
             </div>
 
@@ -425,26 +413,26 @@ const Index = () => {
               {[
                 {
                   icon: Brain,
-                  label: "Mental Health",
-                  desc: "Stress, anxiety, depression",
+                  label: t('healthConcerns.mentalHealth'),
+                  desc: t('healthConcerns.mentalHealthDesc'),
                   gradient: "from-purple-500 to-purple-600",
                 },
                 {
                   icon: Heart,
-                  label: "Cardiovascular",
-                  desc: "Heart conditions, blood pressure",
+                  label: t('healthConcerns.cardiovascular'),
+                  desc: t('healthConcerns.cardiovascularDesc'),
                   gradient: "from-red-500 to-red-600",
                 },
                 {
                   icon: Activity,
-                  label: "General Health",
-                  desc: "Common symptoms, wellness",
+                  label: t('healthConcerns.generalHealth'),
+                  desc: t('healthConcerns.generalHealthDesc'),
                   gradient: "from-green-500 to-green-600",
                 },
                 {
                   icon: Eye,
-                  label: "Preventive Care",
-                  desc: "Health screening, lifestyle",
+                  label: t('healthConcerns.preventiveCare'),
+                  desc: t('healthConcerns.preventiveCareDesc'),
                   gradient: "from-blue-500 to-blue-600",
                 },
               ].map((category, index) => (
@@ -472,30 +460,30 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-secondary">
             <div className="text-center mb-12">
-              <Badge className="bg-secondary/20 text-secondary mb-4">Stay Healthy</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Daily Health Tips</h2>
+              <Badge className="bg-secondary/20 text-secondary mb-4">{t('healthTips.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('healthTips.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Expert advice to keep you healthy and informed
+                {t('healthTips.subtitle')}
               </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 mb-8">
               {[
                 {
-                  tip: "Stay hydrated by drinking at least 8 glasses of water daily",
-                  category: "Nutrition",
+                  tip: t('healthTips.tip1'),
+                  category: t('healthTips.tip1Category'),
                   icon: Target,
                   color: "bg-primary",
                 },
                 {
-                  tip: "Practice deep breathing for 5 minutes to reduce stress and anxiety",
-                  category: "Mental Health",
+                  tip: t('healthTips.tip2'),
+                  category: t('healthTips.tip2Category'),
                   icon: Brain,
                   color: "bg-accent",
                 },
                 {
-                  tip: "Take regular breaks from screen time to protect your vision",
-                  category: "Wellness",
+                  tip: t('healthTips.tip3'),
+                  category: t('healthTips.tip3Category'),
                   icon: Eye,
                   color: "bg-secondary",
                 },
@@ -524,7 +512,7 @@ const Index = () => {
               <Link to="/blog">
                 <Button variant="outline" size="lg" className="bg-background/50">
                   <Lightbulb className="mr-2 h-5 w-5" />
-                  More Health Tips
+                  {t('healthTips.moreHealthTips')}
                 </Button>
               </Link>
             </div>
@@ -532,55 +520,54 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Advanced Features Section - Bento Grid */}
+      {/* Advanced Features Section */}
       <section className="py-20 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-primary">
             <div className="text-center mb-12">
-              <Badge className="bg-primary/20 text-primary mb-4">Cutting Edge</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Advanced AI Features</h2>
+              <Badge className="bg-primary/20 text-primary mb-4">{t('features.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('features.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Cutting-edge technology to support your health journey
+                {t('features.subtitle')}
               </p>
             </div>
 
-            {/* Bento Grid Layout */}
             <div className="grid md:grid-cols-3 gap-6">
               {[
                 {
                   icon: Languages,
-                  title: "Multi-Language Support",
-                  description: "Chat in your preferred language including English, Bengali, and more",
+                  title: t('features.multiLanguage'),
+                  description: t('features.multiLanguageDesc'),
                   size: "md:col-span-2",
                 },
                 {
                   icon: Smartphone,
-                  title: "Mobile Optimized",
-                  description: "Access Doctori AI on any device, anywhere, anytime",
+                  title: t('features.mobileOptimized'),
+                  description: t('features.mobileOptimizedDesc'),
                   size: "",
                 },
                 {
                   icon: Calendar,
-                  title: "Symptom Tracking",
-                  description: "Track your symptoms over time and share with doctors",
+                  title: t('features.symptomTracking'),
+                  description: t('features.symptomTrackingDesc'),
                   size: "",
                 },
                 {
                   icon: FileText,
-                  title: "Health Reports",
-                  description: "Generate detailed health summaries and consultation reports",
+                  title: t('features.healthReports'),
+                  description: t('features.healthReportsDesc'),
                   size: "md:col-span-2",
                 },
                 {
                   icon: TrendingUp,
-                  title: "Progress Monitoring",
-                  description: "Monitor your health trends and improvements over time",
+                  title: t('features.progressMonitoring'),
+                  description: t('features.progressMonitoringDesc'),
                   size: "",
                 },
                 {
                   icon: Zap,
-                  title: "Instant Analysis",
-                  description: "Get immediate insights based on your symptoms and health data",
+                  title: t('features.instantAnalysis'),
+                  description: t('features.instantAnalysisDesc'),
                   size: "md:col-span-2",
                 },
               ].map((feature, index) => (
@@ -606,10 +593,10 @@ const Index = () => {
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-warm">
             <div className="text-center mb-12">
-              <Badge className="bg-orange-500/20 text-orange-600 mb-4">Real Stories</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">What Our Users Say</h2>
+              <Badge className="bg-orange-500/20 text-orange-600 mb-4">{t('testimonials.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('testimonials.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Real experiences from people who trust Doctori AI
+                {t('testimonials.subtitle')}
               </p>
             </div>
 
@@ -676,9 +663,9 @@ const Index = () => {
               <div className="bg-red-500 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center shadow-lg shadow-red-500/30">
                 <Phone className="h-8 w-8 text-primary-foreground" />
               </div>
-              <h2 className="text-2xl font-bold mb-4 text-red-700 dark:text-red-400">Emergency Medical Assistance</h2>
+              <h2 className="text-2xl font-bold mb-4 text-red-700 dark:text-red-400">{t('emergency.title')}</h2>
               <p className="text-lg text-red-600 dark:text-red-300 mb-6">
-                If you're experiencing a medical emergency, please contact emergency services immediately
+                {t('emergency.subtitle')}
               </p>
             </div>
 
@@ -696,7 +683,7 @@ const Index = () => {
             </div>
 
             <p className="text-sm text-red-500 mt-6">
-              Remember: Doctori AI is not a substitute for emergency medical care
+              {t('emergency.disclaimer')}
             </p>
           </div>
         </div>
@@ -707,45 +694,21 @@ const Index = () => {
         <div className="container max-w-4xl mx-auto">
           <div className="section-box section-box-muted">
             <div className="text-center mb-12">
-              <Badge className="bg-muted-foreground/20 text-muted-foreground mb-4">Got Questions?</Badge>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+              <Badge className="bg-muted-foreground/20 text-muted-foreground mb-4">{t('faq.badge')}</Badge>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">{t('faq.title')}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Everything you need to know about Doctori AI
+                {t('faq.subtitle')}
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               {[
-                {
-                  question: "Is Doctori AI free to use?",
-                  answer:
-                    "Yes! Our AI health assistant is completely free. You can chat without creating an account. Premium features like PDF reports require registration.",
-                },
-                {
-                  question: "How accurate is the AI diagnosis?",
-                  answer:
-                    "No. Doctori AI does not provide medical diagnoses or treatment. It offers general health information and guidance only. Always consult a qualified healthcare professional for medical advice.",
-                },
-                {
-                  question: "Can I use Doctori AI in my language?",
-                  answer:
-                    "Yes! We support multiple languages including English, Bengali, and more. Select your preferred language from the dropdown menu.",
-                },
-                {
-                  question: "Is my health data secure?",
-                  answer:
-                    "Absolutely. We use medical-grade security and are HIPAA compliant. Your health information is encrypted and protected.",
-                },
-                {
-                  question: "How do I book an appointment with a doctor?",
-                  answer:
-                    "After chatting with our AI, you'll be shown nearby verified doctors. Click on any doctor to view their profile and book an appointment.",
-                },
-                {
-                  question: "Can doctors join Doctori AI platform?",
-                  answer:
-                    "Yes! Healthcare professionals can register through our 'Join with Us' section. All doctors undergo verification before being listed.",
-                },
+                { question: t('faq.q1'), answer: t('faq.a1') },
+                { question: t('faq.q2'), answer: t('faq.a2') },
+                { question: t('faq.q3'), answer: t('faq.a3') },
+                { question: t('faq.q4'), answer: t('faq.a4') },
+                { question: t('faq.q5'), answer: t('faq.a5') },
+                { question: t('faq.q6'), answer: t('faq.a6') },
               ].map((faq, index) => (
                 <Card key={index} className="bg-background/70 backdrop-blur-sm card-hover-lift">
                   <CardContent className="p-6">
@@ -766,7 +729,6 @@ const Index = () => {
       <section className="py-20 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="rounded-3xl bg-gradient-hero p-12 lg:p-16 text-center relative overflow-hidden">
-            {/* Decorative floating shapes */}
             <div className="floating-shape w-32 h-32 bg-primary/30 top-10 left-10" />
             <div
               className="floating-shape w-24 h-24 bg-secondary/30 bottom-10 right-20"
@@ -775,29 +737,28 @@ const Index = () => {
             <div className="floating-shape w-16 h-16 bg-accent/30 top-20 right-10" style={{ animationDelay: "2s" }} />
 
             <div className="relative z-10">
-              <h2 className="text-3xl lg:text-4xl font-bold mb-6">Ready to Take Control of Your Health?</h2>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-6">{t('cta.title')}</h2>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Join thousands of users who trust Doctori AI for their health guidance. Start your journey to better
-                health today.
+                {t('cta.subtitle')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                 <Link to="/chat">
                   <Button variant="medical" size="lg" className="text-lg px-8 w-full sm:w-auto shadow-medical">
                     <MessageCircle className="mr-2 h-5 w-5" />
-                    Start Free Chat
+                    {t('cta.startFreeChat')}
                   </Button>
                 </Link>
                 <Link to="/doctors">
                   <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Stethoscope className="mr-2 h-5 w-5" />
-                    Find Doctors
+                    {t('cta.findDoctors')}
                   </Button>
                 </Link>
                 <Link to="/login">
                   <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     <Award className="mr-2 h-5 w-5" />
-                    Create Account
+                    {t('cta.createAccount')}
                   </Button>
                 </Link>
               </div>
@@ -805,15 +766,15 @@ const Index = () => {
               <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-muted-foreground">
                 <div className="flex items-center bg-background/50 rounded-full px-4 py-2">
                   <CheckCircle className="h-4 w-4 text-secondary mr-2" />
-                  No credit card required
+                  {t('cta.noCreditCard')}
                 </div>
                 <div className="flex items-center bg-background/50 rounded-full px-4 py-2">
                   <Shield className="h-4 w-4 text-primary mr-2" />
-                  Medical-Grade Security
+                  {t('cta.medicalGradeSecurity')}
                 </div>
                 <div className="flex items-center bg-background/50 rounded-full px-4 py-2">
                   <Clock className="h-4 w-4 text-accent mr-2" />
-                  24/7 available
+                  {t('cta.available247')}
                 </div>
               </div>
             </div>
