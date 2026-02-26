@@ -44,6 +44,7 @@ import TimeSelect from "./pages/booking/TimeSelect";
 import ReviewConfirm from "./pages/booking/ReviewConfirm";
 import Confirmed from "./pages/booking/Confirmed";
 import BloodDonation from "./pages/BloodDonation";
+const AIAnalysis = lazy(() => import('./pages/AIAnalysis'));
 import WritePrescription from "./pages/provider/WritePrescription";
 import MyPrescriptions from "./pages/patient/MyPrescriptions";
 import TermsAndConditions from "./pages/legal/TermsAndConditions";
@@ -93,6 +94,7 @@ const App = () => (
                     <Route path="install" element={<Install />} />
                     <Route path="reminders" element={<Reminders />} />
                     <Route path="blood-donation" element={<BloodDonation />} />
+                    <Route path="ai-analysis" element={<AIAnalysis />} />
                     <Route path="doctor-directory" element={<DoctorDirectory />} />
                     
                     {/* Dashboard redirect route */}

@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.drug-interaction-checker]
 verify_jwt = false
+
+[functions.analyze-medical]
+verify_jwt = false

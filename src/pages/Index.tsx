@@ -79,8 +79,13 @@ const Index = () => {
                     Start Free Chat
                   </Button>
                 </Link>
-                <Link to="/booking/location">
+                <Link to="/ai-analysis">
                   <Button variant="healing" size="lg" className="text-lg px-8 w-full sm:w-auto">
+                    AI Health Analysis
+                  </Button>
+                </Link>
+                <Link to="/booking/location">
+                  <Button variant="hero" size="lg" className="text-lg px-8 w-full sm:w-auto">
                     Book Appointment
                   </Button>
                 </Link>
