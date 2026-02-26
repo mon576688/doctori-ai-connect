@@ -1,100 +1,81 @@
 
 
-# Implementation Plan: Chat Enhancements, Booking Type Selection, and Email Notifications
+# Single "AI Analysis" Button with 3 Tools
 
 ## Overview
+Instead of 3 separate buttons on the homepage, add **one button** ("AI Health Analysis") that navigates to a single page with tabs/cards for all three analysis tools: Prescription Analysis, Medical Report Analysis, and Symptom Analysis.
 
-Four features to implement:
-1. Chat sidebar showing previous session summaries for quick reference
-2. "Download PDF" button after each consultation
-3. Symptom tips panel for new users
-4. Online vs. Physical booking selection with email notifications to both doctor and patient
+## Homepage Change
 
----
+**File: `src/pages/Index.tsx`** (lines 76-92)
 
-## Feature 1: Chat History Sidebar with Summaries
+Add one new button between "Start Free Chat" and "Book Appointment":
 
-**Current state:** The sidebar (`ChatHistory.tsx`) shows session titles, timestamps, symptoms, and urgency badges -- but no summary text.
+```text
+[Start Free Chat] [AI Health Analysis] [Book Appointment] [Blood Donation]
+```
 
-**Changes:**
+The button uses a medical/healing variant with a `FileText` or `Stethoscope` icon and links to `/ai-analysis`.
 
-- **`src/components/chat/ChatHistory.tsx`**: Add a short summary preview (first 80 chars of the last assistant message) beneath each session entry. When a session is selected, show a mini-summary card at the top of the sidebar with symptoms, urgency, and specialty recommendation pulled from the `chat_sessions` table fields (`primary_symptoms`, `urgency_level`, `specialty_recommendation`).
+## New Page: AI Analysis Hub
 
-- **`src/pages/Chat.tsx`**: Pass additional session metadata (specialty_recommendation) from `useChatSession` to `ChatHistory` for display.
+**File: `src/pages/AIAnalysis.tsx`**
 
----
+A single page with three tab panels (using existing Tabs UI component):
 
-## Feature 2: Download PDF Button After Consultation
+- **Tab 1 -- Prescription Analysis**: Upload a prescription photo. AI extracts medicine names, identifies drug class, explains uses, rewrites clearly.
+- **Tab 2 -- Medical Report Analysis**: Upload a medical report photo/file. AI highlights key values, explains medical terms, summarizes findings.
+- **Tab 3 -- Symptom Analysis**: Upload an image of visible symptoms or type a description. AI analyzes and provides condition insights, precautions, and when to see a doctor.
 
-**Current state:** A "View Summary" button appears at phase `summary`. `PDFService` already exists with `generateHealthReport()`.
+Each tab contains:
+- Image upload area (drag-and-drop + file picker, jpg/png, max 10MB)
+- Text input area (optional for prescription/report, primary for symptom text input)
+- "Analyze" button
+- Results display area (structured markdown-style output)
+- Medical disclaimer
 
-**Changes:**
+## New Edge Function
 
-- **`src/pages/Chat.tsx`**: Add a "Download PDF" button next to the existing "View Summary" button when `phase === 'summary'`. On click, it calls `PDFService.generateHealthReport()` using the current session state (symptoms, urgency, specialty, conversation messages). The PDF downloads directly without navigating away.
+**File: `supabase/functions/analyze-medical/index.ts`**
 
----
+Single edge function handling all 3 types via a `type` parameter:
 
-## Feature 3: Symptom Description Tips for New Users
+- **Input**: `{ type: 'prescription' | 'report' | 'symptom', text?: string, imageBase64?: string }`
+- Uses Lovable AI Gateway (Gemini model with vision) with type-specific system prompts
+- Returns structured analysis text
+- `verify_jwt = false` for guest access
 
-**Changes:**
+System prompts:
+- **Prescription**: Extract medicine names, drug class/group, uses, rewrite clearly
+- **Report**: Highlight abnormal values, explain terms simply, summarize findings
+- **Symptom**: Analyze symptoms, suggest possible conditions, recommend when to see a doctor
 
-- **`src/pages/Chat.tsx`**: When the chat is in `initial` phase and there are no user messages yet, display a tips card above the input area with 4-5 practical tips:
-  - "Describe when symptoms started (e.g., 2 days ago)"
-  - "Mention the location of pain or discomfort"
-  - "Rate your pain on a scale of 1-10"
-  - "List any medications you are currently taking"
-  - "Mention if symptoms worsen at specific times"
-- The tips card auto-hides once the user sends their first message.
+All responses end with: "This is for informational purposes only and does not replace professional medical advice."
 
----
+## Route Registration
 
-## Feature 4: Online vs. Physical Booking Selection + Email Notifications
+**File: `src/App.tsx`** -- Add one route:
+```
+/ai-analysis -> AIAnalysis
+```
 
-### 4a. Booking Type Selection
+## Config
 
-**Changes:**
+**File: `supabase/config.toml`** -- Add:
+```toml
+[functions.analyze-medical]
+verify_jwt = false
+```
 
-- **`src/contexts/BookingContext.tsx`**: Add `consultationType: 'online' | 'physical' | null` to BookingState and a `setConsultationType` setter.
+## Files to Create
+1. `supabase/functions/analyze-medical/index.ts`
+2. `src/pages/AIAnalysis.tsx`
 
-- **`src/pages/booking/ReviewConfirm.tsx`**: Before the confirm button, add a radio group or toggle card for selecting:
-  - **Online Consultation** -- Video/audio call (shows note: "Doctor will share a meeting link")
-  - **Physical Visit** -- Visit doctor's chamber (shows the provider's address)
-- Store the selection in BookingContext. Pass `consultation_type` when inserting the appointment via `book_appointment_slot`.
+## Files to Modify
+1. `src/pages/Index.tsx` -- Add 1 new button
+2. `src/App.tsx` -- Add 1 new route
+3. `supabase/config.toml` -- Add function config
 
-- **Database migration**: The `appointments` table already has a `consultation_type` column (default `'video'`). Update the `book_appointment_slot` RPC to accept and store this value, or insert it directly in the `handleConfirm` function.
-
-### 4b. Email Notifications to Both Doctor and Patient
-
-**Current state:** `sendConfirmationEmail` in `ReviewConfirm.tsx` only sends to the patient. The `send-email` edge function exists with Resend integration.
-
-**Changes:**
-
-- **`src/pages/booking/ReviewConfirm.tsx`**: After booking confirmation, also send an email to the doctor/provider. Fetch the provider's email from their profile, then invoke `send-email` a second time with a `doctor_appointment_notification` template.
-
-- **`supabase/functions/send-email/index.ts`**: Add a new `doctor_appointment_notification` template that includes:
-  - Patient name
-  - Appointment date and time
-  - Consultation type (Online / Physical)
-  - Any notes from the patient
-- Also update the existing `appointment_confirmation` template to include the consultation type (online/physical).
-
----
-
-## Technical Details
-
-### Files to Create
-None -- all changes are to existing files.
-
-### Files to Modify
-1. `src/components/chat/ChatHistory.tsx` -- Add summary preview text to each session item
-2. `src/pages/Chat.tsx` -- Add PDF download button, symptom tips card
-3. `src/contexts/BookingContext.tsx` -- Add `consultationType` state
-4. `src/pages/booking/ReviewConfirm.tsx` -- Add consultation type selector, doctor email notification
-5. `supabase/functions/send-email/index.ts` -- Add `doctor_appointment_notification` template, update confirmation template
-
-### Database Changes
-- Minor update to pass `consultation_type` value from the booking form into the appointments insert (column already exists).
-
-### Dependencies
-- No new dependencies needed. Uses existing `jspdf`, `PDFService`, and `send-email` edge function.
+## Dependencies
+None new. Uses existing UI components (Tabs, Card, Button), Lovable AI Gateway, and base64 encoding.
 
