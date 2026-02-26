@@ -3,28 +3,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  Mail,
+  Phone,
+  MapPin,
   Clock,
   MessageCircle,
   Send,
   Heart,
   Shield,
-  Users
-} from "lucide-react";
+  Users } from
+"lucide-react";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 
 export default function Contact() {
   return (
     <div className="container py-8">
-      <SEO 
+      <SEO
         title={PAGE_SEO.contact.title}
         description={PAGE_SEO.contact.description}
-        canonicalPath={PAGE_SEO.contact.canonicalPath}
-      />
+        canonicalPath={PAGE_SEO.contact.canonicalPath} />
+
       <div className="max-w-6xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -76,10 +76,10 @@ export default function Contact() {
               
               <div className="space-y-2">
                 <label className="text-sm font-medium">Message</label>
-                <Textarea 
+                <Textarea
                   placeholder="Tell us how we can help you..."
-                  className="min-h-[120px]"
-                />
+                  className="min-h-[120px]" />
+
               </div>
               
               <Button variant="medical" className="w-full">
@@ -162,7 +162,7 @@ export default function Contact() {
                   <div className="flex items-start space-x-3">
                     <Shield className="h-5 w-5 text-primary mt-0.5" />
                     <div>
-                      <div className="font-medium">HIPAA Compliant</div>
+                      <div className="font-medium">Medical Grade Security</div>
                       <div className="text-sm text-muted-foreground">Your privacy is protected</div>
                     </div>
                   </div>
@@ -231,6 +231,6 @@ export default function Contact() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
