@@ -5,13 +5,15 @@
     "titleHighlight": "Doctori AI",
     "subtitle": "Chat with our AI to understand your symptoms, receive health suggestions, and connect with nearby doctors instantly.",
     "description": "Your trusted virtual health companion, available 24/7 to guide you on your wellness journey.",
-    "startChat": "Start Chat",
+    "startChat": "Start Free Chat",
+    "aiAnalysis": "AI Health Analysis",
     "bookAppointment": "Book Appointment",
     "bloodDonation": "Register for Blood Donation",
     "findDoctors": "Find Doctors",
     "healthBlog": "Health Blog",
     "bmiCalculator": "BMI Calculator",
-    "healthReminders": "Health Reminders"
+    "healthReminders": "Health Reminders",
+    "searchMedicine": "Search Medicine"
   },
   "howItWorks": {
     "badge": "Simple Process",
@@ -55,7 +57,7 @@
     "verifiedDoctors": "Verified Doctors",
     "aiSupport": "AI Support",
     "secure": "Secure",
-    "hipaaCompliant": "HIPAA Compliant",
+    "dataSecured": "Data Secured & Confidential",
     "medicalGradeSecurity": "Medical Grade Security",
     "trustedCare": "Trusted Care"
   },
@@ -76,6 +78,12 @@
     "badge": "Stay Healthy",
     "title": "Daily Health Tips",
     "subtitle": "Expert advice to keep you healthy and informed",
+    "tip1": "Stay hydrated by drinking at least 8 glasses of water daily",
+    "tip1Category": "Nutrition",
+    "tip2": "Practice deep breathing for 5 minutes to reduce stress and anxiety",
+    "tip2Category": "Mental Health",
+    "tip3": "Take regular breaks from screen time to protect your vision",
+    "tip3Category": "Wellness",
     "moreHealthTips": "More Health Tips"
   },
   "features": {
@@ -126,7 +134,12 @@
     "title": "Ready to Take Control of Your Health?",
     "subtitle": "Join thousands of users who trust Doctori AI for their health guidance. Start your journey to better health today.",
     "startJourney": "Start Your Health Journey",
+    "startFreeChat": "Start Free Chat",
+    "findDoctors": "Find Doctors",
+    "createAccount": "Create Account",
     "exploreDoctors": "Explore Doctors",
-    "noCreditCard": "No credit card required • Free to use • 24/7 availability"
+    "noCreditCard": "No credit card required",
+    "medicalGradeSecurity": "Medical-Grade Security",
+    "available247": "24/7 available"
   }
 }

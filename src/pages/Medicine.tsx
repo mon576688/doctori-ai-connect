@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { SEO } from '@/components/SEO';
 import { PAGE_SEO } from '@/lib/seo';
+import { useTranslation } from 'react-i18next';
 
 interface MedicineInfo {
   name: string;
@@ -37,15 +38,17 @@ interface InteractionResult {
   safeToTakeTogether: boolean;
 }
 
-const severityConfig: Record<string, { label: string; className: string; badgeVariant: 'outline' | 'secondary' | 'default' | 'destructive' }> = {
-  none: { label: 'No Interaction', className: 'border-green-500/30 bg-green-500/5', badgeVariant: 'outline' },
-  mild: { label: 'Mild', className: 'border-yellow-500/30 bg-yellow-500/5', badgeVariant: 'secondary' },
-  moderate: { label: 'Moderate', className: 'border-orange-500/30 bg-orange-500/5', badgeVariant: 'default' },
-  severe: { label: 'Severe', className: 'border-destructive/30 bg-destructive/5', badgeVariant: 'destructive' },
-  contraindicated: { label: 'Contraindicated', className: 'border-destructive bg-destructive/10', badgeVariant: 'destructive' },
-};
-
 export default function Medicine() {
+  const { t } = useTranslation('common');
+
+  const severityConfig: Record<string, { labelKey: string; className: string; badgeVariant: 'outline' | 'secondary' | 'default' | 'destructive' }> = {
+    none: { labelKey: 'medicine.noInteraction', className: 'border-green-500/30 bg-green-500/5', badgeVariant: 'outline' },
+    mild: { labelKey: 'medicine.mild', className: 'border-yellow-500/30 bg-yellow-500/5', badgeVariant: 'secondary' },
+    moderate: { labelKey: 'medicine.moderate', className: 'border-orange-500/30 bg-orange-500/5', badgeVariant: 'default' },
+    severe: { labelKey: 'medicine.severe', className: 'border-destructive/30 bg-destructive/5', badgeVariant: 'destructive' },
+    contraindicated: { labelKey: 'medicine.contraindicated', className: 'border-destructive bg-destructive/10', badgeVariant: 'destructive' },
+  };
+
   // Lookup state
   const [searchTerm, setSearchTerm] = useState('');
   const [medicineInfo, setMedicineInfo] = useState<MedicineInfo | null>(null);
@@ -127,7 +130,7 @@ export default function Medicine() {
   const checkInteractions = async () => {
     const validMedicines = medicines.filter(m => m.trim().length > 0);
     if (validMedicines.length < 2) {
-      setInteractionError('Please enter at least 2 medicine names');
+      setInteractionError(t('medicine.enterAtLeast2'));
       return;
     }
 
@@ -159,17 +162,14 @@ export default function Medicine() {
         canonicalPath={PAGE_SEO.medicine.canonicalPath}
       />
       <header className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">Medicine Information</h1>
-        <p className="text-muted-foreground">
-          Search for detailed information about medicines or check for potential drug interactions.
-        </p>
+        <h1 className="text-3xl font-bold mb-4">{t('medicine.title')}</h1>
+        <p className="text-muted-foreground">{t('medicine.subtitle')}</p>
       </header>
 
       <Alert className="mb-6">
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Medical Disclaimer:</strong> This information is AI-generated and for educational purposes only. 
-          Always consult with healthcare professionals before taking any medication. Do not use this as a substitute for professional medical advice.
+          <strong>Medical Disclaimer:</strong> {t('medicine.disclaimer')}
         </AlertDescription>
       </Alert>
 
@@ -177,11 +177,11 @@ export default function Medicine() {
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="lookup" className="flex items-center gap-2">
             <Search className="h-4 w-4" />
-            Medicine Lookup
+            {t('medicine.lookupTab')}
           </TabsTrigger>
           <TabsTrigger value="interactions" className="flex items-center gap-2">
             <ShieldAlert className="h-4 w-4" />
-            Interaction Checker
+            {t('medicine.interactionsTab')}
           </TabsTrigger>
         </TabsList>
 
@@ -189,15 +189,13 @@ export default function Medicine() {
         <TabsContent value="lookup">
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Search Medicine</CardTitle>
-              <CardDescription>
-                Enter the medicine name to get detailed information
-              </CardDescription>
+              <CardTitle>{t('medicine.searchTitle')}</CardTitle>
+              <CardDescription>{t('medicine.searchDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex gap-2">
                 <Input
-                  placeholder="Enter medicine name (e.g., Aspirin, Paracetamol)"
+                  placeholder={t('medicine.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
@@ -209,7 +207,7 @@ export default function Medicine() {
                   ) : (
                     <Search className="h-4 w-4" />
                   )}
-                  Search
+                  {t('medicine.search')}
                 </Button>
               </div>
             </CardContent>
@@ -231,14 +229,14 @@ export default function Medicine() {
                     <Badge variant="secondary">{medicineInfo.category}</Badge>
                   </CardTitle>
                   {medicineInfo.genericName && (
-                    <CardDescription>Generic Name: {medicineInfo.genericName}</CardDescription>
+                    <CardDescription>{t('medicine.genericName')}: {medicineInfo.genericName}</CardDescription>
                   )}
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
                     <h3 className="font-semibold mb-2 flex items-center gap-2">
                       <Info className="h-4 w-4" />
-                      Uses
+                      {t('medicine.uses')}
                     </h3>
                     <ul className="list-disc list-inside space-y-1 text-sm">
                       {medicineInfo.uses.map((use, index) => (
@@ -250,14 +248,14 @@ export default function Medicine() {
                   <Separator />
 
                   <div>
-                    <h3 className="font-semibold mb-2">Dosage</h3>
+                    <h3 className="font-semibold mb-2">{t('medicine.dosage')}</h3>
                     <p className="text-sm bg-muted p-3 rounded-md">{medicineInfo.dosage}</p>
                   </div>
 
                   <Separator />
 
                   <div>
-                    <h3 className="font-semibold mb-2 text-orange-600">Side Effects</h3>
+                    <h3 className="font-semibold mb-2 text-orange-600">{t('medicine.sideEffects')}</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm">
                       {medicineInfo.sideEffects.map((effect, index) => (
                         <li key={index}>{effect}</li>
@@ -268,7 +266,7 @@ export default function Medicine() {
                   <Separator />
 
                   <div>
-                    <h3 className="font-semibold mb-2 text-red-600">Precautions</h3>
+                    <h3 className="font-semibold mb-2 text-red-600">{t('medicine.precautions')}</h3>
                     <ul className="list-disc list-inside space-y-1 text-sm">
                       {medicineInfo.precautions.map((precaution, index) => (
                         <li key={index}>{precaution}</li>
@@ -280,7 +278,7 @@ export default function Medicine() {
                     <>
                       <Separator />
                       <div>
-                        <h3 className="font-semibold mb-2">Brand Names</h3>
+                        <h3 className="font-semibold mb-2">{t('medicine.brandNames')}</h3>
                         <div className="flex flex-wrap gap-2">
                           {medicineInfo.brandNames.map((brand, index) => (
                             <Badge key={index} variant="outline">{brand}</Badge>
@@ -294,7 +292,7 @@ export default function Medicine() {
                     <>
                       <Separator />
                       <div>
-                        <h3 className="font-semibold mb-2">Alternatives</h3>
+                        <h3 className="font-semibold mb-2">{t('medicine.alternatives')}</h3>
                         <div className="flex flex-wrap gap-2">
                           {medicineInfo.alternatives.map((alt, index) => (
                             <Badge key={index} variant="secondary">{alt}</Badge>
@@ -308,9 +306,7 @@ export default function Medicine() {
 
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  Always verify this information with your healthcare provider. Drug interactions, allergies, and individual health conditions can affect safety and effectiveness.
-                </AlertDescription>
+                <AlertDescription>{t('medicine.verifyInfo')}</AlertDescription>
               </Alert>
             </div>
           )}
@@ -320,19 +316,17 @@ export default function Medicine() {
         <TabsContent value="interactions">
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Drug Interaction Checker</CardTitle>
-              <CardDescription>
-                Enter 2-6 medicines to check for potential interactions between them
-              </CardDescription>
+              <CardTitle>{t('medicine.interactionTitle')}</CardTitle>
+              <CardDescription>{t('medicine.interactionDesc')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {medicines.map((medicine, index) => (
                 <div key={index} className="flex gap-2 items-center">
                   <span className="text-sm font-medium text-muted-foreground w-24 shrink-0">
-                    Medicine {index + 1}:
+                    {t('medicine.medicineLabel')} {index + 1}:
                   </span>
                   <Input
-                    placeholder={`Enter medicine name`}
+                    placeholder={t('medicine.searchPlaceholder')}
                     value={medicine}
                     onChange={(e) => updateMedicine(index, e.target.value)}
                     onKeyDown={(e) => {
@@ -357,7 +351,7 @@ export default function Medicine() {
                 {medicines.length < 6 && (
                   <Button variant="outline" onClick={addMedicine} className="gap-2">
                     <Plus className="h-4 w-4" />
-                    Add Medicine
+                    {t('medicine.addMedicine')}
                   </Button>
                 )}
                 <Button
@@ -370,7 +364,7 @@ export default function Medicine() {
                   ) : (
                     <ShieldCheck className="h-4 w-4" />
                   )}
-                  Check Interactions
+                  {t('medicine.checkInteractions')}
                 </Button>
               </div>
             </CardContent>
@@ -397,11 +391,11 @@ export default function Medicine() {
                     <div>
                       <p className="font-semibold text-lg">
                         {interactionResult.safeToTakeTogether
-                          ? 'Generally safe to take together'
-                          : 'Potential interactions detected — consult your doctor'}
+                          ? t('medicine.safeToTake')
+                          : t('medicine.potentialInteractions')}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {interactionResult.interactions.length} interaction(s) analyzed
+                        {interactionResult.interactions.length} {t('medicine.interactionsAnalyzed')}
                       </p>
                     </div>
                   </div>
@@ -419,14 +413,14 @@ export default function Medicine() {
                           {interaction.drug1} + {interaction.drug2}
                         </CardTitle>
                         <Badge variant={config.badgeVariant}>
-                          {config.label}
+                          {t(config.labelKey)}
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <p className="text-sm">{interaction.description}</p>
                       <div className="bg-muted/50 p-3 rounded-md">
-                        <p className="text-sm font-medium">Recommendation:</p>
+                        <p className="text-sm font-medium">{t('medicine.recommendation')}:</p>
                         <p className="text-sm text-muted-foreground">{interaction.recommendation}</p>
                       </div>
                     </CardContent>
@@ -450,10 +444,7 @@ export default function Medicine() {
 
               <Alert>
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  This interaction analysis is AI-generated and may not cover all possible interactions. 
-                  Always consult your doctor or pharmacist before combining medications.
-                </AlertDescription>
+                <AlertDescription>{t('medicine.interactionDisclaimer')}</AlertDescription>
               </Alert>
             </div>
           )}
