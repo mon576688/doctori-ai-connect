@@ -1,33 +1,18 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, Calendar, Home, Video, Phone, MessageCircle } from 'lucide-react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2, Calendar, Home, Video, Building2, MapPin, HomeIcon } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useBooking } from '@/contexts/BookingContext';
 
-const platformIcons: Record<string, React.ReactNode> = {
-  phone: <Phone className="h-4 w-4" />,
-  whatsapp: <MessageCircle className="h-4 w-4" />,
-  zoom: <Video className="h-4 w-4" />,
-  'google-meet': <Video className="h-4 w-4" />,
-};
-
-const platformLabels: Record<string, string> = {
-  phone: 'Phone Call',
-  whatsapp: 'WhatsApp',
-  zoom: 'Zoom Meeting',
-  'google-meet': 'Google Meet',
-};
-
 export default function Confirmed() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { resetBooking, providerData, selectedDate, selectedTime } = useBooking();
-  
-  const consultationType = searchParams.get('type') || 'video';
-  const platform = searchParams.get('platform') || 'zoom';
+  const { resetBooking, providerData, consultationType, city } = useBooking();
+
+  const isPhysical = consultationType === 'physical';
+  const isNurse = providerData?.provider_type === 'nurse';
 
   useEffect(() => {
     // Reset booking state after confirmation
@@ -91,7 +76,7 @@ export default function Confirmed() {
           </CardContent>
         </Card>
 
-        {/* Consultation Options Section */}
+        {/* Consultation Details Section */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Consultation Details</CardTitle>
@@ -100,37 +85,69 @@ export default function Confirmed() {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Consultation Type</span>
               <Badge variant="secondary" className="capitalize">
-                {consultationType === 'video' ? (
-                  <><Video className="h-3 w-3 mr-1" /> Video Call</>
+                {isPhysical ? (
+                  <>
+                    {isNurse ? <HomeIcon className="h-3 w-3 mr-1" /> : <Building2 className="h-3 w-3 mr-1" />}
+                    {isNurse ? 'House Visit' : 'Physical Visit'}
+                  </>
                 ) : (
-                  <><Phone className="h-3 w-3 mr-1" /> Audio Call</>
+                  <><Video className="h-3 w-3 mr-1" /> Online Consultation</>
                 )}
               </Badge>
             </div>
-            
-            <Separator />
-            
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Platform</span>
-              <Badge variant="outline" className="flex items-center gap-1">
-                {platformIcons[platform]}
-                {platformLabels[platform] || platform}
-              </Badge>
-            </div>
 
             <Separator />
 
-            <div className="bg-muted/50 rounded-lg p-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                <strong className="text-foreground">Important:</strong> The doctor will initiate the call at the scheduled time. Please ensure you are available and have a stable internet connection.
-              </p>
-            </div>
-
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>• You will receive a notification when the doctor starts the consultation</p>
-              <p>• Make sure to have your medical records ready</p>
-              <p>• Be in a quiet, private space for the consultation</p>
-            </div>
+            {isPhysical ? (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Location</span>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {providerData?.address || city || 'Will be provided'}
+                  </Badge>
+                </div>
+                <Separator />
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Important:</strong>{' '}
+                    {isNurse
+                      ? 'The nurse will visit your home at the scheduled time. Please ensure someone is available to receive them.'
+                      : 'Please arrive 10-15 minutes before your scheduled time. Bring any relevant medical records.'}
+                  </p>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• Have your medical records and ID ready</p>
+                  {isNurse ? (
+                    <p>• Ensure a clean, well-lit area is prepared for the visit</p>
+                  ) : (
+                    <p>• Arrive early to complete any registration forms</p>
+                  )}
+                  <p>• Wear comfortable clothing for examination</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Platform</span>
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    <Video className="h-3 w-3" />
+                    Video Call (Zoom / Google Meet)
+                  </Badge>
+                </div>
+                <Separator />
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">Important:</strong> The {isNurse ? 'nurse' : 'doctor'} will share a meeting link before the appointment. Please ensure you have a stable internet connection.
+                  </p>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• You will receive the meeting link via notification</p>
+                  <p>• Make sure to have your medical records ready</p>
+                  <p>• Be in a quiet, private space for the consultation</p>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
