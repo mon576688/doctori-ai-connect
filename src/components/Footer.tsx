@@ -16,8 +16,8 @@ import {
   MessageCircle,
   Smartphone,
   Download,
-  UserPlus,
-} from "lucide-react";
+  UserPlus } from
+"lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Footer = () => {
@@ -40,41 +40,41 @@ export const Footer = () => {
               {t('footer.tagline')}
             </p>
             <Link to="/chat">
-              <Button variant="medical" size="sm" className="w-full" aria-label="Start AI health chat">
+              <Button variant="medical" size="sm" className="w-full">
                 <MessageCircle className="mr-2 h-4 w-4" />
                 {t('footer.startChatNow')}
               </Button>
             </Link>
-            {!user && (
-              <Link to="/register/provider">
-                <Button variant="outline" size="sm" className="w-full mt-2" aria-label="Register as a healthcare provider">
+            {!user &&
+            <Link to="/register/provider">
+                <Button variant="outline" size="sm" className="w-full mt-2">
                   <UserPlus className="mr-2 h-4 w-4" />
                   {t('footer.becomeProvider')}
                 </Button>
               </Link>
-            )}
+            }
           </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="font-semibold">{t('footer.quickLinks')}</h3>
+            <h3 className="font-semibold text-center">{t('footer.quickLinks')}</h3>
             <div className="space-y-2 text-sm">
-              <Link to="/" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.home')}
               </Link>
-              <Link to="/doctors" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/doctors" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.findDoctors')}
               </Link>
-              <Link to="/doctor-directory" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/doctor-directory" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.doctorDirectory')}
               </Link>
-              <Link to="/blog" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/blog" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.healthBlog')}
               </Link>
-              <Link to="/about" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/about" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.aboutUs')}
               </Link>
-              <Link to="/contact" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/contact" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.contact')}
               </Link>
             </div>
@@ -82,18 +82,18 @@ export const Footer = () => {
 
           {/* Legal */}
           <div className="space-y-4">
-            <h3 className="font-semibold">{t('footer.legal')}</h3>
+            <h3 className="font-semibold text-center">{t('footer.legal')}</h3>
             <div className="space-y-2 text-sm">
-              <Link to="/terms" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/terms" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.termsConditions')}
               </Link>
-              <Link to="/privacy" className="block text-muted-foreground hover:text-primary transition-colors">
+              <Link to="/privacy" className="block text-muted-foreground hover:text-primary transition-colors text-center">
                 {t('footer.privacyPolicy')}
               </Link>
               <Link
                 to="/doctor-verification"
-                className="block text-muted-foreground hover:text-primary transition-colors"
-              >
+                className="block text-muted-foreground hover:text-primary transition-colors text-center">
+
                 {t('footer.doctorVerification')}
               </Link>
             </div>
@@ -101,7 +101,7 @@ export const Footer = () => {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="font-semibold">{t('footer.contactInfo')}</h3>
+            <h3 className="font-semibold text-center">{t('footer.contactInfo')}</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Phone className="h-4 w-4" />
@@ -137,10 +137,10 @@ export const Footer = () => {
 
           {/* Newsletter */}
           <div className="space-y-4">
-            <h3 className="font-semibold">{t('footer.healthUpdates')}</h3>
+            <h3 className="font-semibold text-center">{t('footer.healthUpdates')}</h3>
             <p className="text-sm text-muted-foreground">{t('footer.weeklyTips')}</p>
             <div className="space-y-2">
-              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" aria-label="Enter email for health updates" />
+              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" />
               <Button variant="healing" size="sm" className="w-full">
                 {t('footer.subscribe')}
               </Button>
@@ -159,16 +159,16 @@ export const Footer = () => {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">{t('footer.followUs')}</span>
             <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Facebook">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Facebook className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Twitter">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Twitter className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Instagram">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Instagram className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on LinkedIn">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Linkedin className="h-4 w-4" />
               </Button>
             </div>
@@ -195,6 +195,6 @@ export const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>);
+
 };
