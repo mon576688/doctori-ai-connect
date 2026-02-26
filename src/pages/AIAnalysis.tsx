@@ -9,29 +9,29 @@ import { useToast } from "@/hooks/use-toast";
 
 type AnalysisType = "prescription" | "report" | "symptom";
 
-const tabConfig: { value: AnalysisType; label: string; icon: React.ElementType; description: string; placeholder: string }[] = [
-  {
-    value: "prescription",
-    label: "Prescription",
-    icon: FileText,
-    description: "Upload a prescription photo. AI extracts medicine names, identifies drug class, and explains uses.",
-    placeholder: "Optionally paste prescription text here...",
-  },
-  {
-    value: "report",
-    label: "Medical Report",
-    icon: Activity,
-    description: "Upload a medical report. AI highlights key values, explains terms, and summarizes findings.",
-    placeholder: "Optionally paste report text here...",
-  },
-  {
-    value: "symptom",
-    label: "Symptom Analysis",
-    icon: Stethoscope,
-    description: "Upload an image of visible symptoms or describe them. AI provides condition insights and guidance.",
-    placeholder: "Describe your symptoms here (e.g., headache for 3 days, mild fever, sore throat)...",
-  },
-];
+const tabConfig: {value: AnalysisType;label: string;icon: React.ElementType;description: string;placeholder: string;}[] = [
+{
+  value: "prescription",
+  label: "Prescription",
+  icon: FileText,
+  description: "Upload a prescription photo. AI extracts medicine names, identifies drug class, and explains uses.",
+  placeholder: "Optionally paste prescription text here..."
+},
+{
+  value: "report",
+  label: "Medical Report",
+  icon: Activity,
+  description: "Upload a medical report. AI highlights key values, explains terms, and summarizes findings.",
+  placeholder: "Optionally paste report text here..."
+},
+{
+  value: "symptom",
+  label: "Symptom Analysis",
+  icon: Stethoscope,
+  description: "Upload an image of visible symptoms or describe them. AI provides condition insights and guidance.",
+  placeholder: "Describe your symptoms here (e.g., headache for 3 days, mild fever, sore throat)..."
+}];
+
 
 const AIAnalysis = () => {
   const [activeTab, setActiveTab] = useState<AnalysisType>("prescription");
@@ -99,7 +99,7 @@ const AIAnalysis = () => {
       }
 
       const { data, error } = await supabase.functions.invoke("analyze-medical", {
-        body: { type: activeTab, text: text || undefined, imageBase64 },
+        body: { type: activeTab, text: text || undefined, imageBase64 }
       });
 
       if (error) throw error;
@@ -111,7 +111,7 @@ const AIAnalysis = () => {
       toast({
         title: "Analysis failed",
         description: err.message || "Something went wrong. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -131,16 +131,16 @@ const AIAnalysis = () => {
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-6">
-          {tabConfig.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
+          {tabConfig.map((tab) =>
+          <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-2">
               <tab.icon className="h-4 w-4" />
               <span className="hidden sm:inline">{tab.label}</span>
             </TabsTrigger>
-          ))}
+          )}
         </TabsList>
 
-        {tabConfig.map((tab) => (
-          <TabsContent key={tab.value} value={tab.value}>
+        {tabConfig.map((tab) =>
+        <TabsContent key={tab.value} value={tab.value}>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -152,71 +152,71 @@ const AIAnalysis = () => {
               <CardContent className="space-y-4">
                 {/* Upload Area */}
                 <div
-                  onDrop={handleDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                  className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {imagePreview ? (
-                    <div className="relative inline-block">
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                onClick={() => fileInputRef.current?.click()}>
+
+                  {imagePreview ?
+                <div className="relative inline-block">
                       <img src={imagePreview} alt="Upload preview" className="max-h-48 rounded-md mx-auto" />
                       <button
-                        onClick={(e) => { e.stopPropagation(); removeImage(); }}
-                        className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1"
-                      >
+                    onClick={(e) => {e.stopPropagation();removeImage();}}
+                    className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1">
+
                         <X className="h-4 w-4" />
                       </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
+                    </div> :
+
+                <div className="space-y-2">
                       <Upload className="h-10 w-10 mx-auto text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">
                         Drag & drop an image here, or click to select
                       </p>
                       <p className="text-xs text-muted-foreground">JPG, PNG — Max 10MB</p>
                     </div>
-                  )}
+                }
                   <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-                  />
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])} />
+
                 </div>
 
                 {/* Text Input */}
                 <Textarea
-                  placeholder={tab.placeholder}
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  rows={4}
-                />
+                placeholder={tab.placeholder}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={4} />
+
 
                 {/* Analyze Button */}
                 <Button
-                  onClick={handleAnalyze}
-                  disabled={isLoading || (!text && !imageFile)}
-                  className="w-full"
-                  variant="medical"
-                  size="lg"
-                >
-                  {isLoading ? (
-                    <>
+                onClick={handleAnalyze}
+                disabled={isLoading || !text && !imageFile}
+                className="w-full"
+                variant="medical"
+                size="lg">
+
+                  {isLoading ?
+                <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Analyzing...
-                    </>
-                  ) : (
-                    <>
+                    </> :
+
+                <>
                       <Stethoscope className="h-4 w-4" />
                       Analyze
                     </>
-                  )}
+                }
                 </Button>
 
                 {/* Results */}
-                {result && (
-                  <Card className="bg-muted/50">
+                {result &&
+              <Card className="bg-muted/50">
                     <CardHeader>
                       <CardTitle className="text-lg">Analysis Results</CardTitle>
                     </CardHeader>
@@ -226,19 +226,19 @@ const AIAnalysis = () => {
                       </div>
                     </CardContent>
                   </Card>
-                )}
+              }
 
                 {/* Disclaimer */}
                 <p className="text-xs text-muted-foreground text-center border-t pt-4">
-                  ⚠️ This AI provides informational support only and does not replace professional medical advice, diagnosis, or treatment.
+                  This AI provides general health information only and is not a substitute for professional medical advice, diagnosis, or treatment; always consult a qualified healthcare provider for personal health concerns.
                 </p>
               </CardContent>
             </Card>
           </TabsContent>
-        ))}
+        )}
       </Tabs>
-    </div>
-  );
+    </div>);
+
 };
 
 export default AIAnalysis;
