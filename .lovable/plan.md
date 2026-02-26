@@ -1,62 +1,76 @@
 
 
-# Fix: Providers & Hospitals Not Showing (RLS + Missing View)
+# Fix Bengali (Bangla) Translation Coverage
 
-## Root Cause
+## Problem Found
 
-Two issues are preventing data from appearing:
+The Bengali translation files exist and have good translations, but most pages **don't use them**. They have hardcoded English strings instead of calling `useTranslation()`.
 
-1. **`providers_public` view has `security_invoker=true`** -- This means the view runs with the calling user's RLS permissions. Since the `profiles` table only lets users see their own profile, and the `doctors` table only lets doctors see their own record, anonymous/unauthenticated users get zero results from this view.
+### Current Status
 
-2. **`hospitals_public` view does not exist** -- The booking code references `hospitals_public` but this view was never created, causing 404 errors.
+| Page/Component | Uses i18n? | Bengali translations exist? |
+|---|---|---|
+| Navbar | Yes | Yes |
+| Footer | Yes | Yes |
+| Chat | Yes | Yes |
+| **Index.tsx (Homepage)** | **No -- hardcoded English** | Yes (bn/home.json ready but unused) |
+| **AIAnalysis.tsx** | **No -- hardcoded English** | No translations file |
+| **Medicine.tsx** | **No -- hardcoded English** | No translations file |
+| **Doctors.tsx** | **No -- hardcoded English** | No translations file |
+| **HealthTipsBD.tsx** | **No -- hardcoded English** | No translations file |
 
-Additionally, the **Find Doctors page (`Doctors.tsx`)** queries `profiles` directly with `role=provider`, which also returns empty due to profiles RLS.
+The homepage (`Index.tsx`) is the biggest issue -- it has ~800 lines of hardcoded English text, but `bn/home.json` already has all the Bengali translations ready and waiting. They're just never loaded.
 
 ## Fix Plan
 
-### Step 1: Database Migration
+### Step 1: Wire up Index.tsx to use existing Bengali translations
 
-**Recreate `providers_public` view without `security_invoker`** so anonymous users can browse providers:
+Add `useTranslation('home')` to `Index.tsx` and replace all hardcoded strings with `t()` calls. The `bn/home.json` file already has all the translations -- they just need to be connected.
 
-```sql
-DROP VIEW IF EXISTS public.providers_public;
-CREATE VIEW public.providers_public AS
-  SELECT p.id, p.first_name, p.last_name, p.name, p.bio, p.photo_url,
-         p.city, p.provider_type,
-         d.specialty, d.experience, d.consultation_fee, d.verified, d.years_experience
-  FROM profiles p
-  LEFT JOIN doctors d ON d.user_id = p.id
-  WHERE p.role = 'provider' AND p.approval_status = 'approved';
--- No security_invoker -- runs as view owner, bypassing RLS
-```
+Missing keys to add to `bn/home.json` and `en/home.json`:
+- `hero.aiAnalysis` -- "এআই স্বাস্থ্য বিশ্লেষণ" / "AI Health Analysis"
+- `hero.searchMedicine` -- "ওষুধ খুঁজুন" / "Search Medicine"
 
-**Create `hospitals_public` view** so the booking flow can query hospitals without needing direct table access (matching the code's expectations):
+### Step 2: Add Bengali translations for AIAnalysis.tsx
 
-```sql
-CREATE VIEW public.hospitals_public AS
-  SELECT id, name, address, city, phone, email, description, logo_url, is_active
-  FROM hospitals
-  WHERE is_active = true;
--- No security_invoker -- public browsing
-```
+Add new keys to `bn/common.json` (or a new namespace) for the AI Analysis page:
+- Page title, tab labels (Prescription, Medical Report, Symptom Analysis)
+- Upload instructions, analyze button, results heading, disclaimer
+- ~20 new translation keys
 
-### Step 2: Fix `Doctors.tsx` (Find Doctors Page)
+Wire `AIAnalysis.tsx` to use `useTranslation()`.
 
-Change the data source from querying `profiles` directly (blocked by RLS) to using `providers_public` view instead. This will also fetch provider services separately using the provider IDs from the view, matching the pattern already used in `ProviderList.tsx`.
+### Step 3: Add Bengali translations for Medicine.tsx
 
-### Step 3: Fix `ProviderList.tsx` Fallback
+Add translation keys for the Medicine page:
+- Page title, search placeholder, tab labels
+- Section headings (Uses, Dosage, Side Effects, Precautions, etc.)
+- Disclaimer text, interaction checker labels
+- ~30 new translation keys
 
-The fallback logic already exists (fetch all providers if none in selected city), but it shows "No providers found in your area" when there are truly zero results from the view. Since the view fix will make data visible, this should resolve itself. No code change needed here.
+Wire `Medicine.tsx` to use `useTranslation()`.
+
+### Step 4: Add Bengali translations for Doctors.tsx
+
+Add translation keys for the Find Doctors page:
+- Page title, search/filter labels, specialty names
+- Card labels (experience, fee, verified, etc.)
+- ~15 new translation keys
+
+Wire `Doctors.tsx` to use `useTranslation()`.
 
 ## Files to Modify
 
-1. **Database migration** -- Recreate `providers_public` view (remove `security_invoker`), create `hospitals_public` view
-2. **`src/pages/Doctors.tsx`** -- Switch from querying `profiles` to `providers_public` view, fetch services separately
+1. `src/pages/Index.tsx` -- Add `useTranslation('home')`, replace hardcoded strings with `t()` calls
+2. `src/pages/AIAnalysis.tsx` -- Add `useTranslation('common')`, replace hardcoded strings
+3. `src/pages/Medicine.tsx` -- Add `useTranslation('common')`, replace hardcoded strings
+4. `src/pages/Doctors.tsx` -- Add `useTranslation('common')`, replace hardcoded strings
+5. `src/locales/en/home.json` -- Add missing keys (aiAnalysis, searchMedicine)
+6. `src/locales/bn/home.json` -- Add missing keys
+7. `src/locales/en/common.json` -- Add keys for Medicine, AIAnalysis, Doctors pages
+8. `src/locales/bn/common.json` -- Add Bengali translations for all new keys
 
-## Impact
+## No new dependencies needed
 
-- Anonymous and logged-in users will see all approved providers on Find Doctors page
-- Booking flow will show providers and hospitals correctly
-- Fallback to "all locations" will work when no providers exist in selected city
-- No sensitive data exposed (view excludes email, phone, address from profiles)
+Uses existing `react-i18next` setup and translation infrastructure.
 
