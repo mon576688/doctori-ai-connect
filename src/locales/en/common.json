@@ -123,6 +123,10 @@
     "severe": "Severe",
     "contraindicated": "Contraindicated"
   },
+  "healthTips": {
+    "title": "Health Tips",
+    "subtitle": "Practical, locally-relevant guidance for healthier living"
+  },
   "doctors": {
     "title": "Find Your Healthcare Provider",
     "subtitle": "Connect with trusted healthcare professionals near you",
