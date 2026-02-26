@@ -45,53 +45,43 @@ export default function ProviderProfile() {
   useEffect(() => {
     const fetchProvider = async () => {
       try {
+        // Use providers_public view (no RLS restrictions) for basic info
         const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            name,
-            first_name,
-            last_name,
-            bio,
-            photo_url,
-            latitude,
-            longitude,
-            address,
-            city,
-            provider_type,
-            phone,
-            email,
-            provider_services (
-              price,
-              service_name,
-              description,
-              duration_minutes
-            )
-          `)
+          .from('providers_public')
+          .select('*')
           .eq('id', id)
           .single();
 
         if (error) throw error;
+
+        // Fetch services separately (also publicly accessible)
+        const { data: servicesData } = await supabase
+          .from('provider_services')
+          .select('service_name, price, description, duration_minutes')
+          .eq('provider_id', id!)
+          .eq('is_active', true);
+
+        const services = servicesData || [];
 
         const formattedProvider = {
           id: data.id,
           name: data.name || `${data.first_name || ''} ${data.last_name || ''}`.trim() || 'Provider',
           bio: data.bio || 'No bio available. This provider has not added a description yet.',
           photo_url: data.photo_url || '/placeholder.svg',
-          latitude: data.latitude ? parseFloat(String(data.latitude)) : 0,
-          longitude: data.longitude ? parseFloat(String(data.longitude)) : 0,
-          address: data.address || 'Address not provided',
+          latitude: 0,
+          longitude: 0,
+          address: 'Address not provided',
           city: data.city || '',
           provider_type: data.provider_type || 'Healthcare Provider',
-          phone: data.phone || 'Not provided',
-          email: data.email || 'Not provided',
-          specialty: data.provider_services?.[0]?.service_name || 'General Practice',
-          price: data.provider_services?.[0]?.price || 0,
-          duration: data.provider_services?.[0]?.duration_minutes || 30,
-          experience: 5,
+          phone: 'Not provided',
+          email: 'Not provided',
+          specialty: data.specialty || services[0]?.service_name || 'General Practice',
+          price: data.consultation_fee || services[0]?.price || 0,
+          duration: services[0]?.duration_minutes || 30,
+          experience: data.years_experience || data.experience || 5,
           rating: 4.8,
           reviews: 0,
-          services: data.provider_services || [],
+          services: services,
           languages: ['English', 'Bengali'],
           education: ['Medical Degree', 'Board Certified'],
           certifications: ['Licensed Healthcare Provider'],
