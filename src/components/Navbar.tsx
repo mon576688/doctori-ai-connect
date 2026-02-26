@@ -83,13 +83,13 @@ export const Navbar = () => {
             <Link to="/" className={`text-foreground hover:text-primary transition-colors ${isActive('/') ? 'text-primary' : ''}`}>
               {t('nav.home')}
             </Link>
-            <Link to="/chat" className={`text-foreground hover:text-primary transition-colors ${isActive('/chat') ? 'text-primary' : ''}`}>
+            <Link to="/chat" title="Chat with AI health assistant" className={`text-foreground hover:text-primary transition-colors ${isActive('/chat') ? 'text-primary' : ''}`}>
               {t('nav.aiHealthAssistant')}
             </Link>
-            <Link to="/doctors" className={`text-foreground hover:text-primary transition-colors ${isActive('/doctors') ? 'text-primary' : ''}`}>
+            <Link to="/doctors" title="Find and book verified doctors near you" className={`text-foreground hover:text-primary transition-colors ${isActive('/doctors') ? 'text-primary' : ''}`}>
               {t('nav.findDoctors')}
             </Link>
-            <Link to="/medicine" className={`text-foreground hover:text-primary transition-colors ${isActive('/medicine') ? 'text-primary' : ''}`}>
+            <Link to="/medicine" title="Search medicine information and drug interactions" className={`text-foreground hover:text-primary transition-colors ${isActive('/medicine') ? 'text-primary' : ''}`}>
               {t('nav.searchMedicine')}
             </Link>
             
@@ -124,17 +124,17 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center space-x-2">
             <LanguageSelector />
             {user && <NotificationBell />}
-            {user ? <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            {user ? <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
               </Button> : <Link to="/login">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" aria-label="Log in to your account">
                   <User className="h-4 w-4" />
                 </Button>
               </Link>}
           </div>
 
           {/* Mobile menu button */}
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsOpen(!isOpen)} aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}>
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
 
@@ -209,6 +209,7 @@ export const Navbar = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 pr-4 py-2 w-full rounded-full border-primary/20 focus:border-primary"
+              aria-label="Search doctors, medicine, and health articles"
             />
           </form>
         </div>

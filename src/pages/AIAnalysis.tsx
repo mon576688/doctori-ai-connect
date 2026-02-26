@@ -7,6 +7,8 @@ import { FileText, Activity, Stethoscope, Upload, X, Loader2 } from "lucide-reac
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
+import { SEO } from "@/components/SEO";
+import { PAGE_SEO } from "@/lib/seo";
 
 type AnalysisType = "prescription" | "report" | "symptom";
 
@@ -124,6 +126,7 @@ const AIAnalysis = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <SEO title={PAGE_SEO.aiAnalysis.title} description={PAGE_SEO.aiAnalysis.description} canonicalPath={PAGE_SEO.aiAnalysis.canonicalPath} />
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-foreground mb-2">{t('aiAnalysis.title')}</h1>
         <p className="text-muted-foreground">{t('aiAnalysis.subtitle')}</p>
