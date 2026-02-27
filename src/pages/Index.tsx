@@ -302,6 +302,16 @@ const Index = () => {
                     {t('hero.healthReminders')}
                   </Button>
                 </Link>
+                <Button
+                  variant="healing"
+                  size="lg"
+                  className="text-lg px-8 w-full sm:w-auto"
+                  aria-label="Scroll to daily wellness practice section"
+                  onClick={() => document.getElementById('daily-wellness')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {t('hero.dailyWellness')}
+                </Button>
               </div>
             </div>
 
@@ -883,7 +893,9 @@ const Index = () => {
       <HeartbeatDivider />
 
       {/* Daily Wellness Practice */}
-      <DailyWellnessPractice />
+      <div id="daily-wellness">
+        <DailyWellnessPractice />
+      </div>
 
       <HeartbeatDivider />
 
