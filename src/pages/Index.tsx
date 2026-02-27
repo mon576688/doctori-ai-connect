@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +34,10 @@ import {
   Calculator,
   Bell,
   Quote,
+  Pill,
+  Droplets,
+  ClipboardCheck,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
@@ -42,6 +47,26 @@ import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { t } = useTranslation('home');
+
+  const featuresRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
+
+    const cards = featuresRef.current?.querySelectorAll('.feature-card');
+    cards?.forEach((card) => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -520,7 +545,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Advanced Features Section */}
+       {/* Advanced Features Section */}
       <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-primary">
@@ -532,57 +557,130 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6" ref={featuresRef}>
               {[
+                {
+                  icon: Sparkles,
+                  title: t('features.aiAnalysisSuite'),
+                  description: t('features.aiAnalysisSuiteDesc'),
+                  size: "md:col-span-3",
+                  link: "/ai-analysis",
+                  badge: "AI-Powered",
+                  gradient: "bg-gradient-to-br from-primary/20 to-accent/10",
+                  iconBg: "bg-gradient-to-br from-primary to-accent",
+                },
                 {
                   icon: Languages,
                   title: t('features.multiLanguage'),
                   description: t('features.multiLanguageDesc'),
                   size: "md:col-span-2",
+                  iconBg: "bg-gradient-primary",
                 },
                 {
                   icon: Smartphone,
                   title: t('features.mobileOptimized'),
                   description: t('features.mobileOptimizedDesc'),
                   size: "",
+                  iconBg: "bg-gradient-primary",
+                },
+                {
+                  icon: Pill,
+                  title: t('features.medicineIntelligence'),
+                  description: t('features.medicineIntelligenceDesc'),
+                  size: "md:col-span-2",
+                  link: "/medicine",
+                  badge: "New",
+                  iconBg: "bg-gradient-healing",
+                },
+                {
+                  icon: Activity,
+                  title: t('features.bmiCalculator'),
+                  description: t('features.bmiCalculatorDesc'),
+                  size: "",
+                  link: "/bmi-calculator",
+                  iconBg: "bg-gradient-healing",
                 },
                 {
                   icon: Calendar,
                   title: t('features.symptomTracking'),
                   description: t('features.symptomTrackingDesc'),
                   size: "",
+                  iconBg: "bg-gradient-primary",
                 },
                 {
                   icon: FileText,
                   title: t('features.healthReports'),
                   description: t('features.healthReportsDesc'),
                   size: "md:col-span-2",
+                  iconBg: "bg-gradient-primary",
+                },
+                {
+                  icon: Bell,
+                  title: t('features.healthReminders'),
+                  description: t('features.healthRemindersDesc'),
+                  size: "",
+                  link: "/reminders",
+                  badge: "New",
+                  iconBg: "bg-gradient-to-br from-accent to-accent/80",
+                },
+                {
+                  icon: Droplets,
+                  title: t('features.bloodDonation'),
+                  description: t('features.bloodDonationDesc'),
+                  size: "md:col-span-2",
+                  link: "/blood-donation",
+                  badge: "Community",
+                  iconBg: "bg-gradient-to-br from-destructive to-destructive/80",
                 },
                 {
                   icon: TrendingUp,
                   title: t('features.progressMonitoring'),
                   description: t('features.progressMonitoringDesc'),
                   size: "",
+                  iconBg: "bg-gradient-primary",
                 },
                 {
                   icon: Zap,
                   title: t('features.instantAnalysis'),
                   description: t('features.instantAnalysisDesc'),
                   size: "md:col-span-2",
+                  iconBg: "bg-gradient-primary",
                 },
-              ].map((feature, index) => (
-                <Card key={index} className={`bg-background/80 backdrop-blur-sm card-hover-lift ${feature.size}`}>
-                  <CardContent className="p-6 flex items-start gap-4">
-                    <div className="bg-gradient-primary p-3 rounded-xl flex-shrink-0">
-                      <feature.icon className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                      <p className="text-muted-foreground">{feature.description}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              ].map((feature, index) => {
+                const cardContent = (
+                  <Card
+                    key={index}
+                    className={`feature-card rounded-2xl border-primary/10 backdrop-blur-sm bg-background/80 card-hover-lift card-hover-glow ${feature.size} ${(feature as any).gradient || ''}`}
+                    style={{ transitionDelay: `${index * 60}ms` }}
+                  >
+                    <CardContent className="p-6 flex items-start gap-4">
+                      <div className={`${(feature as any).iconBg || 'bg-gradient-primary'} p-3 rounded-xl flex-shrink-0`}>
+                        <feature.icon className="h-6 w-6 text-primary-foreground" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="text-lg font-semibold">{feature.title}</h3>
+                          {(feature as any).badge && (
+                            <Badge variant="secondary" className="text-xs">{(feature as any).badge}</Badge>
+                          )}
+                        </div>
+                        <p className="text-muted-foreground">{feature.description}</p>
+                      </div>
+                      {(feature as any).link && (
+                        <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" />
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+
+                return (feature as any).link ? (
+                  <Link key={index} to={(feature as any).link} className={feature.size}>
+                    {cardContent}
+                  </Link>
+                ) : (
+                  cardContent
+                );
+              })}
             </div>
           </div>
         </div>
