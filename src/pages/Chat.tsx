@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb } from "lucide-react";
+import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb, CheckCircle } from "lucide-react";
 import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import ChatHistory from "@/components/chat/ChatHistory";
 import { useNavigate } from "react-router-dom";
@@ -271,7 +271,7 @@ const Chat = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white p-4 md:p-6">
+    <div className="min-h-screen bg-background/60 backdrop-blur-xl p-4 md:p-6">
       <SEO 
         title={PAGE_SEO.chat.title}
         description={PAGE_SEO.chat.description}
@@ -282,8 +282,8 @@ const Chat = () => {
           {/* Desktop History Sidebar */}
           {!isMobile && (
             <div className="w-72 shrink-0">
-              <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm h-[calc(100vh-8rem)] sticky top-4">
-                <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg py-3 px-4">
+              <Card className="shadow-xl border-0 bg-white/70 backdrop-blur-md border border-white/20 h-[calc(100vh-8rem)] sticky top-4">
+                <CardHeader className="border-b bg-gradient-to-r from-primary/90 to-primary text-primary-foreground rounded-t-lg py-3 px-4">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <History className="h-4 w-4" />
                     Chat History
@@ -298,14 +298,14 @@ const Chat = () => {
 
           {/* Main Chat Area */}
           <div className="flex-1 min-w-0">
-            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
-              <CardHeader className="border-b bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+            <Card className="shadow-2xl border-0 bg-white/70 backdrop-blur-md border border-white/20">
+              <CardHeader className="border-b bg-gradient-to-r from-primary/90 to-primary text-primary-foreground rounded-t-lg">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center space-x-3">
                   {/* Mobile History Button */}
                   {isMobile && (
                     <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
                       <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 shrink-0">
+                        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 shrink-0">
                           <History className="h-5 w-5" />
                         </Button>
                       </SheetTrigger>
@@ -320,8 +320,12 @@ const Chat = () => {
                     <Bot className="h-6 w-6" />
                   </div>
                   <span>{t('headerTitle')}</span>
+                  <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
+                    <CheckCircle className="h-3.5 w-3.5" />
+                    <span className="text-xs font-medium">Verified</span>
+                  </div>
                   {isAuthenticated && (
-                    <Badge variant="secondary" className="bg-white/20 text-white">
+                    <Badge variant="secondary" className="bg-white/20 text-primary-foreground">
                       {t('premium')}
                     </Badge>
                   )}
@@ -340,8 +344,8 @@ const Chat = () => {
                     >
                       <div className={`p-2 rounded-lg ${
                         message.role === 'user' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-100 text-gray-800'
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'bg-muted text-foreground'
                       }`}>
                         {message.role === 'user' ? (
                           <User className="h-4 w-4" />
@@ -349,10 +353,10 @@ const Chat = () => {
                           <Bot className="h-4 w-4" />
                         )}
                       </div>
-                      <div className={`flex-1 p-3 rounded-lg shadow-sm ${
+                      <div className={`flex-1 p-3 shadow-sm ${
                         message.role === 'user' 
-                          ? 'bg-blue-600 text-white ml-12' 
-                          : 'bg-white border border-gray-200 mr-12'
+                          ? 'bg-primary text-primary-foreground ml-12 rounded-2xl rounded-br-sm' 
+                          : 'bg-muted/50 backdrop-blur-sm border border-border/30 mr-12 rounded-2xl rounded-bl-sm'
                       } ${message.isUrgent ? 'border-red-500 border-2' : ''}`}>
                         <div className="text-sm md:text-base whitespace-pre-wrap">
                           {formatMessage(message.content)}
@@ -361,7 +365,7 @@ const Chat = () => {
                           <InlineProviderCards providers={message.suggestedProviders} />
                         )}
                         <div className={`text-xs mt-2 ${
-                          message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                          message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                         }`}>
                           {message.timestamp.toLocaleTimeString()}
                         </div>
@@ -371,17 +375,17 @@ const Chat = () => {
 
                   {chat.sessionState.isLoading && (
                     <div className="flex items-start space-x-3">
-                      <div className="p-2 rounded-lg bg-gray-100 text-gray-800">
+                      <div className="p-2 rounded-lg bg-muted text-foreground">
                         <Bot className="h-4 w-4" />
                       </div>
-                      <div className="flex-1 p-3 rounded-lg bg-white border border-gray-200 mr-12">
+                      <div className="flex-1 p-3 rounded-2xl rounded-bl-sm bg-muted/50 backdrop-blur-sm border border-border/30 mr-12">
                         <div className="flex items-center space-x-2">
                           <div className="flex space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                            <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-pulse"></div>
+                            <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                            <div className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-pulse" style={{ animationDelay: '0.6s' }}></div>
                           </div>
-                          <span className="text-sm text-gray-600">{t('thinking')}</span>
+                          <span className="text-sm text-muted-foreground">{t('thinking')}</span>
                         </div>
                       </div>
                     </div>
@@ -423,20 +427,20 @@ const Chat = () => {
                     </div>
                   )}
 
-                  <div className="flex space-x-2">
+                  <div className="relative flex items-center">
                     <Textarea 
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
                       onKeyPress={handleKeyPress} 
                       placeholder={getPlaceholder()}
-                      className="flex-1 min-h-[60px] text-sm md:text-base resize-none" 
+                      className="flex-1 min-h-[48px] max-h-[120px] text-sm md:text-base resize-none rounded-full bg-muted/30 border-border/50 focus:border-primary/50 pr-14 pl-5 py-3" 
                       disabled={chat.sessionState.isLoading} 
                     />
                     <Button 
                       onClick={handleSendMessage} 
                       variant="default" 
                       size="icon" 
-                      className="self-end h-[60px] w-12 md:w-14" 
+                      className="absolute right-2 rounded-full w-10 h-10" 
                       disabled={chat.sessionState.isLoading}
                     >
                       <Send className="h-4 w-4" />
@@ -456,12 +460,12 @@ const Chat = () => {
                     </div>
                   )}
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="bg-muted/30 border border-border/30 rounded-lg p-3">
                     <div className="text-center">
-                      <p className="text-xs md:text-sm text-blue-800 mb-1">
+                      <p className="text-xs md:text-sm text-muted-foreground mb-1">
                         ℹ️ <strong>{t('disclaimerTitle')}</strong>
                       </p>
-                      <p className="text-xs text-blue-700">
+                      <p className="text-xs text-muted-foreground/80">
                         {t('disclaimerText')}
                       </p>
                     </div>

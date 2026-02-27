@@ -51,7 +51,7 @@ const Index = () => {
         canonicalPath={PAGE_SEO.home.canonicalPath}
       />
       {/* Hero Section */}
-      <section className="relative bg-gradient-hero py-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-hero py-24 px-4 overflow-hidden">
         {/* Floating decorations */}
         <div className="floating-shape w-72 h-72 bg-primary/30 -top-20 -left-20" />
         <div
@@ -135,7 +135,7 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-primary">
             <div className="text-center mb-12">
@@ -191,7 +191,7 @@ const Index = () => {
       </section>
 
       {/* Your Complete Health Companion Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-secondary">
             <div className="text-center mb-12">
@@ -256,7 +256,7 @@ const Index = () => {
       </section>
 
       {/* Featured Doctors Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-gradient">
             <div className="text-center mb-12">
@@ -354,7 +354,7 @@ const Index = () => {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-5xl mx-auto">
           <div className="rounded-3xl bg-gradient-primary p-12 lg:p-16 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -398,7 +398,7 @@ const Index = () => {
       </section>
 
       {/* Common Health Concerns Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-accent">
             <div className="text-center mb-12">
@@ -456,7 +456,7 @@ const Index = () => {
       </section>
 
       {/* Daily Health Tips Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-secondary">
             <div className="text-center mb-12">
@@ -521,7 +521,7 @@ const Index = () => {
       </section>
 
       {/* Advanced Features Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-primary">
             <div className="text-center mb-12">
@@ -589,7 +589,7 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-warm">
             <div className="text-center mb-12">
@@ -656,7 +656,7 @@ const Index = () => {
       </section>
 
       {/* Emergency Contact Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="rounded-3xl bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-2 border-red-200 dark:border-red-800/50 p-8 md:p-12 text-center">
             <div className="mb-8">
@@ -690,7 +690,7 @@ const Index = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="section-box section-box-muted">
             <div className="text-center mb-12">
@@ -726,7 +726,7 @@ const Index = () => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4">
+      <section className="py-24 px-4">
         <div className="container max-w-4xl mx-auto">
           <div className="rounded-3xl bg-gradient-hero p-12 lg:p-16 text-center relative overflow-hidden">
             <div className="floating-shape w-32 h-32 bg-primary/30 top-10 left-10" />
