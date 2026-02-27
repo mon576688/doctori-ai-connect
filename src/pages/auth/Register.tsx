@@ -12,7 +12,7 @@ type UserRole = 'user' | 'provider' | 'admin';
 
 const roleConfig = {
   user: {
-    title: 'Patient Registration',
+    title: 'User Registration',
     description: 'Join Doctori AI to get personalized health assistance',
     icon: UserPlus,
     buttonText: 'Create Patient Account'
