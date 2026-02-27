@@ -45,6 +45,7 @@ import heroImage from "@/assets/hero-image.jpg";
 import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 import { useTranslation } from "react-i18next";
+import DailyWellnessPractice from "@/components/DailyWellnessPractice";
 
 const HeartbeatDivider = () => {
   const filterId = useId();
@@ -133,6 +134,13 @@ const Index = () => {
 
     const cards = featuresRef.current?.querySelectorAll('.feature-card');
     cards?.forEach((card) => {
+      observer.observe(card);
+      focusObserver.observe(card);
+    });
+
+    // Wellness cards
+    const wellnessCards = sectionsRef.current?.querySelectorAll('.wellness-card');
+    wellnessCards?.forEach((card) => {
       observer.observe(card);
       focusObserver.observe(card);
     });
@@ -871,6 +879,13 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <HeartbeatDivider />
+
+      {/* Daily Wellness Practice */}
+      <DailyWellnessPractice />
+
+      <HeartbeatDivider />
 
       {/* Parallax Medical Divider */}
       <section className="relative overflow-hidden py-16 pointer-events-none" aria-hidden="true">
