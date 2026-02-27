@@ -19,6 +19,9 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showInstallBtn, setShowInstallBtn] = useState(false);
+  const [showBetaBanner, setShowBetaBanner] = useState(() => {
+    return !localStorage.getItem('beta-banner-dismissed');
+  });
 
   useEffect(() => {
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches
@@ -62,8 +65,35 @@ export const Navbar = () => {
   };
   const isActive = (path: string) => location.pathname === path;
   const isBlogActive = location.pathname.startsWith('/blog');
+  const dismissBetaBanner = () => {
+    setShowBetaBanner(false);
+    localStorage.setItem('beta-banner-dismissed', 'true');
+  };
+
   return (
     <>
+      {/* Beta Notification Bar */}
+      {showBetaBanner && (
+        <div className="bg-primary text-primary-foreground text-sm py-2 px-4 text-center relative z-50">
+          <div className="container flex items-center justify-center gap-3 flex-wrap">
+            <span className="font-medium">
+              🚀 Doctori AI is currently in Private Beta — Experience the future of AI Healthcare.
+            </span>
+            <Link to="/login">
+              <Button size="sm" className="bg-white/20 hover:bg-white/30 text-primary-foreground border-0 rounded-full text-xs px-4 h-7">
+                Join Waitlist
+              </Button>
+            </Link>
+            <button
+              onClick={dismissBetaBanner}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+              aria-label="Dismiss beta banner"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
       <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
           {/* Logo */}
