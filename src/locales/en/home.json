@@ -87,9 +87,9 @@
     "moreHealthTips": "More Health Tips"
   },
   "features": {
-    "badge": "Cutting Edge",
-    "title": "Advanced AI Features",
-    "subtitle": "Cutting-edge technology to support your health journey",
+    "badge": "All-in-One",
+    "title": "All-in-One Health Hub",
+    "subtitle": "Everything you need for your health journey, powered by cutting-edge technology",
     "multiLanguage": "Multi-Language Support",
     "multiLanguageDesc": "Chat in your preferred language including English, Bengali, and more",
     "mobileOptimized": "Mobile Optimized",
@@ -101,7 +101,17 @@
     "progressMonitoring": "Progress Monitoring",
     "progressMonitoringDesc": "Monitor your health trends and improvements over time",
     "instantAnalysis": "Instant Analysis",
-    "instantAnalysisDesc": "Get immediate insights based on your symptoms and health data"
+    "instantAnalysisDesc": "Get immediate insights based on your symptoms and health data",
+    "aiAnalysisSuite": "AI Health Analysis Suite",
+    "aiAnalysisSuiteDesc": "Advanced AI processing for your health data, providing educational insights on symptoms and medical documents.",
+    "medicineIntelligence": "Medicine Intelligence",
+    "medicineIntelligenceDesc": "Explore a comprehensive database to understand your medications and check for potential drug-to-drug interactions.",
+    "bmiCalculator": "BMI Calculator",
+    "bmiCalculatorDesc": "Quickly calculate your Body Mass Index and get personalized health metrics.",
+    "healthReminders": "Health Reminders",
+    "healthRemindersDesc": "Automated scheduling for medication reminders and health check-up notifications.",
+    "bloodDonation": "Blood Donation Registration",
+    "bloodDonationDesc": "Register as a blood donor and help save lives in your community."
   },
   "testimonials": {
     "badge": "Real Stories",
