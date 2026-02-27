@@ -1,100 +1,61 @@
 
 
-# UI/UX Modernization: Notification Bar, Chat Glassmorphism, Global Styling & Hover Effects
+# Expand Features Section with New Health Tool Cards
 
-## 1. Top Notification Bar (Navbar.tsx)
+## Overview
+Add 5 new feature cards to the existing "Advanced Features" bento grid section, with scroll-into-view animations and enhanced hover effects.
 
-Add a slim, dismissible beta announcement bar above the sticky nav.
+## Changes
 
-**Changes to `src/components/Navbar.tsx`:**
-- Add state: `showBetaBanner` initialized from `localStorage.getItem('beta-banner-dismissed')`
-- Render a bar above the `<nav>` element:
-  - `bg-primary text-white text-sm py-2 text-center` with flex layout
-  - Text: "Doctori AI is currently in Private Beta -- Experience the future of AI Healthcare."
-  - "Join Waitlist" button linking to `/login` (small, `bg-white/20 hover:bg-white/30 text-white` rounded pill)
-  - X dismiss button that sets localStorage and hides the bar
-- Adjust the sticky nav: when banner is visible, the banner sits above it (both inside the fragment)
+### File: `src/pages/Index.tsx`
 
----
+**1. Add new icon imports:**
+Add `Pill`, `Droplets`, `ClipboardCheck`, `Sparkles` to the lucide-react imports, plus `useEffect` and `useRef` from React.
 
-## 2. Premium Chat Interface with Glassmorphism (Chat.tsx)
+**2. Add scroll-into-view animation logic:**
+Inside the `Index` component, add a `useEffect` that sets up an `IntersectionObserver` to animate `.feature-card` elements as they scroll into view (scale 0.9 to 1.0, fade in).
 
-Transform the chat page into a premium SaaS-quality interface.
+**3. Expand the features array (lines 536-572):**
+Append 5 new items after the existing 6:
 
-**Changes to `src/pages/Chat.tsx`:**
+| Card | Icon | Badge | Grid Size | Link |
+|------|------|-------|-----------|------|
+| AI Health Analysis Suite | Sparkles | AI-Powered | `md:col-span-3` (full-width hero) | `/ai-analysis` |
+| Medicine Intelligence | Pill | New | `md:col-span-2` | `/medicine` |
+| BMI Calculator | Activity | -- | `md:col-span-1` | `/bmi-calculator` |
+| Health Reminders | Bell | New | `md:col-span-1` | `/reminders` |
+| Blood Donation Registration | Droplets | Community | `md:col-span-2` | `/blood-donation` |
 
-- **Outer container**: Change `bg-gradient-to-br from-blue-50 to-white` to `bg-background/60 backdrop-blur-xl`
-- **Main chat card**: `bg-white/70 backdrop-blur-md border border-white/20 shadow-2xl` (replace `bg-white/90`)
-- **Header gradient**: Change `from-blue-600 to-purple-600` to `from-primary/90 to-primary` (both main card and sidebar)
-- **AI avatar area**: Add a verified badge (CheckCircle icon with "Verified" text) next to "Doctori AI" in the header
-- **Message bubbles**:
-  - User: `bg-primary text-white rounded-2xl rounded-br-sm` (replace `bg-blue-600`)
-  - AI: `bg-muted/50 backdrop-blur-sm border border-border/30 rounded-2xl rounded-bl-sm` (replace `bg-white border border-gray-200`)
-  - User avatar: `bg-primary` (replace `bg-blue-600`)
-  - AI avatar: `bg-muted` (replace `bg-gray-100`)
-  - Timestamps: User `text-primary-foreground/70`, AI `text-muted-foreground`
-- **Loading indicator**: `bg-muted/50 backdrop-blur-sm border border-border/30` with smoother `animate-pulse` dots instead of `animate-bounce`
-- **Input area**: Wrap input in a `relative` container with `rounded-full bg-muted/30 border-border/50 focus:border-primary/50` styling, send button as a circle (`rounded-full w-10 h-10`) positioned inside the input field on the right
-- **Disclaimer box**: Change `bg-blue-50 border-blue-200` to `bg-muted/30 border-border/30` with matching text colors
+**4. Update card rendering (lines 573-585):**
+- Add `feature-card` class for intersection observer targeting
+- Wrap each card in a `Link` when the feature has a `link` property
+- Add initial styles: `opacity-0 translate-y-4 scale-[0.9]` that transition to visible on scroll
+- Apply `rounded-2xl border-primary/10 backdrop-blur-sm` styling
+- Show badge when feature has a `badge` property
+- Use unique gradient backgrounds per icon (primary, healing, accent, warm tones)
 
----
+**5. Update section title:**
+Change from "Advanced AI Features" to "All-in-One Health Hub" to reflect the expanded scope.
 
-## 3. Global Styling & Spacing (index.css, index.html, Index.tsx)
+### File: `src/index.css`
 
-**Changes to `index.html`:**
-- Add Google Fonts link: `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">`
+Add CSS for the scroll animation:
 
-**Changes to `src/index.css`:**
-- Add `font-family: 'Inter', system-ui, -apple-system, sans-serif;` to the `body` rule
-- Update `.card-hover-lift` class:
-  ```css
-  .card-hover-lift {
-    @apply transition-all duration-300 ease-out border border-transparent;
-  }
-  .card-hover-lift:hover {
-    @apply -translate-y-2;
-    border-color: hsl(217 91% 60% / 0.2);
-    box-shadow: 0 12px 40px hsl(217 91% 60% / 0.15);
-  }
-  ```
-- Add new `.card-hover-glow` utility:
-  ```css
-  .card-hover-glow {
-    @apply transition-all duration-300 ease-out;
-  }
-  .card-hover-glow:hover {
-    border-color: hsl(217 91% 60% / 0.3);
-    box-shadow: 0 0 20px hsl(217 91% 60% / 0.1);
-  }
-  ```
-- Add `@keyframes marquee` for the trust bar (future use):
-  ```css
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  .animate-marquee {
-    animation: marquee 30s linear infinite;
-  }
-  ```
+```css
+.feature-card {
+  opacity: 0;
+  transform: translateY(16px) scale(0.9);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.feature-card.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+```
 
-**Changes to `src/pages/Index.tsx`:**
-- Change all section `py-20` to `py-24`
-- Ensure `max-w-6xl` is used consistently (the Trust section uses `max-w-5xl` and Emergency/FAQ use `max-w-4xl` -- keep those as they're intentionally narrower)
+### File: `src/locales/en/home.json`
 
----
+Update the features section translations to include the new card titles/descriptions and the updated section title.
 
-## 4. Enhanced Hover Effects (already covered above)
-
-The `.card-hover-lift` update in `index.css` handles the global hover enhancement. The `button.tsx` already has `transition-all duration-300` in its base class -- no changes needed there.
-
----
-
-## Files to Modify
-
-1. **`index.html`** -- Add Inter font import link
-2. **`src/index.css`** -- Inter font-family, updated card-hover-lift, new card-hover-glow, marquee keyframes
-3. **`src/components/Navbar.tsx`** -- Beta notification bar with dismiss + Join Waitlist button
-4. **`src/pages/Index.tsx`** -- Update section padding from py-20 to py-24
-5. **`src/pages/Chat.tsx`** -- Glassmorphism container, premium message bubbles, verified badge, rounded input with embedded send button
-
+## Visual Result
+The features section will become a rich bento grid with 11 cards total -- the original 6 existing cards plus 5 new ones. The hero "AI Health Analysis Suite" card spans the full width. Cards animate in smoothly on scroll with a zoom + fade effect. Hover states lift the card and add a soft primary-color border glow.
