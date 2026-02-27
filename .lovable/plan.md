@@ -1,67 +1,57 @@
 
 
-# Replace Section Dividers with Heartbeat/Breathing SVG Lines
+# Make Heartbeat Dividers Visible + Hover Animation
 
 ## Overview
-Replace all 12 simple gradient-line dividers (`section-divider`) with an animated SVG heartbeat (ECG) line that gently "breathes" -- pulsing its opacity and stroke width in a slow, calming rhythm.
+The heartbeat lines are currently nearly invisible (opacity 0.08-0.18, stroke 1.5px). This plan increases their visibility significantly and adds an interactive hover animation where the line "draws" itself and glows when the cursor hovers over it.
 
 ## Changes
 
-### File: `src/pages/Index.tsx`
+### 1. `src/pages/Index.tsx` (HeartbeatDivider component, lines 49-69)
 
-**Extract a reusable `HeartbeatDivider` component** (inline or at the top of the file) that renders a horizontal SVG with an ECG-style polyline path:
+- Remove `pointer-events-none` so hover works
+- Add `group` and `cursor-pointer` classes to wrapper
+- Increase base `opacity` from `0.12` to `0.4`
+- Increase `strokeWidth` from `1.5` to `2`
+- Add `className="heartbeat-path"` to the path element
+- Add a `<defs>` block with a glow `<filter>` using `feGaussianBlur` (unique ID via `useId()`)
 
-```
-___/\___/\/\___/\___
-```
+### 2. `src/index.css` (lines 293-301)
 
-The SVG path will be a classic heartbeat trace: flat line, small bump, sharp spike up, sharp spike down, small recovery bump, flat line. The viewBox will be wide (e.g., `0 0 600 40`) with `preserveAspectRatio="none"` and `width="100%"` so it stretches across the container.
-
-- Stroke: `hsl(217 91% 60%)` (primary) at low opacity (~0.12)
-- Stroke width: 1.5px
-- Fill: none
-- The SVG has a CSS animation class `animate-heartbeat-breath` that slowly pulses opacity between 0.06 and 0.15 over ~4 seconds
-
-**Replace all 12 `<div className="section-divider my-4" />` instances** with `<HeartbeatDivider />`.
-
-### File: `src/index.css`
-
-**Replace the `.section-divider` rule** with a heartbeat breathing animation:
+Update the breathing animation and add hover effects:
 
 ```css
-/* Heartbeat breath animation */
 @keyframes heartbeat-breath {
-  0%, 100% { opacity: 0.08; }
-  50% { opacity: 0.18; }
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
 }
 
 .heartbeat-divider {
   animation: heartbeat-breath 4s ease-in-out infinite;
 }
+
+.heartbeat-path {
+  transition: opacity 0.4s ease, stroke-width 0.4s ease;
+}
+
+@keyframes heartbeat-draw {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+.group:hover .heartbeat-divider {
+  animation: none;
+}
+
+.group:hover .heartbeat-path {
+  opacity: 0.8;
+  stroke-width: 3;
+  stroke-dasharray: 1000;
+  animation: heartbeat-draw 1.5s ease-out forwards;
+}
 ```
 
-### SVG Path
-
-The ECG trace path (inside a `viewBox="0 0 600 40"`, centered at y=20):
-
-```
-M 0,20 L 150,20 L 170,20 L 180,12 L 190,20 L 210,20
-L 220,20 L 230,4 L 240,36 L 250,16 L 260,20
-L 280,20 L 290,14 L 300,20
-L 400,20 L 600,20
-```
-
-This creates: flat -- small P-wave bump -- sharp QRS spike -- recovery T-wave bump -- flat. A recognizable heartbeat waveform.
-
-The SVG container will have `max-width: 60%`, `margin: 0 auto`, `pointer-events-none`, and `aria-hidden="true"`.
-
-## Technical Details
-- The breathing animation is pure CSS (no JS needed)
-- SVG uses `preserveAspectRatio="none"` so it scales horizontally to fill width
-- `stroke-linecap: round` and `stroke-linejoin: round` for smooth rendering
-- All decorative: `pointer-events-none`, `aria-hidden="true"`
-- Mobile: same effect, just narrower due to container width
-
-## Visual Result
-Instead of a faint static gradient line between sections, users will see a subtle heartbeat trace that gently pulses -- reinforcing the medical theme and adding life to the transitions between sections.
+## Result
+- At rest: clearly visible heartbeat lines gently pulsing between 30%-60% opacity
+- On hover: line brightens to 80% opacity, thickens, and animates a "drawing" effect tracing the ECG waveform
 
