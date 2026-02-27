@@ -271,4 +271,30 @@ All colors MUST be HSL.
   .feature-card.visible:not(.feature-card-focus) {
     transform: translateY(0) scale(0.97);
   }
+
+  /* Section scroll animation */
+  .section-animate {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .section-animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Subtle dot grid background */
+  .dot-grid-bg {
+    background-image: radial-gradient(circle, hsl(217 91% 60% / 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Section divider line */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(217 91% 60% / 0.1) 30%, hsl(158 64% 52% / 0.1) 70%, transparent);
+    margin: 0 auto;
+    max-width: 60%;
+  }
 }
