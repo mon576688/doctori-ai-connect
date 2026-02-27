@@ -46,6 +46,28 @@ import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 import { useTranslation } from "react-i18next";
 
+const HeartbeatDivider = () => (
+  <div className="my-4 pointer-events-none max-w-[60%] mx-auto" aria-hidden="true">
+    <svg
+      viewBox="0 0 600 40"
+      preserveAspectRatio="none"
+      width="100%"
+      height="24"
+      className="heartbeat-divider"
+    >
+      <path
+        d="M 0,20 L 150,20 L 170,20 L 180,12 L 190,20 L 210,20 L 220,20 L 230,4 L 240,36 L 250,16 L 260,20 L 280,20 L 290,14 L 300,20 L 400,20 L 600,20"
+        fill="none"
+        stroke="hsl(217 91% 60%)"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.12"
+      />
+    </svg>
+  </div>
+);
+
 const Index = () => {
   const { t } = useTranslation('home');
 
@@ -273,7 +295,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* How It Works Section */}
       <section className="py-16 px-4 section-animate">
@@ -331,7 +353,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Your Complete Health Companion Section */}
       <section className="py-16 px-4 section-animate">
@@ -398,7 +420,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Featured Doctors Section */}
       <section className="py-16 px-4 section-animate">
@@ -498,7 +520,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Trust Section */}
       <section className="py-16 px-4 section-animate">
@@ -544,7 +566,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Common Health Concerns Section */}
       <section className="py-16 px-4 section-animate">
@@ -604,7 +626,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Daily Health Tips Section */}
       <section className="py-16 px-4 section-animate">
@@ -671,7 +693,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
        {/* Advanced Features Section */}
       <section className="py-16 px-4 relative overflow-hidden section-animate">
@@ -892,7 +914,7 @@ const Index = () => {
         </svg>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Testimonials Section */}
       <section className="py-16 px-4 section-animate">
@@ -961,7 +983,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Emergency Contact Section */}
       <section className="py-16 px-4 section-animate">
@@ -997,7 +1019,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* FAQ Section */}
       <section className="py-16 px-4 section-animate">
@@ -1035,7 +1057,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="section-divider my-4" />
+      <HeartbeatDivider />
 
       {/* Final CTA Section */}
       <section className="py-16 px-4 section-animate">

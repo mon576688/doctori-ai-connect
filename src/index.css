@@ -290,11 +290,13 @@ All colors MUST be HSL.
     background-size: 24px 24px;
   }
 
-  /* Section divider line */
-  .section-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, hsl(217 91% 60% / 0.1) 30%, hsl(158 64% 52% / 0.1) 70%, transparent);
-    margin: 0 auto;
-    max-width: 60%;
+  /* Heartbeat breath animation */
+  @keyframes heartbeat-breath {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.18; }
+  }
+
+  .heartbeat-divider {
+    animation: heartbeat-breath 4s ease-in-out infinite;
   }
 }
