@@ -67,6 +67,8 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const sectionsRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -99,14 +101,89 @@ const Index = () => {
       focusObserver.observe(card);
     });
 
+    // Section scroll-in animations
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -80px 0px' }
+    );
+
+    const sections = sectionsRef.current?.querySelectorAll('.section-animate');
+    sections?.forEach((section) => sectionObserver.observe(section));
+
     return () => {
       observer.disconnect();
       focusObserver.disconnect();
+      sectionObserver.disconnect();
     };
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden dot-grid-bg" ref={sectionsRef}>
+      {/* Global background gradient mesh */}
+      <div className="fixed inset-0 pointer-events-none z-0" aria-hidden="true">
+        <div
+          className="absolute w-[600px] h-[600px] rounded-full bg-primary/[0.04] blur-[120px] -left-40 top-[10%]"
+          style={{ transform: `translate3d(0, ${scrollY * 0.01}px, 0)` }}
+        />
+        <div
+          className="absolute w-[500px] h-[500px] rounded-full bg-secondary/[0.05] blur-[120px] right-[-10%] top-[30%]"
+          style={{ transform: `translate3d(0, ${scrollY * -0.015}px, 0)` }}
+        />
+        <div
+          className="absolute w-[700px] h-[700px] rounded-full bg-accent/[0.03] blur-[120px] left-[20%] top-[55%]"
+          style={{ transform: `translate3d(0, ${scrollY * 0.02}px, 0)` }}
+        />
+        <div
+          className="absolute w-[400px] h-[400px] rounded-full bg-destructive/[0.03] blur-[120px] right-[5%] top-[75%]"
+          style={{ transform: `translate3d(0, ${scrollY * -0.01}px, 0)` }}
+        />
+        <div
+          className="absolute w-[500px] h-[500px] rounded-full bg-secondary/[0.04] blur-[120px] left-[-5%] top-[90%]"
+          style={{ transform: `translate3d(0, ${scrollY * -0.02}px, 0)` }}
+        />
+      </div>
+
+      {/* Floating medical icons across the full page */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        <HeartPulse
+          className="absolute text-primary/[0.05] left-[8%] top-[15%]"
+          size={64}
+          style={{ transform: `translate3d(0, ${scrollY * -0.04}px, 0)`, animation: 'float 6s ease-in-out infinite' }}
+        />
+        <Stethoscope
+          className="absolute text-secondary/[0.05] right-[12%] top-[28%]"
+          size={52}
+          style={{ transform: `translate3d(0, ${scrollY * 0.03}px, 0)`, animation: 'float 6s ease-in-out infinite 1s' }}
+        />
+        <Shield
+          className="absolute text-accent/[0.04] left-[5%] top-[48%]"
+          size={56}
+          style={{ transform: `translate3d(0, ${scrollY * -0.05}px, 0)`, animation: 'float 6s ease-in-out infinite 2s' }}
+        />
+        <Brain
+          className="absolute text-primary/[0.05] right-[8%] top-[62%]"
+          size={60}
+          style={{ transform: `translate3d(0, ${scrollY * 0.04}px, 0)`, animation: 'float 6s ease-in-out infinite 3s' }}
+        />
+        <Activity
+          className="absolute text-secondary/[0.04] left-[25%] top-[78%]"
+          size={48}
+          style={{ transform: `translate3d(0, ${scrollY * -0.03}px, 0)`, animation: 'float 6s ease-in-out infinite 4s' }}
+        />
+        <Pill
+          className="absolute text-accent/[0.05] right-[18%] top-[88%]"
+          size={44}
+          style={{ transform: `translate3d(0, ${scrollY * 0.02}px, 0)`, animation: 'float 6s ease-in-out infinite 5s' }}
+        />
+      </div>
+
+      <div className="relative z-10">
       <SEO
         title={PAGE_SEO.home.title}
         description={PAGE_SEO.home.description}
@@ -196,8 +273,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* How It Works Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-primary">
             <div className="text-center mb-12">
@@ -252,8 +331,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Your Complete Health Companion Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-secondary">
             <div className="text-center mb-12">
@@ -317,8 +398,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Featured Doctors Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-gradient">
             <div className="text-center mb-12">
@@ -415,8 +498,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Trust Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-5xl mx-auto">
           <div className="rounded-3xl bg-gradient-primary p-12 lg:p-16 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -459,8 +544,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Common Health Concerns Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-accent">
             <div className="text-center mb-12">
@@ -517,8 +604,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Daily Health Tips Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-secondary">
             <div className="text-center mb-12">
@@ -582,8 +671,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
        {/* Advanced Features Section */}
-      <section className="py-24 px-4 relative overflow-hidden">
+      <section className="py-16 px-4 relative overflow-hidden section-animate">
         {/* Background depth blobs */}
         <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
           <div
@@ -801,8 +892,10 @@ const Index = () => {
         </svg>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Testimonials Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-6xl mx-auto">
           <div className="section-box section-box-warm">
             <div className="text-center mb-12">
@@ -868,8 +961,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Emergency Contact Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-4xl mx-auto">
           <div className="rounded-3xl bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-2 border-red-200 dark:border-red-800/50 p-8 md:p-12 text-center">
             <div className="mb-8">
@@ -902,8 +997,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* FAQ Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-4xl mx-auto">
           <div className="section-box section-box-muted">
             <div className="text-center mb-12">
@@ -938,8 +1035,10 @@ const Index = () => {
         </div>
       </section>
 
+      <div className="section-divider my-4" />
+
       {/* Final CTA Section */}
-      <section className="py-24 px-4">
+      <section className="py-16 px-4 section-animate">
         <div className="container max-w-4xl mx-auto">
           <div className="rounded-3xl bg-gradient-hero p-12 lg:p-16 text-center relative overflow-hidden">
             <div className="floating-shape w-32 h-32 bg-primary/30 top-10 left-10" />
@@ -994,6 +1093,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 };
