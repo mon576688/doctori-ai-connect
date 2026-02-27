@@ -292,11 +292,31 @@ All colors MUST be HSL.
 
   /* Heartbeat breath animation */
   @keyframes heartbeat-breath {
-    0%, 100% { opacity: 0.08; }
-    50% { opacity: 0.18; }
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
   }
 
   .heartbeat-divider {
     animation: heartbeat-breath 4s ease-in-out infinite;
+  }
+
+  .heartbeat-path {
+    transition: opacity 0.4s ease, stroke-width 0.4s ease;
+  }
+
+  @keyframes heartbeat-draw {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  .group:hover .heartbeat-divider {
+    animation: none;
+  }
+
+  .group:hover .heartbeat-path {
+    opacity: 0.8;
+    stroke-width: 3;
+    stroke-dasharray: 1000;
+    animation: heartbeat-draw 1.5s ease-out forwards;
   }
 }

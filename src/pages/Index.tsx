@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,27 +46,41 @@ import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 import { useTranslation } from "react-i18next";
 
-const HeartbeatDivider = () => (
-  <div className="my-4 pointer-events-none max-w-[60%] mx-auto" aria-hidden="true">
-    <svg
-      viewBox="0 0 600 40"
-      preserveAspectRatio="none"
-      width="100%"
-      height="24"
-      className="heartbeat-divider"
-    >
-      <path
-        d="M 0,20 L 150,20 L 170,20 L 180,12 L 190,20 L 210,20 L 220,20 L 230,4 L 240,36 L 250,16 L 260,20 L 280,20 L 290,14 L 300,20 L 400,20 L 600,20"
-        fill="none"
-        stroke="hsl(217 91% 60%)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.12"
-      />
-    </svg>
-  </div>
-);
+const HeartbeatDivider = () => {
+  const filterId = useId();
+  return (
+    <div className="my-4 max-w-[60%] mx-auto group cursor-pointer" aria-hidden="true">
+      <svg
+        viewBox="0 0 600 40"
+        preserveAspectRatio="none"
+        width="100%"
+        height="24"
+        className="heartbeat-divider"
+      >
+        <defs>
+          <filter id={filterId}>
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path
+          d="M 0,20 L 150,20 L 170,20 L 180,12 L 190,20 L 210,20 L 220,20 L 230,4 L 240,36 L 250,16 L 260,20 L 280,20 L 290,14 L 300,20 L 400,20 L 600,20"
+          fill="none"
+          stroke="hsl(217 91% 60%)"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.4"
+          className="heartbeat-path"
+          style={{ filter: `url(#${filterId})` }}
+        />
+      </svg>
+    </div>
+  );
+};
 
 const Index = () => {
   const { t } = useTranslation('home');
