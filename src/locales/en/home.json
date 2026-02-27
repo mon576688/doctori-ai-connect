@@ -13,7 +13,8 @@
     "healthBlog": "Health Blog",
     "bmiCalculator": "BMI Calculator",
     "healthReminders": "Health Reminders",
-    "searchMedicine": "Search Medicine"
+    "searchMedicine": "Search Medicine",
+    "dailyWellness": "Daily Wellness"
   },
   "howItWorks": {
     "badge": "Simple Process",
