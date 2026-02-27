@@ -260,4 +260,15 @@ All colors MUST be HSL.
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+
+  .feature-card-focus {
+    transform: translateY(0) scale(1.05) !important;
+    z-index: 2;
+    border-color: hsl(217 91% 60% / 0.25);
+    box-shadow: 0 12px 40px hsl(217 91% 60% / 0.12);
+  }
+
+  .feature-card.visible:not(.feature-card-focus) {
+    transform: translateY(0) scale(0.97);
+  }
 }
