@@ -141,7 +141,7 @@ export default function Login() {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="user">Patient</TabsTrigger>
+              <TabsTrigger value="user">User Login</TabsTrigger>
               <TabsTrigger value="provider">Provider</TabsTrigger>
               <TabsTrigger value="admin">Admin</TabsTrigger>
             </TabsList>
