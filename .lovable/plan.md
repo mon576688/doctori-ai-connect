@@ -1,61 +1,38 @@
 
 
-# Expand Features Section with New Health Tool Cards
+# Add Parallax Floating Medical Divider Between Features and Testimonials
 
 ## Overview
-Add 5 new feature cards to the existing "Advanced Features" bento grid section, with scroll-into-view animations and enhanced hover effects.
+Insert a decorative section between the Features grid and the Testimonials section (after line 687, before line 689 in `Index.tsx`). It will contain gradient blobs and floating medical icons (heartbeat line, pill, stethoscope) that move at a different speed than the scroll via a CSS parallax transform, eliminating the empty white-space feel.
 
 ## Changes
 
 ### File: `src/pages/Index.tsx`
 
-**1. Add new icon imports:**
-Add `Pill`, `Droplets`, `ClipboardCheck`, `Sparkles` to the lucide-react imports, plus `useEffect` and `useRef` from React.
+**1. Add imports:**
+- Add `HeartPulse`, `Stethoscope` from `lucide-react` (Pill is already imported).
 
-**2. Add scroll-into-view animation logic:**
-Inside the `Index` component, add a `useEffect` that sets up an `IntersectionObserver` to animate `.feature-card` elements as they scroll into view (scale 0.9 to 1.0, fade in).
+**2. Add scroll-based parallax state:**
+- Add a `scrollY` state tracked via a `useEffect` with a throttled `scroll` event listener (using `requestAnimationFrame` for performance).
 
-**3. Expand the features array (lines 536-572):**
-Append 5 new items after the existing 6:
+**3. Insert decorative divider section (between lines 687 and 689):**
+A `relative overflow-hidden` section (~`py-16`) containing:
 
-| Card | Icon | Badge | Grid Size | Link |
-|------|------|-------|-----------|------|
-| AI Health Analysis Suite | Sparkles | AI-Powered | `md:col-span-3` (full-width hero) | `/ai-analysis` |
-| Medicine Intelligence | Pill | New | `md:col-span-2` | `/medicine` |
-| BMI Calculator | Activity | -- | `md:col-span-1` | `/bmi-calculator` |
-| Health Reminders | Bell | New | `md:col-span-1` | `/reminders` |
-| Blood Donation Registration | Droplets | Community | `md:col-span-2` | `/blood-donation` |
+- **Two gradient blobs**: Absolutely positioned, large (`w-72 h-72` and `w-96 h-96`), blurred (`blur-3xl`), with primary and secondary colors at low opacity (~0.15). Each blob gets a `translateY` transform driven by `scrollY * -0.08` and `scrollY * 0.06` respectively, creating a subtle parallax drift.
+- **Three floating medical icons**: `HeartPulse`, `Pill`, `Stethoscope` -- absolutely positioned at different spots, low opacity (~0.12), sizes around 40-64px, each with a different parallax multiplier (`scrollY * -0.05`, `scrollY * 0.04`, `scrollY * -0.03`) and a gentle CSS float animation (reusing the existing `floating-shape` keyframes or inline animation).
+- **A subtle SVG heartbeat line**: A horizontal `<svg>` path resembling an ECG trace, centered, very faint (`stroke-primary/10`, `stroke-width: 1.5`), spanning most of the width. This also gets a slight parallax offset.
 
-**4. Update card rendering (lines 573-585):**
-- Add `feature-card` class for intersection observer targeting
-- Wrap each card in a `Link` when the feature has a `link` property
-- Add initial styles: `opacity-0 translate-y-4 scale-[0.9]` that transition to visible on scroll
-- Apply `rounded-2xl border-primary/10 backdrop-blur-sm` styling
-- Show badge when feature has a `badge` property
-- Use unique gradient backgrounds per icon (primary, healing, accent, warm tones)
-
-**5. Update section title:**
-Change from "Advanced AI Features" to "All-in-One Health Hub" to reflect the expanded scope.
+The section has `pointer-events-none` so it doesn't interfere with interaction, and `aria-hidden="true"` for accessibility.
 
 ### File: `src/index.css`
 
-Add CSS for the scroll animation:
+No new CSS needed -- reuse existing `.floating-shape` keyframes and `float` animation. The parallax is handled inline via `transform: translateY(...)` driven by React state.
 
-```css
-.feature-card {
-  opacity: 0;
-  transform: translateY(16px) scale(0.9);
-  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.feature-card.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-```
-
-### File: `src/locales/en/home.json`
-
-Update the features section translations to include the new card titles/descriptions and the updated section title.
+## Performance Notes
+- The scroll listener uses `requestAnimationFrame` to avoid layout thrashing.
+- All parallax transforms use `translate3d` for GPU acceleration.
+- The section is purely decorative with `pointer-events-none`.
 
 ## Visual Result
-The features section will become a rich bento grid with 11 cards total -- the original 6 existing cards plus 5 new ones. The hero "AI Health Analysis Suite" card spans the full width. Cards animate in smoothly on scroll with a zoom + fade effect. Hover states lift the card and add a soft primary-color border glow.
+A soft, layered divider with drifting gradient blobs and faintly visible medical icons that move at a slightly different rate than the page scroll, creating depth and removing the flat white-space gap between Features and Testimonials.
+
