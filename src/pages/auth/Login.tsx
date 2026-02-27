@@ -112,7 +112,7 @@ export default function Login() {
 
   const tabConfig = {
     user: {
-      title: 'Patient Login',
+      title: 'User Login',
       description: 'Access your health dashboard',
       icon: UserPlus,
       registerLink: '/auth/register/user'
