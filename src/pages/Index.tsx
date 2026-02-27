@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ import {
   Droplets,
   ClipboardCheck,
   Sparkles,
+  HeartPulse,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-image.jpg";
@@ -49,6 +50,22 @@ const Index = () => {
   const { t } = useTranslation('home');
 
   const featuresRef = useRef<HTMLDivElement>(null);
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -684,6 +701,62 @@ const Index = () => {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Parallax Medical Divider */}
+      <section className="relative overflow-hidden py-16 pointer-events-none" aria-hidden="true">
+        {/* Gradient blobs */}
+        <div
+          className="absolute w-72 h-72 rounded-full bg-primary/15 blur-3xl -left-20 top-0"
+          style={{ transform: `translate3d(0, ${scrollY * -0.08}px, 0)` }}
+        />
+        <div
+          className="absolute w-96 h-96 rounded-full bg-secondary/10 blur-3xl -right-24 -bottom-10"
+          style={{ transform: `translate3d(0, ${scrollY * 0.06}px, 0)` }}
+        />
+
+        {/* Floating medical icons */}
+        <HeartPulse
+          className="absolute text-primary/12 left-[10%] top-[20%]"
+          size={56}
+          style={{
+            transform: `translate3d(0, ${scrollY * -0.05}px, 0)`,
+            animation: 'float 6s ease-in-out infinite',
+          }}
+        />
+        <Pill
+          className="absolute text-secondary/12 right-[15%] top-[30%]"
+          size={44}
+          style={{
+            transform: `translate3d(0, ${scrollY * 0.04}px, 0)`,
+            animation: 'float 6s ease-in-out infinite 1.5s',
+          }}
+        />
+        <Stethoscope
+          className="absolute text-accent/12 left-[60%] bottom-[20%]"
+          size={48}
+          style={{
+            transform: `translate3d(0, ${scrollY * -0.03}px, 0)`,
+            animation: 'float 6s ease-in-out infinite 3s',
+          }}
+        />
+
+        {/* SVG ECG heartbeat line */}
+        <svg
+          className="w-full max-w-4xl mx-auto h-16"
+          viewBox="0 0 800 60"
+          fill="none"
+          preserveAspectRatio="xMidYMid meet"
+          style={{ transform: `translate3d(0, ${scrollY * -0.02}px, 0)` }}
+        >
+          <path
+            d="M0 30 L150 30 L170 30 L185 10 L200 50 L215 5 L230 55 L245 25 L260 35 L280 30 L400 30 L420 30 L435 12 L450 48 L465 8 L480 52 L495 28 L510 32 L530 30 L800 30"
+            className="stroke-primary/10"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </section>
 
       {/* Testimonials Section */}
