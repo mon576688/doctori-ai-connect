@@ -79,10 +79,30 @@ const Index = () => {
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
 
-    const cards = featuresRef.current?.querySelectorAll('.feature-card');
-    cards?.forEach((card) => observer.observe(card));
+    // Center-focus observer for scaling effect
+    const focusObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.intersectionRatio >= 0.5) {
+            entry.target.classList.add('feature-card-focus');
+          } else {
+            entry.target.classList.remove('feature-card-focus');
+          }
+        });
+      },
+      { threshold: [0, 0.5, 1], rootMargin: '-30% 0px -30% 0px' }
+    );
 
-    return () => observer.disconnect();
+    const cards = featuresRef.current?.querySelectorAll('.feature-card');
+    cards?.forEach((card) => {
+      observer.observe(card);
+      focusObserver.observe(card);
+    });
+
+    return () => {
+      observer.disconnect();
+      focusObserver.disconnect();
+    };
   }, []);
 
   return (
@@ -563,8 +583,24 @@ const Index = () => {
       </section>
 
        {/* Advanced Features Section */}
-      <section className="py-24 px-4">
-        <div className="container max-w-6xl mx-auto">
+      <section className="py-24 px-4 relative overflow-hidden">
+        {/* Background depth blobs */}
+        <div className="absolute inset-0 pointer-events-none z-0" aria-hidden="true">
+          <div
+            className="absolute w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -left-32 top-20"
+            style={{ transform: `translate3d(0, ${scrollY * -0.03}px, 0)` }}
+          />
+          <div
+            className="absolute w-[600px] h-[600px] rounded-full bg-secondary/5 blur-3xl -right-40 top-1/2"
+            style={{ transform: `translate3d(0, ${scrollY * 0.02}px, 0)` }}
+          />
+          <div
+            className="absolute w-[400px] h-[400px] rounded-full bg-accent/5 blur-3xl left-1/4 bottom-0"
+            style={{ transform: `translate3d(0, ${scrollY * -0.04}px, 0)` }}
+          />
+        </div>
+
+        <div className="container max-w-6xl mx-auto relative z-10">
           <div className="section-box section-box-primary">
             <div className="text-center mb-12">
               <Badge className="bg-primary/20 text-primary mb-4">{t('features.badge')}</Badge>
@@ -574,7 +610,13 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6" ref={featuresRef}>
+            <div className="grid md:grid-cols-3 gap-6 relative" ref={featuresRef}>
+              {/* Vertical connector lines */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 hidden md:block" aria-hidden="true">
+                <line x1="25%" y1="0" x2="25%" y2="100%" className="stroke-primary/10" strokeWidth="1" strokeDasharray="4 8" />
+                <line x1="50%" y1="0" x2="50%" y2="100%" className="stroke-primary/10" strokeWidth="1" strokeDasharray="4 8" />
+                <line x1="75%" y1="0" x2="75%" y2="100%" className="stroke-primary/10" strokeWidth="1" strokeDasharray="4 8" />
+              </svg>
               {[
                 {
                   icon: Sparkles,
@@ -667,7 +709,7 @@ const Index = () => {
                 const cardContent = (
                   <Card
                     key={index}
-                    className={`feature-card rounded-2xl border-primary/10 backdrop-blur-sm bg-background/80 card-hover-lift card-hover-glow ${feature.size} ${(feature as any).gradient || ''}`}
+                    className={`feature-card relative z-10 rounded-2xl border-primary/10 backdrop-blur-sm bg-background/80 card-hover-lift card-hover-glow ${feature.size} ${(feature as any).gradient || ''} ${index % 2 === 1 ? 'md:mt-10' : ''}`}
                     style={{ transitionDelay: `${index * 60}ms` }}
                   >
                     <CardContent className="p-6 flex items-start gap-4">
