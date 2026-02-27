@@ -319,4 +319,25 @@ All colors MUST be HSL.
     stroke-dasharray: 1000;
     animation: heartbeat-draw 1.5s ease-out forwards;
   }
+
+  /* Breathing circle animation */
+  @keyframes breathe-expand {
+    0%, 100% { transform: scale(0.6); }
+    50% { transform: scale(1); }
+  }
+
+  .breathing-circle {
+    animation: breathe-expand 8s ease-in-out infinite;
+  }
+
+  /* Wellness card scroll-in */
+  .wellness-card {
+    opacity: 0;
+    transform: translateY(16px) scale(0.9);
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .wellness-card.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
