@@ -10,9 +10,10 @@ export const SITE_CONFIG = {
 // Page-specific SEO metadata
 export const PAGE_SEO = {
   home: {
-    title: 'Doctori AI - AI Health Assistant & Doctor Booking',
-    description: 'Chat with Doctori AI for symptom guidance, find trusted doctors near you, and book appointments 24/7. Your virtual health companion.',
+    title: 'Doctori AI - Find Doctors Near You | AI Health Assistant',
+    description: 'Find nearby doctors, check symptoms with AI, read health blogs, locate blood banks & book appointments. Your trusted doctor AI assistant 24/7.',
     canonicalPath: '/',
+    keywords: 'doctor, doctor AI, find doctor near me, nearby doctor, health analysis, blood bank, health blogs, symptom checker, online doctor appointment',
   },
   chat: {
     title: 'AI Symptom Checker - Free Health Chat',
@@ -21,8 +22,9 @@ export const PAGE_SEO = {
   },
   doctors: {
     title: 'Find & Book Doctors Near You',
-    description: 'Search verified healthcare professionals, compare ratings, and book appointments online. Find the right doctor for your needs.',
+    description: 'Search nearby doctors, compare ratings, and book appointments online. Find verified healthcare professionals for your needs.',
     canonicalPath: '/doctors',
+    keywords: 'find doctor, nearby doctor, book doctor appointment, doctor near me, healthcare professionals',
   },
   booking: {
     title: 'Book Doctor Appointment Online',
@@ -31,8 +33,9 @@ export const PAGE_SEO = {
   },
   blog: {
     title: 'Health Blog - Expert Medical Articles',
-    description: 'Read expert health articles on nutrition, fitness, symptoms, and wellness. Evidence-based medical information.',
+    description: 'Read expert health blogs on nutrition, fitness, symptoms, wellness & disease prevention. Evidence-based medical articles updated regularly.',
     canonicalPath: '/blog',
+    keywords: 'health blogs, medical articles, health tips, wellness blog, disease prevention, nutrition tips',
   },
   healthTips: {
     title: 'Bangladesh Health Tips - Dengue, Safety & More',
@@ -75,9 +78,10 @@ export const PAGE_SEO = {
     canonicalPath: '/reminders',
   },
   bloodDonation: {
-    title: 'Blood Donation Registration',
-    description: 'Register as a blood donor and help save lives. Join our blood donor community in Bangladesh.',
+    title: 'Blood Donation & Blood Bank List',
+    description: 'Register as a blood donor, find blood banks near you, and help save lives. Join our blood donor community in Bangladesh.',
     canonicalPath: '/blood-donation',
+    keywords: 'blood donation, blood bank, blood bank list, blood donor, donate blood, blood group',
   },
   bmiCalculator: {
     title: 'BMI Calculator - Check Your Body Mass Index',
@@ -86,8 +90,9 @@ export const PAGE_SEO = {
   },
   aiAnalysis: {
     title: 'AI Health Analysis - Prescription & Report Scanner',
-    description: 'Upload prescriptions or medical reports for instant AI analysis. Get clear explanations of your health documents.',
+    description: 'Upload prescriptions or medical reports for instant AI health analysis. Get clear explanations and insights from your health documents.',
     canonicalPath: '/ai-analysis',
+    keywords: 'health analysis, AI medical analysis, prescription scanner, medical report analysis, health document reader',
   },
   search: {
     title: 'Search Doctors, Medicine & Health Articles',

@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,36 @@ import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { blogPosts, BlogPost as BlogPostType } from "@/data/blogs";
 import { useToast } from "@/components/ui/use-toast";
 import { SEO } from "@/components/SEO";
+
+const parseMarkdown = (md: string): string => {
+  return md
+    .split('\n')
+    .map(line => {
+      // Headings
+      if (line.startsWith('### ')) return `<h3 class="text-xl font-bold mt-6 mb-2">${line.slice(4)}</h3>`;
+      if (line.startsWith('## ')) return `<h2 class="text-2xl font-bold mt-8 mb-3">${line.slice(3)}</h2>`;
+      if (line.startsWith('# ')) return `<h1 class="text-3xl font-bold mt-8 mb-4">${line.slice(2)}</h1>`;
+      // Horizontal rule
+      if (line.trim() === '---') return '<hr class="my-6 border-border" />';
+      // List items
+      if (line.startsWith('- ') || line.startsWith('• ')) return `<li class="ml-6 list-disc">${applyInline(line.slice(2))}</li>`;
+      // Numbered list
+      const numMatch = line.match(/^(\d+)\.\s\*\*(.*?)\*\*(.*)$/);
+      if (numMatch) return `<li class="ml-6 list-decimal"><strong>${numMatch[2]}</strong>${applyInline(numMatch[3])}</li>`;
+      // Empty line = paragraph break
+      if (line.trim() === '') return '<br />';
+      // Regular paragraph
+      return `<p class="mb-2">${applyInline(line)}</p>`;
+    })
+    .join('\n');
+};
+
+const applyInline = (text: string): string => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/⚠️/g, '⚠️');
+};
 
 const getSupplementsContent = (): string => {
   return `
@@ -262,9 +292,10 @@ export default function BlogPost() {
         {/* Article Content */}
         <Card className="shadow-card">
           <CardContent className="prose prose-lg max-w-none pt-6">
-            <div className="whitespace-pre-line leading-relaxed">
-              {fullContent}
-            </div>
+            <div 
+              className="leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: parseMarkdown(fullContent) }}
+            />
           </CardContent>
         </Card>
 
