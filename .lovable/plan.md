@@ -1,60 +1,61 @@
 
 
-# Enhance Guided Breathing & Vision Guard Cards
+# Improve SEO Meta Tags & Fix Blog Markdown Rendering
 
 ## Overview
-Improve the Guided Breathing overlay with a session timer, cycle counter, and breathing technique selector. Enhance the Vision Guard card with practical eye care tips.
+Two changes: (1) Enhance the main page and key pages with richer meta keywords so people searching for "doctor", "doctor AI", "nearby doctor", "health analysis", "blood bank", "health blogs" etc. can find the site. (2) Fix the blog post page so raw markdown symbols (like `**stars**`, `#` headers, `•` bullets) render as proper formatted text instead of showing as plain text with asterisks.
 
-## Changes (all in `src/components/DailyWellnessPractice.tsx`)
+---
 
-### 1. Guided Breathing -- Add Timer & Session Controls
+## Part 1: Enhanced SEO Meta Tags
 
-**Current**: Simple inhale/exhale circle with no timer or session tracking.
+### `index.html`
+- Add a `<meta name="keywords">` tag with high-value search terms: "doctor, doctor AI, AI doctor, find doctor near me, nearby doctor, health analysis, blood bank, blood donation, health blogs, symptom checker, online doctor appointment, medical AI, health assistant"
+- Update the `<title>` to be more keyword-rich: "Doctori AI - Find Doctors Near You | AI Health Assistant & Blood Bank"
+- Update `<meta name="description">` to include more target keywords naturally
+- Add full absolute URLs for `og:image` (use `https://doctoriai.com/og-image.png` instead of relative `/og-image.png`)
+- Add `og:url` meta tag pointing to `https://doctoriai.com/`
 
-**Enhanced overlay will include**:
-- **Session timer** showing total elapsed time (mm:ss) at the top of the overlay
-- **Cycle counter** tracking how many inhale-exhale cycles completed
-- **Breathing technique selector** (before starting) with 3 presets:
-  - Box Breathing (4s inhale, 4s hold, 4s exhale, 4s hold)
-  - 4-7-8 Relaxation (4s inhale, 7s hold, 8s exhale)
-  - Simple Deep Breath (4s inhale, 4s exhale -- current behavior)
-- **4-phase support**: Update the phase state from `"inhale" | "exhale"` to `"inhale" | "hold-in" | "exhale" | "hold-out"` to support box breathing and 4-7-8
-- **Phase label** showing the current phase name and a countdown for each phase (e.g., "Inhale... 3s")
-- **Session summary** when user closes: show total time and cycles completed briefly via a toast or inline text
+### `src/lib/seo.ts`
+- Update `PAGE_SEO.home` title and description to include target keywords (doctor, nearby doctor, health analysis, blood bank, health blogs)
+- Update descriptions for `doctors`, `bloodDonation`, `blog`, `aiAnalysis` pages to be more keyword-rich for discoverability
 
-**Layout of enhanced overlay**:
-```text
-                        [X close]
-        
-        Technique: [Box] [4-7-8] [Simple]
+### `src/components/SEO.tsx`
+- Add support for a `keywords` prop to pass page-specific keywords
+- Render `<meta name="keywords" content="...">` when provided
 
-            (animated breathing circle)
-        
-             Inhale... 3s
-         
-        Cycle: 4    |    Time: 2:30
-```
+---
 
-### 2. Vision Guard -- Add Practice Tips
+## Part 2: Fix Blog Stars/Markdown Rendering
 
-**Current**: Just a countdown timer with start/stop and a "look away" alert.
+### `src/pages/BlogPost.tsx`
+The blog content is generated as markdown (with `**bold**`, `# headers`, `- lists`) but rendered using `whitespace-pre-line` which shows raw markdown characters (the "stars" the user sees are `**` asterisks).
 
-**Enhanced card will include**:
-- **Tips section** below the timer showing rotating eye care tips, such as:
-  - "Blink 15-20 times per minute to keep eyes moist"
-  - "Adjust screen brightness to match surroundings"
-  - "Keep screen at arm's length (20-26 inches)"
-  - "Position screen slightly below eye level"
-  - "Use the 20-20-20 rule: every 20 min, look 20 feet away for 20 sec"
-- Tips rotate every 8 seconds automatically when the timer is running
-- A small `Info` icon with a tooltip explaining the 20-20-20 rule in detail
-- **Session count** showing how many breaks completed today (persisted in localStorage)
+**Fix approach**: Parse the markdown into proper HTML before rendering.
+- Create a simple markdown-to-HTML converter function (no new dependency needed) that handles:
+  - `# H1`, `## H2`, `### H3` headings
+  - `**bold**` text
+  - `- ` and `• ` list items
+  - `---` horizontal rules
+  - Line breaks and paragraphs
+- Replace the `<div className="whitespace-pre-line">` with a `<div dangerouslySetInnerHTML>` using the parsed HTML
+- Add proper prose styling so headings, lists, and bold text look correct
+
+---
 
 ## Technical Details
 
-- **New imports**: `Timer`, `Info`, `ChevronLeft`, `ChevronRight` from lucide-react
-- **Breathing phases**: New type `"inhale" | "hold-in" | "exhale" | "hold-out"` with configurable durations per technique
-- **Technique config** stored as a constant array of objects: `{ name, phases: [{ label, duration }] }`
-- **localStorage** key `vision-guard-sessions-YYYY-MM-DD` for daily session count
-- No new files or dependencies needed -- everything stays within `DailyWellnessPractice.tsx`
+### Keywords meta tag (index.html):
+```html
+<meta name="keywords" content="doctor, doctor AI, find doctor near me, nearby doctor, health analysis, blood bank, blood donation, health blogs, symptom checker, AI health assistant, online doctor appointment, medical consultation">
+```
+
+### Markdown parser (BlogPost.tsx):
+A lightweight function that converts markdown syntax to HTML using regex replacements -- handles headings, bold, lists, horizontal rules, and paragraphs. No external library needed.
+
+### Files changed:
+- `index.html` -- add keywords meta, update title/description, use absolute og:image URL
+- `src/lib/seo.ts` -- update PAGE_SEO entries with richer keyword descriptions
+- `src/components/SEO.tsx` -- add optional `keywords` prop
+- `src/pages/BlogPost.tsx` -- replace raw text rendering with parsed markdown HTML
 
