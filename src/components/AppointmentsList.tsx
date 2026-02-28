@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { Calendar, Clock, User, FileText, Video, Phone, MessageCircle, ExternalLink, Stethoscope } from "lucide-react";
+import { Calendar, Clock, User, FileText, Video, Phone, MessageCircle, ExternalLink, Stethoscope, MessageSquareDashed } from "lucide-react";
 import { format } from "date-fns";
 
 interface DoctorProfile {
@@ -34,6 +35,8 @@ interface Appointment {
   consultation_platform: string | null;
   consultation_link: string | null;
   consultation_status: string | null;
+  is_chat_enabled?: boolean;
+  session_end_time?: string | null;
   doctors?: {
     user_id: string;
     specialty: string;
@@ -57,6 +60,7 @@ const platformIcons: Record<string, React.ReactNode> = {
 export const AppointmentsList = ({ viewAs = "patient" }: AppointmentsListProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -317,11 +321,11 @@ export const AppointmentsList = ({ viewAs = "patient" }: AppointmentsListProps) 
                     )}
 
                     {/* Meeting Link for Patient */}
-                    {viewAs === "patient" && appointment.consultation_link && appointment.status === "scheduled" && isUpcoming && (
+                    {viewAs === "patient" && appointment.consultation_link && appointment.consultation_status === 'in_progress' && (
                       <div className="bg-primary/10 rounded-lg p-3 space-y-2">
                         <p className="text-sm font-medium text-primary flex items-center gap-2">
                           <Video className="h-4 w-4" />
-                          Consultation Link Available
+                          Consultation In Progress
                         </p>
                         <Button 
                           size="sm" 
@@ -375,6 +379,17 @@ export const AppointmentsList = ({ viewAs = "patient" }: AppointmentsListProps) 
 
                 {viewAs === "patient" && appointment.status === "scheduled" && (
                   <div className="pt-2 border-t flex gap-2 flex-wrap">
+                    {/* Chat with Doctor - only if chat is enabled */}
+                    {appointment.is_chat_enabled && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate('/dashboard?tab=messages')}
+                      >
+                        <MessageSquareDashed className="h-4 w-4 mr-1" />
+                        Chat with Doctor
+                      </Button>
+                    )}
                     {/* Contact Doctor Options */}
                     {appointment.doctors?.profiles?.phone && (
                       <>
@@ -403,6 +418,20 @@ export const AppointmentsList = ({ viewAs = "patient" }: AppointmentsListProps) 
                       className="text-destructive"
                     >
                       Cancel Appointment
+                    </Button>
+                  </div>
+                )}
+
+                {/* Completed appointment - view chat history */}
+                {viewAs === "patient" && appointment.status === "completed" && appointment.is_chat_enabled && (
+                  <div className="pt-2 border-t">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => navigate('/dashboard?tab=messages')}
+                    >
+                      <MessageSquareDashed className="h-4 w-4 mr-1" />
+                      View Chat History
                     </Button>
                   </div>
                 )}

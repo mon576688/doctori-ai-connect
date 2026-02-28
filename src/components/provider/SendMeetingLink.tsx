@@ -14,7 +14,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Video, MessageCircle, Phone, Link2, Send, Loader2 } from 'lucide-react';
+import { Video, MessageCircle, Phone, Link2, Send, Loader2, Monitor } from 'lucide-react';
+import { generateJitsiLink } from '@/lib/bookingUtils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SendMeetingLinkProps {
   appointmentId: string;
@@ -27,6 +29,7 @@ interface SendMeetingLinkProps {
 }
 
 const platformOptions = [
+  { value: 'jitsi', label: 'Jitsi Meet', icon: Monitor, placeholder: 'Auto-generated' },
   { value: 'zoom', label: 'Zoom', icon: Video, placeholder: 'https://zoom.us/j/...' },
   { value: 'google-meet', label: 'Google Meet', icon: Video, placeholder: 'https://meet.google.com/...' },
   { value: 'whatsapp', label: 'WhatsApp Call', icon: MessageCircle, placeholder: 'Will call via WhatsApp' },
@@ -42,7 +45,8 @@ export default function SendMeetingLink({
   onOpenChange,
   onSuccess,
 }: SendMeetingLinkProps) {
-  const [platform, setPlatform] = useState('zoom');
+  const { user } = useAuth();
+  const [platform, setPlatform] = useState('jitsi');
   const [meetingLink, setMeetingLink] = useState('');
   const [message, setMessage] = useState(
     `Hello ${patientName}, your consultation is scheduled. Please join using the link below.`
@@ -53,19 +57,24 @@ export default function SendMeetingLink({
     setSending(true);
     
     try {
-      // For video platforms, require a link
+      // For video platforms (non-Jitsi), require a link
       if ((platform === 'zoom' || platform === 'google-meet') && !meetingLink) {
         toast.error('Please enter a meeting link');
         setSending(false);
         return;
       }
 
+      // Auto-generate Jitsi link if selected
+      const jitsiLink = platform === 'jitsi' ? generateJitsiLink(appointmentId) : '';
+
       // Update appointment with consultation link
-      const linkToSave = platform === 'zoom' || platform === 'google-meet' 
-        ? meetingLink 
-        : platform === 'whatsapp' && patientPhone 
-          ? `https://wa.me/${patientPhone.replace(/\D/g, '')}` 
-          : `tel:${patientPhone}`;
+      const linkToSave = platform === 'jitsi'
+        ? jitsiLink
+        : platform === 'zoom' || platform === 'google-meet' 
+          ? meetingLink 
+          : platform === 'whatsapp' && patientPhone 
+            ? `https://wa.me/${patientPhone.replace(/\D/g, '')}` 
+            : `tel:${patientPhone}`;
 
       const { error: updateError } = await supabase
         .from('appointments')
@@ -92,6 +101,16 @@ export default function SendMeetingLink({
         console.error('Notification error:', notifyError);
       }
 
+      // Also post the link as a direct message
+      if (user && (platform === 'jitsi' || platform === 'zoom' || platform === 'google-meet')) {
+        const displayLink = platform === 'jitsi' ? jitsiLink : meetingLink;
+        await supabase.from('direct_messages').insert({
+          sender_id: user.id,
+          receiver_id: patientId,
+          content: `[SYSTEM] Meeting link shared. Join your consultation: ${displayLink}`
+        });
+      }
+
       toast.success('Meeting link sent to patient!');
       onOpenChange(false);
       onSuccess?.();
@@ -109,6 +128,7 @@ export default function SendMeetingLink({
 
   const selectedPlatform = platformOptions.find(p => p.value === platform);
   const needsLink = platform === 'zoom' || platform === 'google-meet';
+  const isJitsi = platform === 'jitsi';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -146,6 +166,13 @@ export default function SendMeetingLink({
             </RadioGroup>
           </div>
 
+          {isJitsi && (
+            <div className="rounded-md bg-primary/10 p-3 text-sm text-primary">
+              <p className="font-medium">🎥 Jitsi Meet (Free & Instant)</p>
+              <p className="text-xs mt-1 text-muted-foreground">A unique meeting link will be auto-generated. No account needed.</p>
+            </div>
+          )}
+
           {needsLink && (
             <div className="space-y-2">
               <Label htmlFor="meetingLink">Meeting Link</Label>
@@ -161,7 +188,7 @@ export default function SendMeetingLink({
             </div>
           )}
 
-          {!needsLink && (
+          {!needsLink && !isJitsi && (
             <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
               {platform === 'whatsapp' && patientPhone ? (
                 <>Patient will be contacted via WhatsApp at {patientPhone}</>
@@ -189,7 +216,7 @@ export default function SendMeetingLink({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSend} disabled={sending || (needsLink && !meetingLink)}>
+          <Button onClick={handleSend} disabled={sending || (needsLink && !meetingLink && !isJitsi)}>
             {sending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

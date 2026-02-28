@@ -72,6 +72,12 @@ export const BANGLADESH_CITIES = {
 // Alias for backward compatibility
 export const SAUDI_CITIES = BANGLADESH_CITIES;
 
+// Generate a unique Jitsi meeting link for consultations
+export const generateJitsiLink = (appointmentId: string): string => {
+  const hash = Math.random().toString(36).substring(2, 8);
+  return `https://meet.jit.si/doctoriai-${appointmentId.slice(0, 8)}-${hash}`;
+};
+
 export type CityName = keyof typeof BANGLADESH_CITIES;
 
 // Booking steps for progress indicator

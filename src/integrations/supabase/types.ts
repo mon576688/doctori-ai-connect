@@ -85,7 +85,10 @@ export type Database = {
           doctor_id: string
           duration_minutes: number | null
           id: string
+          is_chat_enabled: boolean | null
           notes: string | null
+          session_end_time: string | null
+          session_start_time: string | null
           status: string | null
           updated_at: string
           user_id: string
@@ -104,7 +107,10 @@ export type Database = {
           doctor_id: string
           duration_minutes?: number | null
           id?: string
+          is_chat_enabled?: boolean | null
           notes?: string | null
+          session_end_time?: string | null
+          session_start_time?: string | null
           status?: string | null
           updated_at?: string
           user_id: string
@@ -123,7 +129,10 @@ export type Database = {
           doctor_id?: string
           duration_minutes?: number | null
           id?: string
+          is_chat_enabled?: boolean | null
           notes?: string | null
+          session_end_time?: string | null
+          session_start_time?: string | null
           status?: string | null
           updated_at?: string
           user_id?: string

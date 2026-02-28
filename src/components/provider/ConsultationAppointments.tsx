@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import PatientProfileModal from './PatientProfileModal';
 import SendMeetingLink from './SendMeetingLink';
+import { generateJitsiLink } from '@/lib/bookingUtils';
 import { 
   Video, 
   Phone, 
@@ -124,61 +125,49 @@ export default function ConsultationAppointments() {
 
   const startConsultation = async (appointment: Appointment) => {
     try {
-      // Update consultation status
+      // Generate Jitsi meeting link if no link exists
+      const meetingLink = appointment.consultation_link || generateJitsiLink(appointment.id);
+      
+      // Get doctor name for system message
+      const doctorName = user ? `Dr. ${(await supabase.from('profiles').select('first_name, last_name').eq('id', user.id).single()).data?.first_name || 'Doctor'}` : 'Doctor';
+
+      // Update consultation status with link and session start
       const { error } = await supabase
         .from('appointments')
         .update({ 
           consultation_status: 'in_progress',
-          consultation_started_at: new Date().toISOString()
+          consultation_started_at: new Date().toISOString(),
+          session_start_time: new Date().toISOString(),
+          consultation_link: meetingLink,
+          is_chat_enabled: true
         })
         .eq('id', appointment.id);
 
       if (error) throw error;
+
+      // Auto-post system message with meeting link to chat
+      if (appointment.patient_info?.id && user) {
+        await supabase.from('direct_messages').insert({
+          sender_id: user.id,
+          receiver_id: appointment.patient_info.id,
+          content: `[SYSTEM] Video Consultation Started. Join your consultation with ${doctorName}: ${meetingLink}`
+        });
+      }
 
       // Send notification to patient
       if (appointment.patient_info?.id) {
         await supabase.rpc('send_notification', {
           _user_id: appointment.patient_info.id,
           _title: 'Consultation Started',
-          _message: 'Your doctor has started the consultation. Please join now.',
+          _message: `Your doctor has started the consultation. Join now: ${meetingLink}`,
           _type: 'info',
-          _link: appointment.consultation_link || '/dashboard',
+          _link: meetingLink,
         });
       }
 
-      // Open the appropriate platform
-      const platform = appointment.consultation_platform;
-      let url = appointment.consultation_link || '';
-
-      if (!url) {
-        switch (platform) {
-          case 'zoom':
-            url = 'https://zoom.us/start';
-            break;
-          case 'google-meet':
-            url = 'https://meet.google.com/new';
-            break;
-          case 'whatsapp':
-            if (appointment.patient_info?.phone) {
-              url = `https://wa.me/${appointment.patient_info.phone.replace(/\D/g, '')}`;
-            } else {
-              toast.error('Patient phone number not available');
-              return;
-            }
-            break;
-          case 'phone':
-            if (appointment.patient_info?.phone) {
-              url = `tel:${appointment.patient_info.phone}`;
-            } else {
-              toast.error('Patient phone number not available');
-              return;
-            }
-            break;
-        }
-      }
-
-      if (url) {
-        window.open(url, '_blank');
+      // Open the meeting link
+      if (meetingLink) {
+        window.open(meetingLink, '_blank');
       }
 
       toast.success('Consultation started!');
@@ -196,18 +185,28 @@ export default function ConsultationAppointments() {
         .update({ 
           status: 'completed',
           consultation_status: 'completed',
-          consultation_ended_at: new Date().toISOString()
+          consultation_ended_at: new Date().toISOString(),
+          session_end_time: new Date().toISOString()
         })
         .eq('id', appointmentId);
 
       if (error) throw error;
+
+      // Auto-post system message about consultation end
+      if (patientId && user) {
+        await supabase.from('direct_messages').insert({
+          sender_id: user.id,
+          receiver_id: patientId,
+          content: '[SYSTEM] Consultation ended. You can still send follow-up messages for the next 24 hours.'
+        });
+      }
 
       // Send notification to patient
       if (patientId) {
         await supabase.rpc('send_notification', {
           _user_id: patientId,
           _title: 'Consultation Completed',
-          _message: 'Your consultation has been completed. You can view your prescription in your dashboard.',
+          _message: 'Your consultation has been completed. You can send follow-up messages for 24 hours.',
           _type: 'success',
           _link: '/dashboard',
         });
