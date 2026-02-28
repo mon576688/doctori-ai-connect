@@ -7,6 +7,7 @@ interface SEOProps {
   ogImage?: string;
   ogType?: 'website' | 'article';
   noIndex?: boolean;
+  keywords?: string;
   article?: {
     publishedTime?: string;
     section?: string;
@@ -20,6 +21,7 @@ export const SEO = ({
   ogImage = '/og-image.png',
   ogType = 'website',
   noIndex = false,
+  keywords,
   article
 }: SEOProps) => {
   const siteUrl = 'https://doctoriai.com';
@@ -35,6 +37,7 @@ export const SEO = ({
     <Helmet>
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      {keywords && <meta name="keywords" content={keywords} />}
       {noIndex && <meta name="robots" content="noindex,nofollow" />}
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
       
