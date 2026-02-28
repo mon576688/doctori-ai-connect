@@ -1,40 +1,27 @@
 
-
-# Add "Daily Wellness" Button to Hero Section
+# Link Footer "Download Our Apps" Buttons to Install Page
 
 ## Overview
-Add a new button in the hero section that smooth-scrolls down to the Daily Wellness Practice section on the page.
+Replace the two non-functional "Google Play Store" and "Apple App Store" buttons in the footer with a single "Install App" button (or two buttons) that link to the existing `/install` page, where users get platform-specific guidance for adding the PWA to their home screen.
 
 ## Changes
 
-### 1. `src/pages/Index.tsx`
-- Add an `id="daily-wellness"` attribute to the Daily Wellness Practice section wrapper so it can be targeted by scroll
-- Add a new button in the hero's second row of buttons (after Health Reminders) that reads **"Daily Wellness"** with a `Heart` or `Sparkles` icon
-- The button uses an `<a href="#daily-wellness">` anchor (or `onClick` with `scrollIntoView`) to smooth-scroll to the section instead of navigating to a new page
-- Style: Use `variant="healing"` to give it a distinct green gradient look, matching the wellness theme
+### `src/components/Footer.tsx`
+- Wrap both buttons (or replace them) with `<Link to="/install">` from react-router-dom
+- Update button labels to "Install on Android" and "Install on iOS" (or a single "Install App" button)
+- Remove the "Coming soon to mobile platforms" text since the install feature is live
+- Update the section description to reflect PWA installation instead of app store downloads
 
-### 2. `src/locales/en/home.json`
-- Add a new key under `hero`: `"dailyWellness": "Daily Wellness"`
+### `src/locales/en/common.json`
+- Update `footer.googlePlay` to `"Install on Android"` 
+- Update `footer.appStore` to `"Install on iOS"`
+- Update `footer.comingSoon` to `"Available now — add to your home screen!"`
+- Update `footer.getOnMobile` to `"Install Doctori AI on your device"`
+
+### Other locale files (bn, es, fr, ar)
+- Update the same 4 keys with translated equivalents in each locale file
 
 ## Technical Details
-
-**Button placement** (line ~304, after the Health Reminders button):
-```tsx
-<button
-  onClick={() => document.getElementById('daily-wellness')?.scrollIntoView({ behavior: 'smooth' })}
->
-  <Sparkles /> Daily Wellness
-</button>
-```
-
-**Section anchor** (on the DailyWellnessPractice wrapper):
-```tsx
-<div id="daily-wellness">
-  <DailyWellnessPractice />
-</div>
-```
-
-- No new dependencies
-- No new routes needed -- it scrolls within the same page
-- Uses existing `variant="healing"` button style for visual distinction
-
+- Uses existing `Link` component (already imported in Footer.tsx) to navigate to `/install`
+- The `/install` page already handles platform detection and provides iOS/Android-specific instructions
+- No new dependencies needed
