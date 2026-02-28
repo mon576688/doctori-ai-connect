@@ -7,10 +7,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { MessageSquare, Send, Search, ArrowLeft, Plus, CheckCheck, Mail } from 'lucide-react';
+import { MessageSquare, Send, Search, ArrowLeft, CheckCheck, Mail, Video, Lock, Info } from 'lucide-react';
 import { format, isToday, isYesterday } from 'date-fns';
 
 interface Contact {
@@ -20,6 +19,7 @@ interface Contact {
   last_message?: string;
   last_message_time?: string;
   unread_count: number;
+  is_read_only?: boolean;
 }
 
 interface Message {
@@ -29,13 +29,6 @@ interface Message {
   content: string;
   is_read: boolean;
   created_at: string;
-}
-
-interface DoctorOption {
-  id: string;
-  name: string;
-  photo_url: string | null;
-  specialty: string | null;
 }
 
 function formatDateSeparator(dateStr: string): string {
@@ -59,6 +52,36 @@ function groupMessagesByDate(messages: Message[]): { date: string; messages: Mes
     }
   }
   return groups;
+}
+
+// System message renderer
+function SystemMessageCard({ content }: { content: string }) {
+  const text = content.replace('[SYSTEM] ', '');
+  const urlMatch = text.match(/(https?:\/\/[^\s]+)/);
+
+  return (
+    <div className="flex justify-center mb-3">
+      <div className="bg-accent/50 border border-accent rounded-lg px-4 py-3 max-w-[85%] text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 text-sm font-medium text-accent-foreground">
+          <Info className="h-4 w-4" />
+          System
+        </div>
+        <p className="text-sm text-accent-foreground/80">
+          {urlMatch ? text.replace(urlMatch[0], '').trim() : text}
+        </p>
+        {urlMatch && (
+          <Button
+            size="sm"
+            className="gap-2"
+            onClick={() => window.open(urlMatch[0], '_blank')}
+          >
+            <Video className="h-4 w-4" />
+            Join Consultation
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 }
 
 // Skeleton loaders
@@ -116,9 +139,6 @@ export function Inbox() {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
   const [isTyping, setIsTyping] = useState(false);
-  const [newConversationOpen, setNewConversationOpen] = useState(false);
-  const [doctorOptions, setDoctorOptions] = useState<DoctorOption[]>([]);
-  const [doctorsLoading, setDoctorsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingChannelRef = useRef<any>(null);
@@ -256,22 +276,54 @@ export function Inbox() {
     setContactsLoading(true);
 
     try {
-      const { data: sentMessages, error: sentError } = await supabase
+      // Fetch appointment-linked contacts
+      const { data: appointments, error: aptError } = await supabase
+        .from('appointments')
+        .select('user_id, doctor_id, is_chat_enabled, session_end_time')
+        .eq('is_chat_enabled', true)
+        .or(`user_id.eq.${user.id},doctor_id.eq.${user.id}`);
+
+      if (aptError) throw aptError;
+
+      // Also get contacts from existing messages (for backwards compatibility)
+      const { data: sentMessages } = await supabase
         .from('direct_messages')
         .select('receiver_id')
         .eq('sender_id', user.id);
 
-      const { data: receivedMessages, error: receivedError } = await supabase
+      const { data: receivedMessages } = await supabase
         .from('direct_messages')
         .select('sender_id')
         .eq('receiver_id', user.id);
 
-      if (sentError || receivedError) throw sentError || receivedError;
+      const contactIds = new Set<string>();
+      const contactReadOnlyMap = new Map<string, boolean>();
 
-      const contactIds = new Set([
-        ...(sentMessages?.map(m => m.receiver_id) || []),
-        ...(receivedMessages?.map(m => m.sender_id) || [])
-      ]);
+      // Add appointment contacts
+      (appointments || []).forEach(apt => {
+        const contactId = apt.user_id === user.id ? apt.doctor_id : apt.user_id;
+        contactIds.add(contactId);
+        
+        // Check read-only: if session_end_time is set and older than 24h
+        const currentReadOnly = contactReadOnlyMap.get(contactId);
+        if (apt.session_end_time) {
+          const endTime = new Date(apt.session_end_time);
+          const isExpired = endTime.getTime() < Date.now() - 24 * 60 * 60 * 1000;
+          // Only read-only if ALL appointments with this contact are expired
+          if (currentReadOnly === undefined) {
+            contactReadOnlyMap.set(contactId, isExpired);
+          } else if (!isExpired) {
+            contactReadOnlyMap.set(contactId, false);
+          }
+        } else {
+          // Active appointment (no end time) = not read-only
+          contactReadOnlyMap.set(contactId, false);
+        }
+      });
+
+      // Add message contacts (existing conversations)
+      (sentMessages || []).forEach(m => contactIds.add(m.receiver_id));
+      (receivedMessages || []).forEach(m => contactIds.add(m.sender_id));
 
       if (contactIds.size === 0) {
         setContacts([]);
@@ -309,7 +361,8 @@ export function Inbox() {
             photo_url: profile.photo_url,
             last_message: lastMsg?.content,
             last_message_time: lastMsg?.created_at,
-            unread_count: count || 0
+            unread_count: count || 0,
+            is_read_only: contactReadOnlyMap.get(profile.id) ?? false
           };
         })
       );
@@ -386,7 +439,7 @@ export function Inbox() {
       console.error('Error sending message:', error);
       toast({
         title: "Send Failed",
-        description: "Failed to send message",
+        description: "Failed to send message. You may only message doctors with an active appointment.",
         variant: "destructive"
       });
     } finally {
@@ -394,72 +447,12 @@ export function Inbox() {
     }
   };
 
-  // Fetch doctors from past appointments for new conversation
-  const fetchDoctorOptions = async () => {
-    if (!user) return;
-    setDoctorsLoading(true);
-    try {
-      const { data: appointments, error } = await supabase
-        .from('appointments')
-        .select('doctor_id')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      const doctorIds = [...new Set(appointments?.map(a => a.doctor_id) || [])];
-      const existingContactIds = new Set(contacts.map(c => c.id));
-      const newDoctorIds = doctorIds.filter(id => !existingContactIds.has(id));
-
-      if (newDoctorIds.length === 0) {
-        setDoctorOptions([]);
-        setDoctorsLoading(false);
-        return;
-      }
-
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, photo_url, provider_type')
-        .in('id', newDoctorIds);
-
-      const { data: doctors } = await supabase
-        .from('doctors')
-        .select('user_id, specialty')
-        .in('user_id', newDoctorIds);
-
-      const doctorMap = new Map(doctors?.map(d => [d.user_id, d.specialty]) || []);
-
-      setDoctorOptions(
-        (profiles || []).map(p => ({
-          id: p.id,
-          name: `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Unknown',
-          photo_url: p.photo_url,
-          specialty: doctorMap.get(p.id) || p.provider_type || null
-        }))
-      );
-    } catch (error) {
-      console.error('Error fetching doctor options:', error);
-    } finally {
-      setDoctorsLoading(false);
-    }
-  };
-
-  const startNewConversation = (doctor: DoctorOption) => {
-    const newContact: Contact = {
-      id: doctor.id,
-      name: doctor.name,
-      photo_url: doctor.photo_url,
-      unread_count: 0
-    };
-    setContacts(prev => [newContact, ...prev]);
-    setSelectedContact(newContact);
-    setNewConversationOpen(false);
-  };
-
   const filteredContacts = contacts.filter(c =>
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const messageGroups = groupMessagesByDate(messages);
+  const isReadOnly = selectedContact?.is_read_only ?? false;
 
   return (
     <Card className="h-[600px] flex flex-col">
@@ -472,7 +465,7 @@ export function Inbox() {
       <CardContent className="flex-1 flex overflow-hidden p-0">
         {/* Contacts List */}
         <div className={`w-full md:w-1/3 border-r flex flex-col ${selectedContact ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-3 border-b space-y-2">
+          <div className="p-3 border-b">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -482,50 +475,6 @@ export function Inbox() {
                 className="pl-9"
               />
             </div>
-            <Dialog open={newConversationOpen} onOpenChange={(open) => {
-              setNewConversationOpen(open);
-              if (open) fetchDoctorOptions();
-            }}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full gap-2">
-                  <Plus className="h-4 w-4" />
-                  New Conversation
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Start a New Conversation</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {doctorsLoading ? (
-                    <ContactsSkeleton />
-                  ) : doctorOptions.length === 0 ? (
-                    <p className="text-center text-muted-foreground py-6 text-sm">
-                      No new doctors to message. You can only start conversations with doctors from your past appointments.
-                    </p>
-                  ) : (
-                    doctorOptions.map((doc) => (
-                      <div
-                        key={doc.id}
-                        onClick={() => startNewConversation(doc)}
-                        className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-muted transition-colors"
-                      >
-                        <Avatar>
-                          <AvatarImage src={doc.photo_url || undefined} />
-                          <AvatarFallback>{doc.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{doc.name}</p>
-                          {doc.specialty && (
-                            <p className="text-sm text-muted-foreground">{doc.specialty}</p>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </DialogContent>
-            </Dialog>
           </div>
           <ScrollArea className="flex-1">
             {contactsLoading ? (
@@ -535,22 +484,10 @@ export function Inbox() {
                 <div className="rounded-full bg-muted p-4 mb-4">
                   <Mail className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="font-medium mb-1">No messages yet</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Start a conversation with your healthcare provider
+                <p className="font-medium mb-1">No conversations yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Your conversations will appear here once you book an appointment with a doctor.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => {
-                    setNewConversationOpen(true);
-                    fetchDoctorOptions();
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
-                  New Conversation
-                </Button>
               </div>
             ) : (
               filteredContacts.map((contact) => (
@@ -576,11 +513,16 @@ export function Inbox() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="font-medium truncate">{contact.name}</p>
-                      {contact.unread_count > 0 && (
-                        <Badge variant="default" className="ml-2">
-                          {contact.unread_count}
-                        </Badge>
-                      )}
+                      <div className="flex items-center gap-1">
+                        {contact.is_read_only && (
+                          <Lock className="h-3 w-3 text-muted-foreground" />
+                        )}
+                        {contact.unread_count > 0 && (
+                          <Badge variant="default" className="ml-1">
+                            {contact.unread_count}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                     {contact.last_message && (
                       <p className="text-sm text-muted-foreground truncate">
@@ -645,6 +587,12 @@ export function Inbox() {
                         </div>
                         {group.messages.map((msg) => {
                           const isMine = msg.sender_id === user?.id;
+                          const isSystem = msg.content.startsWith('[SYSTEM]');
+
+                          if (isSystem) {
+                            return <SystemMessageCard key={msg.id} content={msg.content} />;
+                          }
+
                           return (
                             <div
                               key={msg.id}
@@ -684,21 +632,28 @@ export function Inbox() {
                 )}
               </ScrollArea>
 
-              {/* Message Input */}
-              <div className="p-3 border-t flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => {
-                    setNewMessage(e.target.value);
-                    broadcastTyping();
-                  }}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                />
-                <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
+              {/* Message Input or Read-Only Banner */}
+              {isReadOnly ? (
+                <div className="p-3 border-t bg-muted/50 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                  <Lock className="h-4 w-4" />
+                  This conversation is read-only. Book a new appointment to message again.
+                </div>
+              ) : (
+                <div className="p-3 border-t flex gap-2">
+                  <Input
+                    placeholder="Type a message..."
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      broadcastTyping();
+                    }}
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  />
+                  <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-muted-foreground">
@@ -707,7 +662,7 @@ export function Inbox() {
                   <MessageSquare className="h-12 w-12" />
                 </div>
                 <p className="font-medium mb-1">Select a conversation</p>
-                <p className="text-sm">or start a new one with your doctor</p>
+                <p className="text-sm">Conversations are created when you book an appointment</p>
               </div>
             </div>
           )}
