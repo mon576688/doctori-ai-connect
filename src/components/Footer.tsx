@@ -123,14 +123,18 @@ export const Footer = () => {
             <h3 className="font-semibold">{t('footer.downloadApps')}</h3>
             <p className="text-sm text-muted-foreground">{t('footer.getOnMobile')}</p>
             <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <Download className="h-4 w-4 mr-2" />
-                {t('footer.googlePlay')}
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start">
-                <Smartphone className="h-4 w-4 mr-2" />
-                {t('footer.appStore')}
-              </Button>
+              <Link to="/install">
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Download className="h-4 w-4 mr-2" />
+                  {t('footer.googlePlay')}
+                </Button>
+              </Link>
+              <Link to="/install">
+                <Button variant="outline" size="sm" className="w-full justify-start">
+                  <Smartphone className="h-4 w-4 mr-2" />
+                  {t('footer.appStore')}
+                </Button>
+              </Link>
             </div>
             <p className="text-xs text-muted-foreground">{t('footer.comingSoon')}</p>
           </div>
