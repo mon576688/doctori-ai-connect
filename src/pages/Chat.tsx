@@ -5,7 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb, CheckCircle } from "lucide-react";
+import { MessageCircle, Send, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb, CheckCircle } from "lucide-react";
+
+const AiAvatar = ({ size = "sm" }: { size?: "sm" | "md" }) => (
+  <div className={`${size === "md" ? "h-6 w-6" : "h-5 w-5"} rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0`}>
+    <span className={`font-bold text-white ${size === "md" ? "text-[10px]" : "text-[8px]"}`}>AI</span>
+  </div>
+);
 import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import ChatHistory from "@/components/chat/ChatHistory";
 import { useNavigate } from "react-router-dom";
@@ -317,7 +323,7 @@ const Chat = () => {
                     </Sheet>
                   )}
                   <div className="bg-white/20 p-2 rounded-lg">
-                    <Bot className="h-6 w-6" />
+                    <AiAvatar size="md" />
                   </div>
                   <span>{t('headerTitle')}</span>
                   <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
@@ -350,7 +356,7 @@ const Chat = () => {
                         {message.role === 'user' ? (
                           <User className="h-4 w-4" />
                         ) : (
-                          <Bot className="h-4 w-4" />
+                          <AiAvatar />
                         )}
                       </div>
                       <div className={`flex-1 p-3 shadow-sm ${
@@ -375,8 +381,8 @@ const Chat = () => {
 
                   {chat.sessionState.isLoading && (
                     <div className="flex items-start space-x-3">
-                      <div className="p-2 rounded-lg bg-muted text-foreground">
-                        <Bot className="h-4 w-4" />
+                      <div className="p-2 rounded-lg bg-transparent">
+                        <AiAvatar />
                       </div>
                       <div className="flex-1 p-3 rounded-2xl rounded-bl-sm bg-muted/50 backdrop-blur-sm border border-border/30 mr-12">
                         <div className="flex items-center space-x-2">
