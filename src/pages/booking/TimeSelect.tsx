@@ -40,18 +40,87 @@ export default function TimeSelect() {
 
     const fetchTimeSlots = async () => {
       try {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+
+        // First check availability_dates
         const { data, error } = await supabase
           .from('availability_dates')
           .select('time_slot')
           .eq('provider_id', id)
-          .eq('date', format(selectedDate, 'yyyy-MM-dd'))
+          .eq('date', dateStr)
           .eq('is_available', true)
           .eq('is_booked', false);
 
         if (error) throw error;
 
-        const slots = (data || []).map((d) => d.time_slot);
-        const grouped = groupTimeSlots(slots);
+        let slots = (data || []).map((d) => d.time_slot);
+
+        // If no specific dates, fall back to recurring weekly slots
+        if (slots.length === 0) {
+          const dayOfWeek = selectedDate.getDay();
+          const { data: weeklySlots, error: slotsError } = await supabase
+            .from('availability_slots')
+            .select('start_time, end_time')
+            .eq('provider_id', id)
+            .eq('day_of_week', dayOfWeek)
+            .eq('is_available', true);
+
+          if (!slotsError && weeklySlots && weeklySlots.length > 0) {
+            // Generate hourly time slots from each range
+            const generatedSlots: string[] = [];
+            for (const slot of weeklySlots) {
+              const startHour = parseInt(slot.start_time.split(':')[0], 10);
+              const endHour = parseInt(slot.end_time.split(':')[0], 10);
+              for (let h = startHour; h < endHour; h++) {
+                generatedSlots.push(`${h.toString().padStart(2, '0')}:00:00`);
+              }
+            }
+
+            // Filter out already-booked appointments
+            const { data: bookedAppts } = await supabase
+              .from('appointments')
+              .select('appointment_date')
+              .eq('doctor_id', id)
+              .eq('status', 'scheduled')
+              .gte('appointment_date', `${dateStr}T00:00:00`)
+              .lte('appointment_date', `${dateStr}T23:59:59`);
+
+            const bookedTimes = new Set(
+              (bookedAppts || []).map((a) => {
+                const d = new Date(a.appointment_date);
+                return `${d.getHours().toString().padStart(2, '0')}:00:00`;
+              })
+            );
+
+            // Also filter out slots already in availability_dates as booked
+            const { data: bookedDates } = await supabase
+              .from('availability_dates')
+              .select('time_slot')
+              .eq('provider_id', id)
+              .eq('date', dateStr)
+              .eq('is_booked', true);
+
+            const bookedDateTimes = new Set(
+              (bookedDates || []).map((d) => d.time_slot)
+            );
+
+            slots = generatedSlots.filter(
+              (s) => !bookedTimes.has(s) && !bookedDateTimes.has(s)
+            );
+          }
+        }
+
+        // Format time slots for display (HH:MM format)
+        const displaySlots = slots.map((s) => {
+          const parts = s.split(':');
+          const hour = parseInt(parts[0], 10);
+          const minute = parts[1] || '00';
+          const ampm = hour >= 12 ? 'PM' : 'AM';
+          const displayHour = hour % 12 || 12;
+          return `${displayHour}:${minute} ${ampm}`;
+        });
+
+        const grouped = groupTimeSlots(displaySlots);
         setTimeSlots(grouped);
       } catch (error) {
         console.error('Error fetching time slots:', error);
