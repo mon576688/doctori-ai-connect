@@ -236,10 +236,12 @@ const Chat = () => {
   };
 
   const hasUserMessages = chat.sessionState.messages.some((m) => m.role === 'user');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [chat.sessionState.messages, chat.sessionState.isLoading]);
 
   const getPlaceholder = () => {
