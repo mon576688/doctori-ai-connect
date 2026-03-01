@@ -339,9 +339,9 @@ This is not medical advice. Always consult with a qualified healthcare provider 
 
 I'm here to help you understand your symptoms and guide you toward appropriate medical care. Please feel free to describe your symptoms or health concerns in as much detail as you're comfortable sharing.
 
-⚠️ **IMPORTANT EMERGENCY NOTICE**: If you're experiencing a medical emergency (chest pain, difficulty breathing, severe bleeding, etc.), please call ${language === 'bn' ? '999' : '911'} immediately or go to your nearest emergency room.
+⚠️ IMPORTANT EMERGENCY NOTICE: If you're experiencing a medical emergency (chest pain, difficulty breathing, severe bleeding, etc.), please call ${language === 'bn' ? '999' : '911'} immediately or go to your nearest emergency room.
 
-ℹ️ **Medical Disclaimer**: I provide general health information only and am not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for personal health concerns.
+ℹ️ Medical Disclaimer: I provide general health information only and am not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider for personal health concerns.
 
 What brings you here today? I'm listening and ready to help guide you toward the right care. 💙`;
 
