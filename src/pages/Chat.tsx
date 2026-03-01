@@ -5,7 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MessageCircle, Send, Bot, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb, CheckCircle } from "lucide-react";
+import { MessageCircle, Send, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb, CheckCircle } from "lucide-react";
+
+const AiAvatar = ({ size = "sm" }: { size?: "sm" | "md" }) => (
+  <div className={`${size === "md" ? "h-6 w-6" : "h-5 w-5"} rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0`}>
+    <span className={`font-bold text-white ${size === "md" ? "text-[10px]" : "text-[8px]"}`}>AI</span>
+  </div>
+);
 import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import ChatHistory from "@/components/chat/ChatHistory";
 import { useNavigate } from "react-router-dom";
