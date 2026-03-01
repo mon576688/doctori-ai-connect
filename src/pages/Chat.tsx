@@ -412,6 +412,7 @@ const Chat = () => {
                       </div>
                     </div>
                   }
+                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input Area */}
