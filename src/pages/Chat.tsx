@@ -381,8 +381,8 @@ const Chat = () => {
 
                   {chat.sessionState.isLoading && (
                     <div className="flex items-start space-x-3">
-                      <div className="p-2 rounded-lg bg-muted text-foreground">
-                        <Bot className="h-4 w-4" />
+                      <div className="p-2 rounded-lg bg-transparent">
+                        <AiAvatar />
                       </div>
                       <div className="flex-1 p-3 rounded-2xl rounded-bl-sm bg-muted/50 backdrop-blur-sm border border-border/30 mr-12">
                         <div className="flex items-center space-x-2">
