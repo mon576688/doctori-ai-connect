@@ -356,7 +356,7 @@ const Chat = () => {
                         {message.role === 'user' ? (
                           <User className="h-4 w-4" />
                         ) : (
-                          <Bot className="h-4 w-4" />
+                          <AiAvatar />
                         )}
                       </div>
                       <div className={`flex-1 p-3 shadow-sm ${
