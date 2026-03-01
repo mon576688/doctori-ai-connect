@@ -236,10 +236,12 @@ const Chat = () => {
   };
 
   const hasUserMessages = chat.sessionState.messages.some((m) => m.role === 'user');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [chat.sessionState.messages, chat.sessionState.isLoading]);
 
   const getPlaceholder = () => {
@@ -356,7 +358,7 @@ const Chat = () => {
 
               <CardContent className="p-0">
                 {/* Messages Area */}
-                <div className="h-[400px] md:h-[500px] overflow-y-auto p-4 md:p-6 space-y-4">
+                <div ref={messagesContainerRef} className="h-[400px] md:h-[500px] overflow-y-auto p-4 md:p-6 space-y-4">
                   {chat.sessionState.messages.map((message, index) =>
                   <div
                     key={`${message.id}-${index}`}
@@ -412,7 +414,6 @@ const Chat = () => {
                       </div>
                     </div>
                   }
-                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input Area */}
