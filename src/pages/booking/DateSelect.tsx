@@ -7,7 +7,7 @@ import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { BookingProgress } from '@/components/booking/BookingProgress';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 
 export default function DateSelect() {
   const { id } = useParams<{ id: string }>();
@@ -81,6 +81,7 @@ export default function DateSelect() {
 
     const fetchAvailability = async () => {
       try {
+        // First check availability_dates (specific dates)
         const { data, error } = await supabase
           .from('availability_dates')
           .select('date')
@@ -92,7 +93,30 @@ export default function DateSelect() {
         if (error) throw error;
 
         const uniqueDates = [...new Set((data || []).map((d) => d.date))];
-        const dates = uniqueDates.map((d) => new Date(d));
+        let dates = uniqueDates.map((d) => new Date(d));
+
+        // If no specific dates, fall back to recurring weekly slots
+        if (dates.length === 0) {
+          const { data: weeklySlots, error: slotsError } = await supabase
+            .from('availability_slots')
+            .select('day_of_week, start_time, end_time')
+            .eq('provider_id', id)
+            .eq('is_available', true);
+
+          if (!slotsError && weeklySlots && weeklySlots.length > 0) {
+            const generated: Date[] = [];
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            for (let i = 0; i < 14; i++) {
+              const d = addDays(today, i);
+              if (weeklySlots.some((s) => s.day_of_week === d.getDay())) {
+                generated.push(d);
+              }
+            }
+            dates = generated;
+          }
+        }
+
         setAvailableDates(dates);
       } catch (error) {
         console.error('Error fetching availability:', error);
