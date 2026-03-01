@@ -7,11 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MessageCircle, Send, User, AlertTriangle, Phone, Download, History, Plus, FileDown, Lightbulb, CheckCircle } from "lucide-react";
 
-const AiAvatar = ({ size = "sm" }: { size?: "sm" | "md" }) => (
-  <div className={`${size === "md" ? "h-6 w-6" : "h-5 w-5"} rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0`}>
+const AiAvatar = ({ size = "sm" }: {size?: "sm" | "md";}) =>
+<div className={`${size === "md" ? "h-6 w-6" : "h-5 w-5"} rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shrink-0`}>
     <span className={`font-bold text-white ${size === "md" ? "text-[10px]" : "text-[8px]"}`}>AI</span>
-  </div>
-);
+  </div>;
+
 import InlineProviderCards from "@/components/chat/InlineProviderCards";
 import ChatHistory from "@/components/chat/ChatHistory";
 import { useNavigate } from "react-router-dom";
@@ -63,7 +63,7 @@ const Chat = () => {
   const isMobile = useIsMobile();
   const [messageInput, setMessageInput] = useState("");
   const [historyOpen, setHistoryOpen] = useState(false);
-  
+
   // Provider recommendations state
   const [showRecommendations, setShowRecommendations] = useState(false);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -81,10 +81,10 @@ const Chat = () => {
   const fetchNearbyProviders = useCallback(async (specialty: string) => {
     setLoadingProviders(true);
     setShowRecommendations(true);
-    
+
     try {
       const locationResult = await getCurrentLocation();
-      
+
       let searchParams: any = {
         specialty: specialty || 'General Practice',
         limit: 8
@@ -96,12 +96,12 @@ const Chat = () => {
         setSearchLocation('Your Location');
       } else {
         if (user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('city')
-            .eq('id', user.id)
-            .single();
-          
+          const { data: profile } = await supabase.
+          from('profiles').
+          select('city').
+          eq('id', user.id).
+          single();
+
           if (profile?.city) {
             searchParams.city = profile.city;
             setSearchLocation(profile.city);
@@ -178,13 +178,13 @@ const Chat = () => {
     if (chat.sessionState.phase === 'initial' && !isHealthRelated(content)) {
       toast({
         title: "Health Topics Only",
-        description: "Please describe a health symptom or medical concern to get started.",
+        description: "Please describe a health symptom or medical concern to get started."
       });
       return;
     }
 
     setMessageInput("");
-    chat.sendMessage(content).catch(error => {
+    chat.sendMessage(content).catch((error) => {
       console.error('Error sending message:', error);
     });
   };
@@ -211,9 +211,9 @@ const Chat = () => {
   const handleDownloadPDF = async () => {
     try {
       const userName = user?.email?.split('@')[0] || 'Patient';
-      const lastAssistantMsg = [...chat.sessionState.messages]
-        .reverse()
-        .find(m => m.role === 'assistant');
+      const lastAssistantMsg = [...chat.sessionState.messages].
+      reverse().
+      find((m) => m.role === 'assistant');
 
       await PDFService.generateHealthReport({
         patientName: userName,
@@ -221,11 +221,11 @@ const Chat = () => {
         symptoms: chat.sessionState.symptoms,
         aiAssessment: lastAssistantMsg?.content || 'Assessment completed.',
         recommendations: [
-          `Recommended specialty: ${chat.sessionState.specialtyRecommendation || 'General Practice'}`,
-          'Follow up with a healthcare provider for professional advice.',
-        ],
+        `Recommended specialty: ${chat.sessionState.specialtyRecommendation || 'General Practice'}`,
+        'Follow up with a healthcare provider for professional advice.'],
+
         urgencyLevel: chat.sessionState.urgencyLevel,
-        doctorRecommendation: `We recommend consulting a ${chat.sessionState.specialtyRecommendation || 'General Practitioner'}.`,
+        doctorRecommendation: `We recommend consulting a ${chat.sessionState.specialtyRecommendation || 'General Practitioner'}.`
       });
 
       toast({ title: 'PDF Downloaded', description: 'Your health report has been saved.' });
@@ -235,21 +235,21 @@ const Chat = () => {
     }
   };
 
-  const hasUserMessages = chat.sessionState.messages.some(m => m.role === 'user');
+  const hasUserMessages = chat.sessionState.messages.some((m) => m.role === 'user');
 
   const getPlaceholder = () => {
-    return isAuthenticated 
-      ? t('placeholderAuthenticated')
-      : t('placeholderGuest');
+    return isAuthenticated ?
+    t('placeholderAuthenticated') :
+    t('placeholderGuest');
   };
 
   const formatMessage = (content: string) => {
-    return content.split('\n').map((line, index) => (
-      <span key={index}>
+    return content.split('\n').map((line, index) =>
+    <span key={index}>
         {line}
         <br />
       </span>
-    ));
+    );
   };
 
   const getEmergencyNumber = () => {
@@ -265,29 +265,29 @@ const Chat = () => {
     </div>;
   }
 
-  const historyPanel = (
-    <ChatHistory
-      sessions={'sessions' in authenticatedChat ? authenticatedChat.sessions : []}
-      activeSessionId={chat.sessionState.sessionId}
-      onSelectSession={handleSelectSession}
-      onNewChat={handleNewChat}
-      isAuthenticated={!!isAuthenticated}
-      loading={'sessionsLoading' in authenticatedChat ? authenticatedChat.sessionsLoading : false}
-    />
-  );
+  const historyPanel =
+  <ChatHistory
+    sessions={'sessions' in authenticatedChat ? authenticatedChat.sessions : []}
+    activeSessionId={chat.sessionState.sessionId}
+    onSelectSession={handleSelectSession}
+    onNewChat={handleNewChat}
+    isAuthenticated={!!isAuthenticated}
+    loading={'sessionsLoading' in authenticatedChat ? authenticatedChat.sessionsLoading : false} />;
+
+
 
   return (
     <div className="min-h-screen bg-background/60 backdrop-blur-xl p-4 md:p-6">
-      <SEO 
+      <SEO
         title={PAGE_SEO.chat.title}
         description={PAGE_SEO.chat.description}
-        canonicalPath={PAGE_SEO.chat.canonicalPath}
-      />
+        canonicalPath={PAGE_SEO.chat.canonicalPath} />
+
       <div className="max-w-6xl mx-auto">
         <div className="flex gap-4">
           {/* Desktop History Sidebar */}
-          {!isMobile && (
-            <div className="w-72 shrink-0">
+          {!isMobile &&
+          <div className="w-72 shrink-0">
               <Card className="shadow-xl border-0 bg-white/70 backdrop-blur-md border border-white/20 h-[calc(100vh-8rem)] sticky top-4">
                 <CardHeader className="border-b bg-gradient-to-r from-primary/90 to-primary text-primary-foreground rounded-t-lg py-3 px-4">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -300,7 +300,7 @@ const Chat = () => {
                 </CardContent>
               </Card>
             </div>
-          )}
+          }
 
           {/* Main Chat Area */}
           <div className="flex-1 min-w-0">
@@ -308,8 +308,8 @@ const Chat = () => {
               <CardHeader className="border-b bg-gradient-to-r from-primary/90 to-primary text-primary-foreground rounded-t-lg">
                 <CardTitle className="text-xl md:text-2xl font-bold flex items-center space-x-3">
                   {/* Mobile History Button */}
-                  {isMobile && (
-                    <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+                  {isMobile &&
+                  <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
                       <SheetTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 shrink-0">
                           <History className="h-5 w-5" />
@@ -321,7 +321,7 @@ const Chat = () => {
                         </div>
                       </SheetContent>
                     </Sheet>
-                  )}
+                  }
                   <div className="bg-white/20 p-2 rounded-lg">
                     <AiAvatar size="md" />
                   </div>
@@ -330,57 +330,57 @@ const Chat = () => {
                     <CheckCircle className="h-3.5 w-3.5" />
                     <span className="text-xs font-medium">Verified</span>
                   </div>
-                  {isAuthenticated && (
-                    <Badge variant="secondary" className="bg-white/20 text-primary-foreground">
+                  {isAuthenticated &&
+                  <Badge variant="secondary" className="bg-white/20 text-primary-foreground">
                       {t('premium')}
                     </Badge>
-                  )}
+                  }
                 </CardTitle>
               </CardHeader>
 
               <CardContent className="p-0">
                 {/* Messages Area */}
                 <div className="h-[400px] md:h-[500px] overflow-y-auto p-4 md:p-6 space-y-4">
-                  {chat.sessionState.messages.map((message, index) => (
-                    <div
-                      key={`${message.id}-${index}`}
-                      className={`flex items-start space-x-3 ${
-                        message.role === 'user' ? 'flex-row-reverse space-x-reverse' : 'flex-row'
-                      }`}
-                    >
+                  {chat.sessionState.messages.map((message, index) =>
+                  <div
+                    key={`${message.id}-${index}`}
+                    className={`flex items-start space-x-3 ${
+                    message.role === 'user' ? 'flex-row-reverse space-x-reverse' : 'flex-row'}`
+                    }>
+
                       <div className={`p-2 rounded-lg ${
-                        message.role === 'user' 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'bg-muted text-foreground'
-                      }`}>
-                        {message.role === 'user' ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <AiAvatar />
-                        )}
+                    message.role === 'user' ?
+                    'bg-primary text-primary-foreground' :
+                    'bg-muted text-foreground'}`
+                    }>
+                        {message.role === 'user' ?
+                      <User className="h-4 w-4" /> :
+
+                      <AiAvatar />
+                      }
                       </div>
                       <div className={`flex-1 p-3 shadow-sm ${
-                        message.role === 'user' 
-                          ? 'bg-primary text-primary-foreground ml-12 rounded-2xl rounded-br-sm' 
-                          : 'bg-muted/50 backdrop-blur-sm border border-border/30 mr-12 rounded-2xl rounded-bl-sm'
-                      } ${message.isUrgent ? 'border-red-500 border-2' : ''}`}>
+                    message.role === 'user' ?
+                    'bg-primary text-primary-foreground ml-12 rounded-2xl rounded-br-sm' :
+                    'bg-muted/50 backdrop-blur-sm border border-border/30 mr-12 rounded-2xl rounded-bl-sm'} ${
+                    message.isUrgent ? 'border-red-500 border-2' : ''}`}>
                         <div className="text-sm md:text-base whitespace-pre-wrap">
                           {formatMessage(message.content)}
                         </div>
-                        {message.role === 'assistant' && message.suggestedProviders && message.suggestedProviders.length > 0 && (
-                          <InlineProviderCards providers={message.suggestedProviders} />
-                        )}
+                        {message.role === 'assistant' && message.suggestedProviders && message.suggestedProviders.length > 0 &&
+                      <InlineProviderCards providers={message.suggestedProviders} />
+                      }
                         <div className={`text-xs mt-2 ${
-                          message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                        }`}>
+                      message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'}`
+                      }>
                           {message.timestamp.toLocaleTimeString()}
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
 
-                  {chat.sessionState.isLoading && (
-                    <div className="flex items-start space-x-3">
+                  {chat.sessionState.isLoading &&
+                  <div className="flex items-start space-x-3">
                       <div className="p-2 rounded-lg bg-transparent">
                         <AiAvatar />
                       </div>
@@ -395,14 +395,14 @@ const Chat = () => {
                         </div>
                       </div>
                     </div>
-                  )}
+                  }
                 </div>
 
                 {/* Input Area */}
                 <div className="p-4 md:p-6 border-t space-y-4">
                   {/* Symptom Tips for New Users */}
-                  {chat.sessionState.phase === 'initial' && !hasUserMessages && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                  {chat.sessionState.phase === 'initial' && !hasUserMessages &&
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
                       <div className="flex items-center gap-2 mb-2">
                         <Lightbulb className="h-4 w-4 text-amber-600" />
                         <span className="text-sm font-semibold text-amber-800">Tips for describing symptoms</span>
@@ -415,10 +415,10 @@ const Chat = () => {
                         <li>Mention if symptoms worsen at specific times</li>
                       </ul>
                     </div>
-                  )}
+                  }
 
-                  {chat.sessionState.urgencyLevel === "emergency" && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  {chat.sessionState.urgencyLevel === "emergency" &&
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                       <div className="flex items-center space-x-2 mb-2">
                         <AlertTriangle className="h-5 w-5 text-red-600" />
                         <span className="text-red-800 font-semibold text-sm">{t('urgentTitle')}</span>
@@ -431,30 +431,30 @@ const Chat = () => {
                         {t('callEmergency')}
                       </Button>
                     </div>
-                  )}
+                  }
 
                   <div className="relative flex items-center">
-                    <Textarea 
+                    <Textarea
                       value={messageInput}
                       onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyPress={handleKeyPress} 
+                      onKeyPress={handleKeyPress}
                       placeholder={getPlaceholder()}
-                      className="flex-1 min-h-[48px] max-h-[120px] text-sm md:text-base resize-none rounded-full bg-muted/30 border-border/50 focus:border-primary/50 pr-14 pl-5 py-3" 
-                      disabled={chat.sessionState.isLoading} 
-                    />
-                    <Button 
-                      onClick={handleSendMessage} 
-                      variant="default" 
-                      size="icon" 
-                      className="absolute right-2 rounded-full w-10 h-10" 
-                      disabled={chat.sessionState.isLoading}
-                    >
+                      className="flex-1 min-h-[48px] max-h-[120px] text-sm md:text-base resize-none rounded-full bg-muted/30 border-border/50 focus:border-primary/50 pr-14 pl-5 py-3"
+                      disabled={chat.sessionState.isLoading} />
+
+                    <Button
+                      onClick={handleSendMessage}
+                      variant="default"
+                      size="icon"
+                      className="absolute right-2 rounded-full w-10 h-10"
+                      disabled={chat.sessionState.isLoading}>
+
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
 
-                  {chat.sessionState.phase === "summary" && (
-                    <div className="flex gap-2">
+                  {chat.sessionState.phase === "summary" &&
+                  <div className="flex gap-2">
                       <Button onClick={handleViewSummary} variant="secondary" size="sm" className="flex-1">
                         <Download className="h-4 w-4 mr-2" />
                         {t('viewSummary')}
@@ -464,7 +464,7 @@ const Chat = () => {
                         Download PDF
                       </Button>
                     </div>
-                  )}
+                  }
 
                   <div className="bg-muted/30 border border-border/30 rounded-lg p-3">
                     <div className="text-center">
@@ -480,20 +480,20 @@ const Chat = () => {
               </CardContent>
             </Card>
 
-            {showRecommendations && (
-              <ProviderRecommendations
-                providers={providers}
-                hospitals={hospitals}
-                specialty={chat.sessionState.specialtyRecommendation || 'General Practice'}
-                isLoading={loadingProviders}
-                searchLocation={searchLocation}
-              />
-            )}
+            {showRecommendations &&
+            <ProviderRecommendations
+              providers={providers}
+              hospitals={hospitals}
+              specialty={chat.sessionState.specialtyRecommendation || 'General Practice'}
+              isLoading={loadingProviders}
+              searchLocation={searchLocation} />
+
+            }
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Chat;
