@@ -244,12 +244,23 @@ const Chat = () => {
   };
 
   const formatMessage = (content: string) => {
-    return content.split('\n').map((line, index) =>
-    <span key={index}>
-        {line}
-        <br />
-      </span>
-    );
+    return content.split('\n').map((line, index) => {
+      const segments = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
+      return (
+        <span key={index}>
+          {segments.map((seg, i) => {
+            if (seg.startsWith('**') && seg.endsWith('**')) {
+              return <strong key={i}>{seg.slice(2, -2)}</strong>;
+            }
+            if (seg.startsWith('*') && seg.endsWith('*')) {
+              return <em key={i}>{seg.slice(1, -1)}</em>;
+            }
+            return <span key={i}>{seg}</span>;
+          })}
+          <br />
+        </span>
+      );
+    });
   };
 
   const getEmergencyNumber = () => {
