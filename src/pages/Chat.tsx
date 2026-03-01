@@ -323,7 +323,7 @@ const Chat = () => {
                     </Sheet>
                   )}
                   <div className="bg-white/20 p-2 rounded-lg">
-                    <Bot className="h-6 w-6" />
+                    <AiAvatar size="md" />
                   </div>
                   <span>{t('headerTitle')}</span>
                   <div className="flex items-center gap-1 bg-white/20 rounded-full px-2 py-0.5">
