@@ -236,6 +236,11 @@ const Chat = () => {
   };
 
   const hasUserMessages = chat.sessionState.messages.some((m) => m.role === 'user');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chat.sessionState.messages, chat.sessionState.isLoading]);
 
   const getPlaceholder = () => {
     return isAuthenticated ?
