@@ -776,6 +776,7 @@ export type Database = {
       }
       notifications: {
         Row: {
+          category: string
           created_at: string | null
           id: string
           is_read: boolean | null
@@ -786,6 +787,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string
           created_at?: string | null
           id?: string
           is_read?: boolean | null
@@ -796,6 +798,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string
           created_at?: string | null
           id?: string
           is_read?: boolean | null
@@ -1655,16 +1658,28 @@ export type Database = {
         Args: { _action: string; _metadata?: Json }
         Returns: undefined
       }
-      send_notification: {
-        Args: {
-          _link?: string
-          _message: string
-          _title: string
-          _type?: string
-          _user_id: string
-        }
-        Returns: string
-      }
+      send_notification:
+        | {
+            Args: {
+              _link?: string
+              _message: string
+              _title: string
+              _type?: string
+              _user_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              _category?: string
+              _link?: string
+              _message: string
+              _title: string
+              _type?: string
+              _user_id: string
+            }
+            Returns: string
+          }
       verify_admin_access: { Args: never; Returns: boolean }
     }
     Enums: {
