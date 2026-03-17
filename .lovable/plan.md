@@ -1,146 +1,138 @@
 
 
-# Fix: Bridge Availability Slots to Booking Flow
+# Expand Doctori AI to 300–500 SEO-Optimized Pages
 
-## Problem
-The provider dashboard saves weekly recurring schedules to `availability_slots` (e.g., Monday 9:00-17:00). But the booking flow (`DateSelect.tsx`, `TimeSelect.tsx`) only queries `availability_dates` (specific date+time entries). Real providers who set their schedule through the dashboard have zero `availability_dates` rows, so the booking page shows "No available dates."
+## Architecture Overview
 
-## Solution
-Update `DateSelect.tsx` and `TimeSelect.tsx` to also check `availability_slots` when no `availability_dates` exist. This generates available dates dynamically from the provider's weekly recurring schedule.
-
----
-
-## Changes
-
-### 1. `src/pages/booking/DateSelect.tsx`
-Update `fetchAvailability` to:
-- First check `availability_dates` (existing logic, for providers who use specific dates)
-- If none found, fall back to `availability_slots` and generate dates for the next 14 days based on the provider's weekly schedule
-- Combine both sources for the calendar
+Create three large static data modules (symptoms, conditions, expanded blogs) with rich medical content, two new page templates with structured data, listing/index pages, and a comprehensive static sitemap covering all URLs.
 
 ```text
-Logic:
-1. Query availability_dates for future dates (existing)
-2. Query availability_slots for the provider
-3. For each slot, generate dates for the next 14 days matching that day_of_week
-4. Exclude dates already in availability_dates or past dates
-5. Merge into the available dates list
+src/data/
+  symptoms.ts        ← 150 symptom entries with full content
+  conditions.ts      ← 150 condition entries with full content
+  blogs.ts           ← expanded to ~100 blog posts
+
+src/pages/
+  SymptomPage.tsx    ← /symptoms/:slug template
+  ConditionPage.tsx  ← /conditions/:slug template
+  SymptomsIndex.tsx  ← /symptoms listing
+  ConditionsIndex.tsx← /conditions listing
+
+public/
+  sitemap.xml        ← auto-includes all 400+ URLs
 ```
 
-### 2. `src/pages/booking/TimeSelect.tsx`
-Update `fetchTimeSlots` to:
-- First check `availability_dates` for the selected date (existing)
-- If none found, fall back to `availability_slots` for that day of week
-- Generate 30-minute or 60-minute time slots from the start/end times
-- Check against existing `appointments` to exclude already-booked times
+## Data Structure
 
-```text
-Logic:
-1. Query availability_dates for selected date (existing)
-2. If empty, query availability_slots where day_of_week matches
-3. Generate hourly slots from start_time to end_time
-4. Query appointments for that provider+date to filter out booked ones
-5. Group into morning/afternoon/evening
+### Symptoms (`src/data/symptoms.ts`)
+Each of the 150 entries contains:
+- `slug`, `name`, `metaTitle`, `metaDescription`
+- `overview` (2-3 paragraphs)
+- `causes` (list of causes with descriptions)
+- `whenToSeeDoctor` (red flags list)
+- `homeRemedies` (practical tips)
+- `relatedSymptoms` (slugs for internal linking)
+- `relatedConditions` (slugs for cross-linking to /conditions/)
+- `relatedBlogs` (blog slugs)
+- `specialtyRecommendation` (e.g., "Neurology")
+- `faq` (3-5 Q&A pairs for FAQ structured data)
+
+Categories: Pain, Respiratory, Digestive, Neurological, Skin, Cardiovascular, Musculoskeletal, General, Mental Health, Women's Health, Children's, ENT, Eye, Urological
+
+### Conditions (`src/data/conditions.ts`)
+Each of the 150 entries contains:
+- `slug`, `name`, `metaTitle`, `metaDescription`
+- `overview`, `symptoms` list, `causes`, `riskFactors`
+- `diagnosis`, `treatment`, `prevention`
+- `whenToSeeDoctor`
+- `relatedSymptoms`, `relatedConditions`, `relatedBlogs`
+- `faq` (for structured data)
+
+Categories: Cardiovascular, Respiratory, Endocrine, Neurological, Digestive, Musculoskeletal, Infectious, Mental Health, Skin, Autoimmune, Cancer, Women's Health, Children's, Kidney/Urinary
+
+### Blogs (`src/data/blogs.ts`)
+Expand from 61 to ~100 posts. Add a `content` field to each entry with full markdown body (rather than generating generic content in BlogPost.tsx). New posts cover topics that interlink with symptoms/conditions.
+
+## Page Templates
+
+### SymptomPage (`/symptoms/:slug`)
+Sections: H1 title → Overview → Common Causes → When to See a Doctor → Home Remedies → Related Symptoms (internal links) → Related Conditions (internal links) → FAQ accordion → CTA card ("Check your symptoms with AI" → /chat)
+
+SEO: `<SEO>` component with unique title/description/canonical. FAQ structured data via JSON-LD script tag. MedicalWebPage schema.
+
+### ConditionPage (`/conditions/:slug`)
+Sections: H1 title → Overview → Symptoms → Causes & Risk Factors → Diagnosis → Treatment → Prevention → When to See a Doctor → Related links → FAQ → CTA to /chat
+
+SEO: Same pattern. MedicalCondition structured data.
+
+### Index Pages
+- `/symptoms` — grid of all 150 symptoms, searchable/filterable by category
+- `/conditions` — grid of all 150 conditions, searchable/filterable by category
+
+Both include SEO metadata and link to individual pages.
+
+### BlogPost.tsx Update
+Replace `generateFullContent()` generic fallback with actual `content` field from data. Add CTA section and related symptoms/conditions links at bottom.
+
+## Routes (App.tsx)
+Add four new lazy-loaded routes:
+```
+/symptoms          → SymptomsIndex
+/symptoms/:slug    → SymptomPage
+/conditions        → ConditionsIndex
+/conditions/:slug  → ConditionPage
 ```
 
-### 3. `src/pages/booking/ReviewConfirm.tsx` (minor update)
-When confirming a booking for a slot derived from `availability_slots` (not `availability_dates`):
-- The `book_appointment_slot` function expects an `availability_dates` row to mark as booked
-- Add a fallback: if no matching `availability_dates` row exists, create one on-the-fly (INSERT then mark booked), OR skip the availability_dates update for slot-based bookings
-- The safest approach: create the `availability_dates` entry during booking so the slot is properly tracked
+## Sitemap (`public/sitemap.xml`)
+Static file listing all ~450 URLs:
+- Homepage + existing pages (~20)
+- 150 `/symptoms/[slug]` entries
+- 150 `/conditions/[slug]` entries
+- ~100 `/blog/[slug]` entries
+- Index pages `/symptoms`, `/conditions`
 
-### 4. Database: Update `book_appointment_slot` function
-Modify the function to handle cases where the availability comes from `availability_slots` instead of `availability_dates`:
-- If no `availability_dates` row exists for the provider+date+time, create one with `is_booked = true`
-- This ensures the slot is recorded and won't be double-booked
+All with `lastmod`, `changefreq`, and `priority` values.
 
-```sql
--- Updated logic inside book_appointment_slot:
--- Try to find and lock existing availability_dates row
--- If not found, check availability_slots for that day_of_week
--- If valid, INSERT a new availability_dates row as booked
--- If neither exists, raise exception
-```
+## robots.txt
+Add `Allow: /symptoms/` and `Allow: /conditions/` explicitly.
 
----
+## Internal Linking Strategy
+- Each symptom page links to 3-5 related symptoms, 2-3 related conditions, and 1-2 blog posts
+- Each condition page links to its symptoms, related conditions, and blog posts
+- Every content page has a CTA linking to `/chat` (AI symptom checker)
+- Blog posts link to relevant symptom/condition pages
 
-## Technical Details
+## SEO & Structured Data
+Each symptom/condition page outputs:
+- `<SEO>` with unique title, description, canonical, keywords, og tags
+- JSON-LD `FAQPage` schema from the faq array
+- JSON-LD `MedicalWebPage` / `MedicalCondition` schema
 
-### DateSelect fallback logic:
-```typescript
-// After checking availability_dates...
-if (availableDates.length === 0) {
-  // Fetch recurring weekly slots
-  const { data: weeklySlots } = await supabase
-    .from('availability_slots')
-    .select('day_of_week, start_time, end_time')
-    .eq('provider_id', id)
-    .eq('is_available', true);
-  
-  // Generate next 14 days matching those days of week
-  const generated: Date[] = [];
-  for (let i = 0; i < 14; i++) {
-    const d = addDays(new Date(), i);
-    if (weeklySlots?.some(s => s.day_of_week === d.getDay())) {
-      generated.push(d);
-    }
-  }
-  setAvailableDates(generated);
-}
-```
+## SSR Limitation
+Lovable runs as a client-side SPA (Vite + React). True SSR is not available. However:
+- Google renders JavaScript pages and will index them
+- `react-helmet` sets meta tags dynamically
+- The service worker denylist already excludes `.xml`, `.txt`, `.json`
+- All content is in static data files (no API calls needed to render)
 
-### TimeSelect fallback logic:
-```typescript
-// After checking availability_dates...
-if (slots.length === 0 && selectedDate) {
-  const dayOfWeek = selectedDate.getDay();
-  const { data: weeklySlots } = await supabase
-    .from('availability_slots')
-    .select('start_time, end_time')
-    .eq('provider_id', id)
-    .eq('day_of_week', dayOfWeek)
-    .eq('is_available', true);
-  
-  // Generate hourly time slots from each range
-  // Filter out already-booked appointments
-}
-```
+## Implementation Scope
+Due to the volume (300+ pages of medical content), this will be split across multiple implementation steps:
 
-### Updated `book_appointment_slot` function:
-```sql
--- Replace the strict availability_dates lookup with:
-SELECT (is_available = true AND is_booked = false) INTO _is_available
-FROM availability_dates
-WHERE provider_id = _provider_id AND date = _date AND time_slot = _time_slot
-FOR UPDATE;
+**Step 1**: Data files + page templates + routes + sitemap (symptoms data: 150 entries, conditions data: 150 entries)
+**Step 2**: Expand blogs to 100 entries with full content
+**Step 3**: Cross-linking, structured data, index pages
 
-IF _is_available IS NULL THEN
-  -- No availability_dates row; check availability_slots
-  IF EXISTS (
-    SELECT 1 FROM availability_slots
-    WHERE provider_id = _provider_id
-      AND day_of_week = EXTRACT(DOW FROM _date)
-      AND is_available = true
-      AND start_time <= _time_slot
-      AND end_time > _time_slot
-  ) THEN
-    -- Create the availability_dates row as booked
-    INSERT INTO availability_dates (provider_id, date, time_slot, is_available, is_booked)
-    VALUES (_provider_id, _date, _time_slot, true, true);
-  ELSE
-    RAISE EXCEPTION 'Time slot is no longer available';
-  END IF;
-ELSIF _is_available = false THEN
-  RAISE EXCEPTION 'Time slot is no longer available';
-ELSE
-  -- Mark existing row as booked
-  UPDATE availability_dates SET is_booked = true, updated_at = now()
-  WHERE provider_id = _provider_id AND date = _date AND time_slot = _time_slot;
-END IF;
-```
-
-### Files to modify:
-1. `src/pages/booking/DateSelect.tsx` -- add availability_slots fallback
-2. `src/pages/booking/TimeSelect.tsx` -- add availability_slots fallback
-3. Database migration -- update `book_appointment_slot` function to handle slot-based availability
+## Files to Create/Modify
+1. **Create** `src/data/symptoms.ts` — 150 symptom entries
+2. **Create** `src/data/conditions.ts` — 150 condition entries
+3. **Create** `src/pages/SymptomPage.tsx` — symptom template
+4. **Create** `src/pages/ConditionPage.tsx` — condition template
+5. **Create** `src/pages/SymptomsIndex.tsx` — listing page
+6. **Create** `src/pages/ConditionsIndex.tsx` — listing page
+7. **Modify** `src/data/blogs.ts` — expand to ~100 posts with content
+8. **Modify** `src/pages/BlogPost.tsx` — use content field, add cross-links
+9. **Modify** `src/App.tsx` — add new routes
+10. **Modify** `src/lib/seo.ts` — add SEO configs for new page types
+11. **Rewrite** `public/sitemap.xml` — all 450+ URLs
+12. **Modify** `public/robots.txt` — allow new paths
 
