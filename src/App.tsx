@@ -101,6 +101,12 @@ const App = () => (
                     <Route path="ai-analysis" element={<AIAnalysis />} />
                     <Route path="doctor-directory" element={<DoctorDirectory />} />
                     
+                    {/* Symptoms & Conditions SEO Pages */}
+                    <Route path="symptoms" element={<SymptomsIndex />} />
+                    <Route path="symptoms/:slug" element={<SymptomPage />} />
+                    <Route path="conditions" element={<ConditionsIndex />} />
+                    <Route path="conditions/:slug" element={<ConditionPage />} />
+                    
                     {/* Dashboard redirect route */}
                     <Route path="dashboard" element={<Dashboard />} />
                     

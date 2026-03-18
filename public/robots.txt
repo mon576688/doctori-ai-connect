@@ -16,6 +16,11 @@ Allow: /
 User-agent: *
 Allow: /
 
+# Allow SEO content pages
+Allow: /symptoms/
+Allow: /conditions/
+Allow: /blog/
+
 # Disallow private/auth pages
 Disallow: /dashboard
 Disallow: /dashboard/
