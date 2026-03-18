@@ -92,4 +92,15 @@ export const blogPosts: BlogPost[] = [
   make(60, "Mindful Eating for Beginners", "Nutrition and Fitness", '2025-01-04'),
   // Mental Health & Treatments (61)
   make(61, "Which Supplements Can Boost the Effects of Antidepressants?", "Treatments and Prevention", '2025-07-15'),
+  // New SEO-optimized posts (62-71)
+  make(62, "How to Reduce Fever Naturally at Home", "Symptoms and Diagnosis", '2025-07-18'),
+  make(63, "Why Do I Have Headaches Every Day?", "Symptoms and Diagnosis", '2025-07-20'),
+  make(64, "Dengue Prevention Tips for Bangladesh", "Diseases and Conditions", '2025-07-22'),
+  make(65, "Best Foods to Lower Blood Sugar Naturally", "Nutrition and Fitness", '2025-07-24'),
+  make(66, "Signs You May Have an Anxiety Disorder", "Mental Health", '2025-07-26'),
+  make(67, "Understanding Your Blood Test Results", "Symptoms and Diagnosis", '2025-07-28'),
+  make(68, "Home Remedies for Sore Throat and Cough", "Treatments and Prevention", '2025-07-30'),
+  make(69, "How to Manage Back Pain While Working from Home", "Healthy Living", '2025-08-01'),
+  make(70, "Complete Guide to Childhood Vaccination Schedule", "Children's Health", '2025-08-03'),
+  make(71, "Recognizing Heart Attack Warning Signs in Women", "Women's Health", '2025-08-05'),
 ];

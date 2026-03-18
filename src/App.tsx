@@ -58,6 +58,10 @@ const UserProfile = lazy(() => import('./pages/UserProfile'));
 const Search = lazy(() => import('./pages/Search'));
 const Install = lazy(() => import('./pages/Install'));
 const DoctorDirectory = lazy(() => import('./pages/DoctorDirectory'));
+const SymptomsIndex = lazy(() => import('./pages/SymptomsIndex'));
+const SymptomPage = lazy(() => import('./pages/SymptomPage'));
+const ConditionsIndex = lazy(() => import('./pages/ConditionsIndex'));
+const ConditionPage = lazy(() => import('./pages/ConditionPage'));
 
 const App = () => (
   <I18nextProvider i18n={i18n}>
@@ -96,6 +100,12 @@ const App = () => (
                     <Route path="blood-donation" element={<BloodDonation />} />
                     <Route path="ai-analysis" element={<AIAnalysis />} />
                     <Route path="doctor-directory" element={<DoctorDirectory />} />
+                    
+                    {/* Symptoms & Conditions SEO Pages */}
+                    <Route path="symptoms" element={<SymptomsIndex />} />
+                    <Route path="symptoms/:slug" element={<SymptomPage />} />
+                    <Route path="conditions" element={<ConditionsIndex />} />
+                    <Route path="conditions/:slug" element={<ConditionPage />} />
                     
                     {/* Dashboard redirect route */}
                     <Route path="dashboard" element={<Dashboard />} />
