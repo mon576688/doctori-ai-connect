@@ -58,6 +58,10 @@ const UserProfile = lazy(() => import('./pages/UserProfile'));
 const Search = lazy(() => import('./pages/Search'));
 const Install = lazy(() => import('./pages/Install'));
 const DoctorDirectory = lazy(() => import('./pages/DoctorDirectory'));
+const SymptomsIndex = lazy(() => import('./pages/SymptomsIndex'));
+const SymptomPage = lazy(() => import('./pages/SymptomPage'));
+const ConditionsIndex = lazy(() => import('./pages/ConditionsIndex'));
+const ConditionPage = lazy(() => import('./pages/ConditionPage'));
 
 const App = () => (
   <I18nextProvider i18n={i18n}>
