@@ -103,4 +103,15 @@ export const blogPosts: BlogPost[] = [
   make(69, "How to Manage Back Pain While Working from Home", "Healthy Living", '2025-08-01'),
   make(70, "Complete Guide to Childhood Vaccination Schedule", "Children's Health", '2025-08-03'),
   make(71, "Recognizing Heart Attack Warning Signs in Women", "Women's Health", '2025-08-05'),
+  // High-ranking SEO posts (72-81)
+  make(72, "How Long Does the Flu Last and When to See a Doctor", "Diseases and Conditions", '2025-08-07'),
+  make(73, "What Causes Chest Pain When Breathing Deeply", "Symptoms and Diagnosis", '2025-08-09'),
+  make(74, "How to Lower Blood Pressure Quickly and Naturally", "Healthy Living", '2025-08-11'),
+  make(75, "Early Warning Signs of Diabetes You Should Not Ignore", "Diseases and Conditions", '2025-08-13'),
+  make(76, "What Does a Panic Attack Feel Like vs Heart Attack", "Mental Health", '2025-08-15'),
+  make(77, "Foods That Fight Inflammation and Boost Immunity", "Nutrition and Fitness", '2025-08-17'),
+  make(78, "How to Stop Acid Reflux and Heartburn at Night", "Treatments and Prevention", '2025-08-19'),
+  make(79, "Why Am I Always Tired Even After Sleeping Well", "Symptoms and Diagnosis", '2025-08-21'),
+  make(80, "Best Exercises to Relieve Lower Back Pain Fast", "Nutrition and Fitness", '2025-08-23'),
+  make(81, "How to Recognize Symptoms of a Stroke FAST", "Diseases and Conditions", '2025-08-25'),
 ];
