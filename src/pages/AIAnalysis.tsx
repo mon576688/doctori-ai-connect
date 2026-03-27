@@ -224,8 +224,8 @@ const AIAnalysis = () => {
                       <CardTitle className="text-lg">{t('aiAnalysis.results')}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="prose prose-sm max-w-none dark:prose-invert whitespace-pre-wrap">
-                        {result}
+                      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-strong:text-foreground prose-table:border-collapse prose-th:border prose-th:border-border prose-th:bg-muted prose-th:px-3 prose-th:py-2 prose-td:border prose-td:border-border prose-td:px-3 prose-td:py-2">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{result}</ReactMarkdown>
                       </div>
                     </CardContent>
                   </Card>
