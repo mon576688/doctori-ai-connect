@@ -232,9 +232,12 @@ const AIAnalysis = () => {
                 )}
 
                 {/* Disclaimer */}
-                <p className="text-xs text-muted-foreground text-center border-t pt-4">
-                  {t('aiAnalysis.disclaimer')}
-                </p>
+                <div className="border-t pt-4 flex items-start gap-2">
+                  <span className="text-amber-500 text-lg leading-none">⚠️</span>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                    This AI provides general health information only and is <span className="text-red-600 dark:text-red-400 font-bold">not a substitute</span> for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for personal health concerns.
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
