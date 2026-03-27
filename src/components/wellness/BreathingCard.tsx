@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Wind, Sparkles, X, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,35 +11,35 @@ import {
 import { toast } from "@/hooks/use-toast";
 
 /* ─── Technique Definitions ─── */
-type Phase = { label: string; type: "inhale" | "hold-in" | "exhale" | "hold-out"; duration: number };
-type Technique = { name: string; short: string; phases: Phase[] };
+type Phase = { labelKey: string; type: "inhale" | "hold-in" | "exhale" | "hold-out"; duration: number };
+type Technique = { nameKey: string; shortKey: string; phases: Phase[] };
 
 const TECHNIQUES: Technique[] = [
   {
-    name: "Box Breathing",
-    short: "Box",
+    nameKey: "wellness.breathingBox",
+    shortKey: "wellness.breathingBoxShort",
     phases: [
-      { label: "Inhale", type: "inhale", duration: 4 },
-      { label: "Hold", type: "hold-in", duration: 4 },
-      { label: "Exhale", type: "exhale", duration: 4 },
-      { label: "Hold", type: "hold-out", duration: 4 },
+      { labelKey: "wellness.breathingInhale", type: "inhale", duration: 4 },
+      { labelKey: "wellness.breathingHold", type: "hold-in", duration: 4 },
+      { labelKey: "wellness.breathingExhale", type: "exhale", duration: 4 },
+      { labelKey: "wellness.breathingHold", type: "hold-out", duration: 4 },
     ],
   },
   {
-    name: "4-7-8 Relaxation",
-    short: "4-7-8",
+    nameKey: "wellness.breathing478",
+    shortKey: "wellness.breathing478Short",
     phases: [
-      { label: "Inhale", type: "inhale", duration: 4 },
-      { label: "Hold", type: "hold-in", duration: 7 },
-      { label: "Exhale", type: "exhale", duration: 8 },
+      { labelKey: "wellness.breathingInhale", type: "inhale", duration: 4 },
+      { labelKey: "wellness.breathingHold", type: "hold-in", duration: 7 },
+      { labelKey: "wellness.breathingExhale", type: "exhale", duration: 8 },
     ],
   },
   {
-    name: "Simple Deep Breath",
-    short: "Simple",
+    nameKey: "wellness.breathingSimple",
+    shortKey: "wellness.breathingSimpleShort",
     phases: [
-      { label: "Inhale", type: "inhale", duration: 4 },
-      { label: "Exhale", type: "exhale", duration: 4 },
+      { labelKey: "wellness.breathingInhale", type: "inhale", duration: 4 },
+      { labelKey: "wellness.breathingExhale", type: "exhale", duration: 4 },
     ],
   },
 ];
@@ -46,6 +47,7 @@ const TECHNIQUES: Technique[] = [
 const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
 const BreathingCard = () => {
+  const { t } = useTranslation('home');
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [techIdx, setTechIdx] = useState(0);
   const [phaseIdx, setPhaseIdx] = useState(0);
@@ -58,7 +60,6 @@ const BreathingCard = () => {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Start breathing cycle when overlay opens
   useEffect(() => {
     if (!overlayOpen) return;
     setPhaseIdx(0);
@@ -73,7 +74,6 @@ const BreathingCard = () => {
     };
   }, [overlayOpen, techIdx]);
 
-  // Phase countdown timer
   useEffect(() => {
     if (!overlayOpen) return;
     setCountdown(currentPhase.duration);
@@ -81,7 +81,6 @@ const BreathingCard = () => {
     timerRef.current = setInterval(() => {
       setCountdown((c) => {
         if (c <= 1) {
-          // Move to next phase
           setPhaseIdx((pi) => {
             const next = pi + 1;
             if (next >= technique.phases.length) {
@@ -90,7 +89,7 @@ const BreathingCard = () => {
             }
             return next;
           });
-          return 0; // will be reset by the phaseIdx change
+          return 0;
         }
         return c - 1;
       });
@@ -105,11 +104,11 @@ const BreathingCard = () => {
     setOverlayOpen(false);
     if (elapsed > 0) {
       toast({
-        title: "Breathing Session Complete",
-        description: `${cycles} cycle${cycles !== 1 ? "s" : ""} · ${fmtTime(elapsed)} elapsed`,
+        title: t('wellness.breathingComplete'),
+        description: `${cycles} ${t('wellness.breathingCycles')} · ${fmtTime(elapsed)}`,
       });
     }
-  }, [elapsed, cycles]);
+  }, [elapsed, cycles, t]);
 
   const circleScale = currentPhase.type === "inhale" ? "scale(1)" : currentPhase.type === "exhale" ? "scale(0.6)" : "scale(0.8)";
   const circleColor =
@@ -137,7 +136,7 @@ const BreathingCard = () => {
             <div className="bg-primary/10 p-2 rounded-lg">
               <Wind className="h-5 w-5 text-primary" />
             </div>
-            <h3 className="font-semibold text-foreground">Guided Breathing</h3>
+            <h3 className="font-semibold text-foreground">{t('wellness.breathing')}</h3>
           </div>
           <TooltipProvider>
             <Tooltip>
@@ -147,7 +146,7 @@ const BreathingCard = () => {
                 </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-[220px]">
-                <p className="text-xs">AI can analyze your breathing patterns to optimize recovery and focus.</p>
+                <p className="text-xs">{t('wellness.breathingAiTip')}</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -155,25 +154,23 @@ const BreathingCard = () => {
         <div className="flex items-center justify-center py-6">
           <div className="w-20 h-20 rounded-full bg-primary/20 border-2 border-primary/40 breathing-circle" />
         </div>
-        <p className="text-xs text-muted-foreground text-center">Tap to begin breathing exercise</p>
+        <p className="text-xs text-muted-foreground text-center">{t('wellness.breathingTap')}</p>
       </div>
 
-      {/* Full-screen overlay */}
       {overlayOpen && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/90 backdrop-blur-md">
           <button
             onClick={handleClose}
             className="absolute top-6 right-6 text-muted-foreground hover:text-foreground"
-            aria-label="Close breathing overlay"
+            aria-label={t('wellness.breathingClose')}
           >
             <X className="h-6 w-6" />
           </button>
 
-          {/* Technique selector */}
           <div className="flex gap-2 mb-10">
-            {TECHNIQUES.map((t, i) => (
+            {TECHNIQUES.map((tech, i) => (
               <Button
-                key={t.short}
+                key={tech.shortKey}
                 size="sm"
                 variant={i === techIdx ? "default" : "outline"}
                 onClick={() => {
@@ -183,12 +180,11 @@ const BreathingCard = () => {
                   setElapsed(0);
                 }}
               >
-                {t.short}
+                {t(tech.shortKey)}
               </Button>
             ))}
           </div>
 
-          {/* Breathing circle */}
           <div
             className="w-40 h-40 rounded-full transition-all duration-[3000ms] ease-in-out"
             style={{
@@ -198,16 +194,14 @@ const BreathingCard = () => {
             }}
           />
 
-          {/* Phase label + countdown */}
           <p className="mt-8 text-2xl font-semibold text-foreground">
-            {currentPhase.label}... {countdown}s
+            {t(currentPhase.labelKey)}... {countdown}s
           </p>
-          <p className="mt-2 text-muted-foreground text-sm">{technique.name}</p>
+          <p className="mt-2 text-muted-foreground text-sm">{t(technique.nameKey)}</p>
 
-          {/* Cycle & Timer */}
           <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-1">
-              Cycle: <span className="font-semibold text-foreground">{cycles}</span>
+              {t('wellness.breathingCycles')}: <span className="font-semibold text-foreground">{cycles}</span>
             </span>
             <span className="text-muted-foreground/40">|</span>
             <span className="flex items-center gap-1">
