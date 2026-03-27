@@ -485,14 +485,14 @@ const Chat = () => {
                   }
 
                   <div className="bg-muted/30 border border-border/30 rounded-lg p-3">
-                    <div className="text-center">
-                      <p className="text-xs md:text-sm text-muted-foreground mb-1">
-                        ℹ️ <strong>{t('disclaimerTitle')}</strong>
-                      </p>
-                      <p className="text-xs text-muted-foreground/80">
-                        {t('disclaimerText')}
-                      </p>
-                    </div>
+                     <div className="text-center">
+                       <p className="text-xs md:text-sm text-amber-600 dark:text-amber-400 font-medium mb-1">
+                         ⚠️ <strong>{t('disclaimerTitle')}</strong>
+                       </p>
+                       <p className="text-xs text-amber-600 dark:text-amber-400">
+                         This AI provides general health information only and is <span className="text-red-600 dark:text-red-400 font-bold">not a substitute</span> for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider for personal health concerns.
+                       </p>
+                     </div>
                   </div>
                 </div>
               </CardContent>
