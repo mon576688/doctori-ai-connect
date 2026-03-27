@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Eye, Play, Square, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,19 +9,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const EYE_TIPS = [
-  "Blink 15-20 times per minute to keep eyes moist",
-  "Adjust screen brightness to match surroundings",
-  "Keep screen at arm's length (20-26 inches)",
-  "Position screen slightly below eye level",
-  "Use the 20-20-20 rule: every 20 min, look 20 feet away for 20 sec",
-  "Take a 5-10 minute break every hour of screen time",
-  "Reduce glare with an anti-glare screen filter",
-];
-
 const todayKey = () => `vision-guard-sessions-${new Date().toISOString().slice(0, 10)}`;
 
 const VisionGuardCard = () => {
+  const { t } = useTranslation('home');
+
+  const EYE_TIPS = [
+    t('wellness.visionTip1'),
+    t('wellness.visionTip2'),
+    t('wellness.visionTip3'),
+    t('wellness.visionTip4'),
+    t('wellness.visionTip5'),
+    t('wellness.visionTip6'),
+    t('wellness.visionTip7'),
+  ];
+
   const [running, setRunning] = useState(false);
   const [seconds, setSeconds] = useState(1200);
   const [alert, setAlert] = useState(false);
@@ -30,7 +33,6 @@ const VisionGuardCard = () => {
     return stored ? parseInt(stored, 10) : 0;
   });
 
-  // Countdown timer
   useEffect(() => {
     if (!running) return;
     if (seconds <= 0) {
@@ -42,12 +44,11 @@ const VisionGuardCard = () => {
     return () => clearInterval(id);
   }, [running, seconds]);
 
-  // Rotate tips every 8s while running
   useEffect(() => {
     if (!running) return;
     const id = setInterval(() => setTipIdx((i) => (i + 1) % EYE_TIPS.length), 8000);
     return () => clearInterval(id);
-  }, [running]);
+  }, [running, EYE_TIPS.length]);
 
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
@@ -70,7 +71,7 @@ const VisionGuardCard = () => {
           <div className="bg-secondary/10 p-2 rounded-lg">
             <Eye className="h-5 w-5 text-secondary" />
           </div>
-          <h3 className="font-semibold text-foreground">Vision Guard</h3>
+          <h3 className="font-semibold text-foreground">{t('wellness.visionGuard')}</h3>
         </div>
         <TooltipProvider>
           <Tooltip>
@@ -81,7 +82,7 @@ const VisionGuardCard = () => {
             </TooltipTrigger>
             <TooltipContent className="max-w-[240px]">
               <p className="text-xs">
-                <strong>20-20-20 Rule:</strong> Every 20 minutes, look at something 20 feet away for 20 seconds. This relaxes your eye muscles and reduces digital eye strain.
+                <strong>{t('wellness.visionRule')}:</strong> {t('wellness.visionTip5')}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -90,14 +91,14 @@ const VisionGuardCard = () => {
 
       <div className="text-center py-2">
         <p className="text-3xl font-mono font-bold text-foreground">{fmt(seconds)}</p>
-        <p className="text-xs text-muted-foreground mt-1">20-20-20 Rule</p>
+        <p className="text-xs text-muted-foreground mt-1">{t('wellness.visionRule')}</p>
       </div>
 
       {alert ? (
         <div className="text-center space-y-2">
-          <p className="text-sm font-medium text-secondary">Look 20 feet away for 20 seconds</p>
+          <p className="text-sm font-medium text-secondary">{t('wellness.visionLookAway')}</p>
           <Button size="sm" variant="secondary" onClick={acknowledge}>
-            Done
+            ✓
           </Button>
         </div>
       ) : (
@@ -107,22 +108,20 @@ const VisionGuardCard = () => {
             variant={running ? "destructive" : "outline"}
             onClick={() => setRunning(!running)}
           >
-            {running ? <><Square className="h-4 w-4 mr-1" /> Stop</> : <><Play className="h-4 w-4 mr-1" /> Start</>}
+            {running ? <><Square className="h-4 w-4 mr-1" /> {t('wellness.visionStop')}</> : <><Play className="h-4 w-4 mr-1" /> {t('wellness.visionStart')}</>}
           </Button>
         </div>
       )}
 
-      {/* Rotating tips */}
       <div className="mt-4 min-h-[2.5rem] flex items-center justify-center">
         <p className="text-xs text-muted-foreground text-center italic transition-opacity duration-500">
           💡 {EYE_TIPS[tipIdx]}
         </p>
       </div>
 
-      {/* Session count */}
       {sessions > 0 && (
         <p className="text-xs text-center text-primary/70 mt-2">
-          {sessions} break{sessions !== 1 ? "s" : ""} today ✓
+          {sessions} {t('wellness.visionSessions')} ✓
         </p>
       )}
     </div>
