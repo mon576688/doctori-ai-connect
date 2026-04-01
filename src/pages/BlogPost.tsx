@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, Clock, Share2 } from "lucide-react";
 import { blogPosts, BlogPost as BlogPostType } from "@/data/blogs";
+import { BLOG_ARTICLES } from "@/data/blogContents";
 import { useToast } from "@/components/ui/use-toast";
 import { SEO } from "@/components/SEO";
 
