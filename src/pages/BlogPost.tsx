@@ -138,11 +138,17 @@ Curcumin and probiotics also show promise. Supplement choice should be individua
 };
 
 const generateFullContent = (post: BlogPostType): string => {
-  // Special content for supplement article
+  // Check for unique article content first
+  if (BLOG_ARTICLES[post.id]) {
+    return BLOG_ARTICLES[post.id].trim();
+  }
+  
+  // Special content for supplement article (legacy fallback)
   if (post.id === 61) {
     return getSupplementsContent();
   }
   
+  // Generic fallback for any future posts without dedicated content
   return `
 # ${post.title}
 
@@ -152,29 +158,9 @@ ${post.excerpt}
 
 This comprehensive guide covers everything you need to know about ${post.title.toLowerCase()}. Our medical experts have compiled the latest evidence-based information to help you make informed decisions about your health.
 
-## Key Points
-
-• Understanding the basics and what you need to know
-• When to seek professional medical advice
-• Practical tips for daily management
-• Warning signs that require immediate attention
-• Lifestyle modifications that can help
-
-## Important Reminders
-
-⚠️ **Medical Disclaimer**: This information is for educational purposes only and should not replace professional medical advice. Always consult with a qualified healthcare provider for personalized guidance.
-
-## When to See a Doctor
-
-If you experience any concerning symptoms or have questions about your health, it's important to consult with a healthcare professional. They can provide personalized advice based on your specific situation.
-
-## Additional Resources
-
-For more health information and expert guidance, explore our other articles or consult with our AI Health Assistant for personalized recommendations.
-
 ---
 
-*This article was reviewed by medical professionals and is part of Doctori AI's commitment to providing accurate, trustworthy health information.*
+⚠️ **Medical Disclaimer**: This information is for educational purposes only and should not replace professional medical advice. Always consult with a qualified healthcare provider for personalized guidance.
   `.trim();
 };
 
