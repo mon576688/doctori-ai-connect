@@ -137,6 +137,7 @@ Curcumin and probiotics also show promise. Supplement choice should be individua
   `.trim();
 };
 
+// Cache-bust: v2 unique content integration 2026-04-02
 const generateFullContent = (post: BlogPostType): string => {
   // Check for unique article content first
   if (BLOG_ARTICLES[post.id]) {
@@ -149,6 +150,7 @@ const generateFullContent = (post: BlogPostType): string => {
   }
   
   // Generic fallback for any future posts without dedicated content
+  console.warn(`[BlogPost] Post ID ${post.id} ("${post.title}") missing unique content — using fallback`);
   return `
 # ${post.title}
 
