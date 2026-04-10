@@ -172,9 +172,16 @@ export const Footer = () => {
             <h3 className="font-semibold text-center">{t('footer.healthUpdates')}</h3>
             <p className="text-sm text-muted-foreground">{t('footer.weeklyTips')}</p>
             <div className="space-y-2">
-              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" />
-              <Button variant="healing" size="sm" className="w-full">
-                {t('footer.subscribe')}
+              <Input
+                placeholder={t('footer.emailPlaceholder')}
+                className="text-sm"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+              />
+              <Button variant="healing" size="sm" className="w-full" onClick={handleSubscribe} disabled={submitting}>
+                {submitting ? '...' : t('footer.subscribe')}
               </Button>
             </div>
           </div>
