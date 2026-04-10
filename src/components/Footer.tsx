@@ -26,6 +26,31 @@ import { useAuth } from "@/hooks/useAuth";
 export const Footer = () => {
   const { user } = useAuth();
   const { t } = useTranslation('common');
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubscribe = async () => {
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error(t('footer.invalidEmail', 'Please enter a valid email address'));
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .insert({ email: trimmed });
+    setSubmitting(false);
+    if (error) {
+      if (error.code === '23505') {
+        toast.info(t('footer.alreadySubscribed', 'You are already subscribed!'));
+      } else {
+        toast.error(t('footer.subscribeError', 'Something went wrong. Please try again.'));
+      }
+    } else {
+      toast.success(t('footer.subscribeSuccess', 'Successfully subscribed!'));
+      setEmail("");
+    }
+  };
 
   return (
     <footer className="bg-muted/30 border-t">
