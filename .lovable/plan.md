@@ -1,20 +1,32 @@
 
 
-# Fix Blog Posts Showing Generic Content Instead of Unique Articles
+# Set Up Newsletter Email Subscription
 
-## Problem
-The code in `BlogPost.tsx` correctly imports `BLOG_ARTICLES` and checks for unique content, and the `blogContents.ts` file contains unique articles for all 81 posts. However, the preview is still showing the old generic "Overview / Key Points / Important Reminders" template — text that no longer exists in the current codebase.
-
-This indicates a **stale build/cache issue** where the preview hasn't picked up the latest changes.
-
-## Solution
-Make a trivial edit to `BlogPost.tsx` to force a full rebuild and cache bust. Also add a minor defensive improvement: log a console warning if a blog post falls through to the generic fallback, so future issues are easier to diagnose.
+## Overview
+The footer has a subscribe form but it's currently non-functional — no state, no handler, no backend. We'll wire it up end-to-end.
 
 ## Changes
 
-### `src/pages/BlogPost.tsx`
-1. Add a `console.warn` in the generic fallback path so missing content is visible in dev tools
-2. Add a small comment change to force Vite to invalidate its module cache for this file
+### 1. Create `newsletter_subscribers` table (migration)
+```sql
+CREATE TABLE public.newsletter_subscribers (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  email text NOT NULL UNIQUE,
+  subscribed_at timestamptz NOT NULL DEFAULT now(),
+  is_active boolean NOT NULL DEFAULT true
+);
+ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can subscribe" ON public.newsletter_subscribers FOR INSERT TO public WITH CHECK (true);
+```
 
-This is a minimal change — the actual content integration code is already correct and complete. The issue is purely a build/cache staleness problem.
+### 2. Update `src/components/Footer.tsx`
+- Add `useState` for the email input
+- Add email validation (basic format check)
+- On submit, insert into `newsletter_subscribers` via Supabase client
+- Show success/error toast
+- Disable button while submitting
+
+### Files Modified
+- **Migration**: Create `newsletter_subscribers` table
+- **`src/components/Footer.tsx`**: Add subscribe handler with state management and toast feedback
 
