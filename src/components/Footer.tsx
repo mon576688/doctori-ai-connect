@@ -198,9 +198,11 @@ export const Footer = () => {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">{t('footer.followUs')}</span>
             <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Facebook className="h-4 w-4" />
-              </Button>
+              <a href="https://www.facebook.com/doctoriai" target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Facebook className="h-4 w-4" />
+                </Button>
+              </a>
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Twitter className="h-4 w-4" />
               </Button>
