@@ -206,12 +206,16 @@ export const Footer = () => {
               <Button variant="ghost" size="icon" className="h-8 w-8">
                 <Twitter className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Instagram className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Linkedin className="h-4 w-4" />
-              </Button>
+              <a href="https://www.instagram.com/doctoriai/" target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Instagram className="h-4 w-4" />
+                </Button>
+              </a>
+              <a href="https://www.linkedin.com/company/doctoriai/?viewAsMember=true" target="_blank" rel="noopener noreferrer">
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Linkedin className="h-4 w-4" />
+                </Button>
+              </a>
             </div>
             {/* Staff Access Link */}
             <Link to="/login/admin" className="text-muted-foreground hover:text-primary transition-colors text-xs">
