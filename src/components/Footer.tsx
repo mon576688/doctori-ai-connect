@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import {
   Heart,
@@ -23,6 +26,31 @@ import { useAuth } from "@/hooks/useAuth";
 export const Footer = () => {
   const { user } = useAuth();
   const { t } = useTranslation('common');
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubscribe = async () => {
+    const trimmed = email.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast.error(t('footer.invalidEmail', 'Please enter a valid email address'));
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase
+      .from('newsletter_subscribers')
+      .insert({ email: trimmed });
+    setSubmitting(false);
+    if (error) {
+      if (error.code === '23505') {
+        toast.info(t('footer.alreadySubscribed', 'You are already subscribed!'));
+      } else {
+        toast.error(t('footer.subscribeError', 'Something went wrong. Please try again.'));
+      }
+    } else {
+      toast.success(t('footer.subscribeSuccess', 'Successfully subscribed!'));
+      setEmail("");
+    }
+  };
 
   return (
     <footer className="bg-muted/30 border-t">
@@ -144,9 +172,16 @@ export const Footer = () => {
             <h3 className="font-semibold text-center">{t('footer.healthUpdates')}</h3>
             <p className="text-sm text-muted-foreground">{t('footer.weeklyTips')}</p>
             <div className="space-y-2">
-              <Input placeholder={t('footer.emailPlaceholder')} className="text-sm" />
-              <Button variant="healing" size="sm" className="w-full">
-                {t('footer.subscribe')}
+              <Input
+                placeholder={t('footer.emailPlaceholder')}
+                className="text-sm"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+              />
+              <Button variant="healing" size="sm" className="w-full" onClick={handleSubscribe} disabled={submitting}>
+                {submitting ? '...' : t('footer.subscribe')}
               </Button>
             </div>
           </div>
