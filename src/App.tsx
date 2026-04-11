@@ -11,48 +11,47 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { BookingProvider } from "./contexts/BookingContext";
 import { Layout } from "./components/Layout";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import Index from "./pages/Index";
-import Chat from "./pages/Chat";
-import ChatSummary from "./pages/ChatSummary";
-import Doctors from "./pages/Doctors";
-import DoctorProfile from "./pages/DoctorProfile";
-import Medicine from "./pages/Medicine";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Register from "./pages/auth/Register";
-import ProviderRegister from "./pages/auth/ProviderRegister";
-import Login from "./pages/auth/Login";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import ResetPassword from "./pages/auth/ResetPassword";
-import UserDashboard from "./pages/dashboard/UserDashboard";
-import ProviderDashboard from "./pages/dashboard/ProviderDashboard";
-import ProviderPendingPage from "./pages/dashboard/ProviderPendingPage";
-import AdminDashboard from "./pages/dashboard/AdminDashboard";
-import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
-import BMICalculator from "./pages/BMICalculator";
-import Reminders from "./pages/Reminders";
-import LocationSelect from "./pages/booking/LocationSelect";
-import ProviderTypeSelect from "./pages/booking/ProviderTypeSelect";
-import ProviderList from "./pages/booking/ProviderList";
-import ProviderProfile from "./pages/booking/ProviderProfile";
-import HospitalProfile from "./pages/booking/HospitalProfile";
-import DateSelect from "./pages/booking/DateSelect";
-import TimeSelect from "./pages/booking/TimeSelect";
-import ReviewConfirm from "./pages/booking/ReviewConfirm";
-import Confirmed from "./pages/booking/Confirmed";
-import BloodDonation from "./pages/BloodDonation";
+
+// All pages lazy-loaded for code splitting
+const Index = lazy(() => import('./pages/Index'));
+const Chat = lazy(() => import('./pages/Chat'));
+const ChatSummary = lazy(() => import('./pages/ChatSummary'));
+const Doctors = lazy(() => import('./pages/Doctors'));
+const DoctorProfile = lazy(() => import('./pages/DoctorProfile'));
+const Medicine = lazy(() => import('./pages/Medicine'));
+const Blog = lazy(() => import('./pages/Blog'));
+const BlogPost = lazy(() => import('./pages/BlogPost'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const Register = lazy(() => import('./pages/auth/Register'));
+const ProviderRegister = lazy(() => import('./pages/auth/ProviderRegister'));
+const Login = lazy(() => import('./pages/auth/Login'));
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/auth/ResetPassword'));
+const UserDashboard = lazy(() => import('./pages/dashboard/UserDashboard'));
+const ProviderDashboard = lazy(() => import('./pages/dashboard/ProviderDashboard'));
+const ProviderPendingPage = lazy(() => import('./pages/dashboard/ProviderPendingPage'));
+const AdminDashboard = lazy(() => import('./pages/dashboard/AdminDashboard'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const BMICalculator = lazy(() => import('./pages/BMICalculator'));
+const Reminders = lazy(() => import('./pages/Reminders'));
+const LocationSelect = lazy(() => import('./pages/booking/LocationSelect'));
+const ProviderTypeSelect = lazy(() => import('./pages/booking/ProviderTypeSelect'));
+const ProviderList = lazy(() => import('./pages/booking/ProviderList'));
+const ProviderProfile = lazy(() => import('./pages/booking/ProviderProfile'));
+const HospitalProfile = lazy(() => import('./pages/booking/HospitalProfile'));
+const DateSelect = lazy(() => import('./pages/booking/DateSelect'));
+const TimeSelect = lazy(() => import('./pages/booking/TimeSelect'));
+const ReviewConfirm = lazy(() => import('./pages/booking/ReviewConfirm'));
+const Confirmed = lazy(() => import('./pages/booking/Confirmed'));
+const BloodDonation = lazy(() => import('./pages/BloodDonation'));
 const AIAnalysis = lazy(() => import('./pages/AIAnalysis'));
-import WritePrescription from "./pages/provider/WritePrescription";
-import MyPrescriptions from "./pages/patient/MyPrescriptions";
-import TermsAndConditions from "./pages/legal/TermsAndConditions";
-import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
-import DoctorVerificationPolicy from "./pages/legal/DoctorVerificationPolicy";
-
-const queryClient = new QueryClient();
-
+const WritePrescription = lazy(() => import('./pages/provider/WritePrescription'));
+const MyPrescriptions = lazy(() => import('./pages/patient/MyPrescriptions'));
+const TermsAndConditions = lazy(() => import('./pages/legal/TermsAndConditions'));
+const PrivacyPolicy = lazy(() => import('./pages/legal/PrivacyPolicy'));
+const DoctorVerificationPolicy = lazy(() => import('./pages/legal/DoctorVerificationPolicy'));
 const HealthTipsBD = lazy(() => import('./pages/HealthTipsBD'));
 const UserProfile = lazy(() => import('./pages/UserProfile'));
 const Search = lazy(() => import('./pages/Search'));
@@ -62,6 +61,14 @@ const SymptomsIndex = lazy(() => import('./pages/SymptomsIndex'));
 const SymptomPage = lazy(() => import('./pages/SymptomPage'));
 const ConditionsIndex = lazy(() => import('./pages/ConditionsIndex'));
 const ConditionPage = lazy(() => import('./pages/ConditionPage'));
+
+const queryClient = new QueryClient();
+
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-[50vh]">
+    <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent" />
+  </div>
+);
 
 const App = () => (
   <I18nextProvider i18n={i18n}>
@@ -73,7 +80,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <BrowserRouter>
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<PageLoader />}>
                 <Routes>
                   <Route path="/" element={<Layout />}>
                     <Route index element={<Index />} />
@@ -83,10 +90,8 @@ const App = () => (
                     <Route path="doctors" element={<Doctors />} />
                     <Route path="doctor/:id" element={<DoctorProfile />} />
                     <Route path="medicine" element={<Medicine />} />
-                    {/* Blog routes */}
                     <Route path="blog" element={<Blog />} />
                     <Route path="blog/:slug" element={<BlogPost />} />
-                    {/* Health Tips - Separate page */}
                     <Route path="health-tips" element={<HealthTipsBD />} />
                     <Route path="about" element={<About />} />
                     <Route path="contact" element={<Contact />} />
@@ -101,16 +106,13 @@ const App = () => (
                     <Route path="ai-analysis" element={<AIAnalysis />} />
                     <Route path="doctor-directory" element={<DoctorDirectory />} />
                     
-                    {/* Symptoms & Conditions SEO Pages */}
                     <Route path="symptoms" element={<SymptomsIndex />} />
                     <Route path="symptoms/:slug" element={<SymptomPage />} />
                     <Route path="conditions" element={<ConditionsIndex />} />
                     <Route path="conditions/:slug" element={<ConditionPage />} />
                     
-                    {/* Dashboard redirect route */}
                     <Route path="dashboard" element={<Dashboard />} />
                     
-                    {/* Booking Routes */}
                     <Route path="booking" element={<LocationSelect />} />
                     <Route path="booking/location" element={<LocationSelect />} />
                     <Route path="booking/type" element={<ProviderTypeSelect />} />
@@ -122,7 +124,6 @@ const App = () => (
                     <Route path="booking/review" element={<ReviewConfirm />} />
                     <Route path="booking/confirmed" element={<Confirmed />} />
                     
-                    {/* Authentication Routes */}
                     <Route path="auth/register/user" element={<Register />} />
                     <Route path="auth/register/provider" element={<ProviderRegister />} />
                     <Route path="auth/register/admin" element={<Register />} />
@@ -136,7 +137,6 @@ const App = () => (
                     <Route path="auth/forgot-password" element={<ForgotPassword />} />
                     <Route path="auth/reset-password" element={<ResetPassword />} />
                     
-                    {/* Protected Dashboard Routes */}
                     <Route 
                       path="dashboard/user" 
                       element={
@@ -177,7 +177,6 @@ const App = () => (
                         </ProtectedRoute>
                       } 
                     />
-                    {/* Provider Prescription Route */}
                     <Route 
                       path="provider/prescription" 
                       element={
@@ -194,7 +193,6 @@ const App = () => (
                         </ProtectedRoute>
                       } 
                     />
-                    {/* Patient Prescriptions Route */}
                     <Route 
                       path="patient/prescriptions" 
                       element={

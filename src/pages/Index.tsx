@@ -321,6 +321,8 @@ const Index = () => {
                 alt="Doctori AI virtual health assistant interface showing doctor consultation"
                 className="rounded-2xl shadow-float w-full animate-float"
                 loading="eager"
+                width={600}
+                height={400}
               />
             </div>
           </div>

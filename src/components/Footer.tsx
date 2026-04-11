@@ -198,21 +198,21 @@ export const Footer = () => {
           <div className="flex items-center space-x-4">
             <span className="text-sm text-muted-foreground">{t('footer.followUs')}</span>
             <div className="flex space-x-2">
-              <a href="https://www.facebook.com/doctoriai" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+              <a href="https://www.facebook.com/doctoriai" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Facebook">
                   <Facebook className="h-4 w-4" />
                 </Button>
               </a>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Follow us on Twitter">
                 <Twitter className="h-4 w-4" />
               </Button>
-              <a href="https://www.instagram.com/doctoriai/" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+              <a href="https://www.instagram.com/doctoriai/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Instagram">
                   <Instagram className="h-4 w-4" />
                 </Button>
               </a>
-              <a href="https://www.linkedin.com/company/doctoriai/?viewAsMember=true" target="_blank" rel="noopener noreferrer">
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+              <a href="https://www.linkedin.com/company/doctoriai/?viewAsMember=true" target="_blank" rel="noopener noreferrer" aria-label="Follow us on LinkedIn">
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="LinkedIn">
                   <Linkedin className="h-4 w-4" />
                 </Button>
               </a>

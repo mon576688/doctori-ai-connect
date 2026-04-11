@@ -20,6 +20,7 @@ export const ChatWidget = () => {
         size="icon"
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-float z-50"
         onClick={() => setIsOpen(true)}
+        aria-label="Open chat assistant"
       >
         <MessageCircle className="h-6 w-6" />
       </Button>
@@ -34,12 +35,13 @@ export const ChatWidget = () => {
           <MessageCircle className="h-5 w-5 text-white" />
           <span className="font-medium text-white">Doctori AI</span>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white hover:bg-white/20"
-          onClick={() => setIsOpen(false)}
-        >
+         <Button
+           variant="ghost"
+           size="icon"
+           className="text-white hover:bg-white/20"
+           onClick={() => setIsOpen(false)}
+           aria-label="Close chat assistant"
+         >
           <X className="h-4 w-4" />
         </Button>
       </div>
