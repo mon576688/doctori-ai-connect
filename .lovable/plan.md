@@ -1,32 +1,46 @@
 
 
-# Set Up Newsletter Email Subscription
+# Reduce Unused JavaScript (~541 KiB) and Fix Lighthouse Issues
 
-## Overview
-The footer has a subscribe form but it's currently non-functional — no state, no handler, no backend. We'll wire it up end-to-end.
+## Problem
+The entire app ships as one 812 KiB bundle because ~35 page components are eagerly imported in `App.tsx`. Only ~10 are lazy-loaded. This means every visitor downloads admin dashboards, booking flows, prescription pages, etc. on first load.
 
-## Changes
+## Plan
 
-### 1. Create `newsletter_subscribers` table (migration)
-```sql
-CREATE TABLE public.newsletter_subscribers (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  email text NOT NULL UNIQUE,
-  subscribed_at timestamptz NOT NULL DEFAULT now(),
-  is_active boolean NOT NULL DEFAULT true
-);
-ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Anyone can subscribe" ON public.newsletter_subscribers FOR INSERT TO public WITH CHECK (true);
-```
+### 1. Lazy-load all page components in `App.tsx`
+Convert every remaining static `import` for pages to `lazy(() => import(...))`. This includes:
+- `Index`, `Chat`, `ChatSummary`, `Doctors`, `DoctorProfile`, `Medicine`
+- `Blog`, `BlogPost`, `About`, `Contact`
+- `Register`, `ProviderRegister`, `Login`, `ForgotPassword`, `ResetPassword`
+- `UserDashboard`, `ProviderDashboard`, `ProviderPendingPage`, `AdminDashboard`, `Dashboard`
+- `BMICalculator`, `Reminders`, `BloodDonation`
+- `LocationSelect`, `ProviderTypeSelect`, `ProviderList`, `ProviderProfile`, `HospitalProfile`, `DateSelect`, `TimeSelect`, `ReviewConfirm`, `Confirmed`
+- `WritePrescription`, `MyPrescriptions`
+- `TermsAndConditions`, `PrivacyPolicy`, `DoctorVerificationPolicy`
+- `NotFound`
 
-### 2. Update `src/components/Footer.tsx`
-- Add `useState` for the email input
-- Add email validation (basic format check)
-- On submit, insert into `newsletter_subscribers` via Supabase client
-- Show success/error toast
-- Disable button while submitting
+Keep `Layout` as a static import since it's needed on every route.
+
+### 2. Improve the Suspense fallback
+Replace the bare `<div>Loading...</div>` with a centered spinner/skeleton for better UX and CLS.
+
+### 3. Fix accessibility issues mentioned in the audit
+- **Buttons without accessible names**: Add `aria-label` to icon-only buttons (social links in Footer, ChatWidget toggle, etc.)
+- **Links without discernible names**: Add `aria-label` to icon-only links
+- **Color contrast**: Review and adjust low-contrast text colors
+- **Heading order**: Ensure headings follow sequential order (no skipping from h2 to h4)
+
+### 4. Add explicit width/height to images
+Add `width` and `height` attributes to key images (especially above-the-fold) to prevent layout shifts.
 
 ### Files Modified
-- **Migration**: Create `newsletter_subscribers` table
-- **`src/components/Footer.tsx`**: Add subscribe handler with state management and toast feedback
+- **`src/App.tsx`** — Convert all page imports to lazy, improve fallback
+- **`src/components/Footer.tsx`** — Add `aria-label` to social icon links/buttons
+- **`src/components/ChatWidget.tsx`** — Add `aria-label` to toggle button
+- **`src/pages/Index.tsx`** — Fix heading order, image dimensions if needed
+
+### Expected Impact
+- Bundle will be split into ~30+ chunks loaded on demand
+- Initial JS payload should drop from ~812 KiB to ~200-300 KiB
+- Accessibility score improvement from fixing button/link names and contrast
 
