@@ -5,11 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  Users, 
-  UserCheck, 
-  UserX, 
-  CheckCircle, 
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Users,
+  UserCheck,
+  UserX,
+  CheckCircle,
   XCircle,
   Clock,
   Mail,
@@ -17,7 +19,11 @@ import {
   Calendar,
   Stethoscope,
   Award,
-  FileText
+  FileText,
+  Search,
+  Moon,
+  Sun,
+  ChevronRight
 } from 'lucide-react';
 import {
   Table,
@@ -73,6 +79,24 @@ interface Provider extends User {
   license_number?: string;
 }
 
+const tabLabels: Record<string, string> = {
+  dashboard: 'Dashboard',
+  bookings: 'Bookings',
+  pending: 'Pending Approvals',
+  providers: 'Healthcare Providers',
+  'provider-services': 'Provider Services',
+  'add-provider': 'Add Provider',
+  hospitals: 'Hospitals & Clinics',
+  users: 'All Users',
+  'user-mgmt': 'User Management',
+  'blood-donors': 'Blood Donors',
+  documents: 'Document Review',
+  analytics: 'Analytics',
+  content: 'Content Management',
+  bulk: 'Bulk Operations',
+  export: 'Data Export',
+};
+
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
@@ -83,6 +107,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [appointmentsCount, setAppointmentsCount] = useState(0);
   const [recentActivity, setRecentActivity] = useState<Array<{ id: string; type: string; message: string; time: Date }>>([]);
+  const [darkMode, setDarkMode] = useState(() => document.documentElement.classList.contains('dark'));
+  const [headerSearch, setHeaderSearch] = useState('');
   const [actionDialog, setActionDialog] = useState<{
     open: boolean;
     action: 'approve' | 'reject';
@@ -92,6 +118,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const toggleDarkMode = () => {
+    const next = !darkMode;
+    setDarkMode(next);
+    document.documentElement.classList.toggle('dark', next);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -103,39 +135,35 @@ export default function AdminDashboard() {
 
       if (usersError) throw usersError;
 
-      // Fetch all user roles from user_roles table
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
       if (rolesError) throw rolesError;
 
-      // Fetch appointments count
       const { count: apptCount } = await supabase
         .from('appointments')
         .select('*', { count: 'exact', head: true });
 
       setAppointmentsCount(apptCount || 0);
 
-      // Create a map of user_id to primary role
       const roleMap = new Map<string, string>();
       rolesData?.forEach(({ user_id, role }) => {
         const currentRole = roleMap.get(user_id);
-        if (!currentRole || 
+        if (!currentRole ||
             (role === 'admin') ||
             (role === 'provider' && currentRole === 'user')) {
           roleMap.set(user_id, role);
         }
       });
 
-      // Separate users and providers based on role from user_roles table
       const regularUsers: User[] = [];
       const allProviders: Provider[] = [];
 
       allUsers?.forEach((user) => {
         const userRole = roleMap.get(user.id) || 'user';
         const userWithRole = { ...user, role: userRole };
-        
+
         if (userRole === 'provider') {
           allProviders.push(userWithRole as Provider);
         } else {
@@ -145,7 +173,6 @@ export default function AdminDashboard() {
 
       const pending = allProviders.filter(p => p.approval_status === 'pending');
 
-      // Create recent activity from users/providers
       const activity = allUsers?.slice(0, 10).map(user => ({
         id: user.id,
         type: roleMap.get(user.id) === 'provider' ? 'provider' : 'user',
@@ -172,7 +199,7 @@ export default function AdminDashboard() {
   const handleProviderAction = async (providerId: string, action: 'approve' | 'reject') => {
     try {
       const newStatus = action === 'approve' ? 'approved' : 'rejected';
-      
+
       const { error } = await supabase
         .from('profiles')
         .update({ approval_status: newStatus })
@@ -203,10 +230,10 @@ export default function AdminDashboard() {
       approved: { variant: 'default', icon: CheckCircle },
       rejected: { variant: 'destructive', icon: XCircle }
     };
-    
+
     const config = variants[status] || variants.pending;
     const Icon = config.icon;
-    
+
     return (
       <Badge variant={config.variant} className="gap-1">
         <Icon className="h-3 w-3" />
@@ -226,7 +253,7 @@ export default function AdminDashboard() {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="text-2xl font-bold">
+            <h3 className="text-2xl font-bold tracking-tight">
               {provider.first_name} {provider.last_name}
             </h3>
             <div className="flex items-center gap-2 mt-2">
@@ -264,14 +291,14 @@ export default function AdminDashboard() {
             <Stethoscope className="h-4 w-4" />
             Professional Information
           </h4>
-          
+
           {provider.specialty && (
             <div>
               <p className="text-sm font-medium">Specialty</p>
               <p className="text-sm text-muted-foreground">{provider.specialty}</p>
             </div>
           )}
-          
+
           {provider.experience !== undefined && (
             <div>
               <p className="text-sm font-medium flex items-center gap-2">
@@ -281,7 +308,7 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground">{provider.experience} years</p>
             </div>
           )}
-          
+
           {provider.license_number && (
             <div>
               <p className="text-sm font-medium flex items-center gap-2">
@@ -291,7 +318,7 @@ export default function AdminDashboard() {
               <p className="text-sm text-muted-foreground">{provider.license_number}</p>
             </div>
           )}
-          
+
           {provider.bio && (
             <div>
               <p className="text-sm font-medium">Bio</p>
@@ -350,11 +377,11 @@ export default function AdminDashboard() {
         return (
           <div className="space-y-4">
             {selectedProvider ? (
-              <Card>
+              <Card className="border-0 shadow-sm">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>Provider Details</CardTitle>
-                    <Button variant="outline" onClick={() => setSelectedProvider(null)}>
+                    <CardTitle className="tracking-tight">Provider Details</CardTitle>
+                    <Button variant="outline" size="sm" onClick={() => setSelectedProvider(null)}>
                       Back to List
                     </Button>
                   </div>
@@ -364,15 +391,17 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             ) : pendingProviders.length === 0 ? (
-              <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No pending provider applications
+              <Card className="border-0 shadow-sm">
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-3 text-emerald-500/50" />
+                  <p className="font-medium">All caught up!</p>
+                  <p className="text-sm">No pending provider applications</p>
                 </CardContent>
               </Card>
             ) : (
-              <Card>
+              <Card className="border-0 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 tracking-tight">
                     <Clock className="h-5 w-5" />
                     Pending Provider Applications
                   </CardTitle>
@@ -391,7 +420,7 @@ export default function AdminDashboard() {
                     </TableHeader>
                     <TableBody>
                       {pendingProviders.map((provider) => (
-                        <TableRow key={provider.id}>
+                        <TableRow key={provider.id} className="group">
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar>
@@ -414,15 +443,13 @@ export default function AdminDashboard() {
                             {formatDistanceToNow(new Date(provider.created_at), { addSuffix: true })}
                           </TableCell>
                           <TableCell>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setSelectedProvider(provider)}
-                              >
-                                View Details
-                              </Button>
-                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setSelectedProvider(provider)}
+                            >
+                              View Details
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -436,9 +463,9 @@ export default function AdminDashboard() {
 
       case 'providers':
         return (
-          <Card>
+          <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 tracking-tight">
                 <Stethoscope className="h-5 w-5" />
                 All Healthcare Providers
               </CardTitle>
@@ -488,9 +515,9 @@ export default function AdminDashboard() {
 
       case 'users':
         return (
-          <Card>
+          <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 tracking-tight">
                 <Users className="h-5 w-5" />
                 All Users
               </CardTitle>
@@ -542,34 +569,24 @@ export default function AdminDashboard() {
 
       case 'analytics':
         return <AdminAnalytics />;
-
       case 'content':
         return <ContentManagement />;
-
       case 'bulk':
         return <BulkOperations />;
-
       case 'user-mgmt':
         return <UserManagement />;
-
       case 'blood-donors':
         return <BloodDonorManagement />;
-
       case 'documents':
         return <DocumentReview />;
-
       case 'export':
         return <DataExport />;
-
       case 'hospitals':
         return <HospitalManagement />;
-
       case 'add-provider':
         return <AddProviderForm />;
-
       case 'provider-services':
         return <ProviderServiceManagement />;
-
       default:
         return null;
     }
@@ -577,10 +594,30 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading admin dashboard...</p>
+      <div className="min-h-screen bg-background">
+        <div className="md:ml-64 p-6 pt-16 md:pt-6 space-y-6">
+          {/* Skeleton header */}
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-9 rounded-lg" />
+              <Skeleton className="h-9 w-9 rounded-lg" />
+            </div>
+          </div>
+          {/* Skeleton KPI cards */}
+          <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-28 rounded-xl" />
+            ))}
+          </div>
+          {/* Skeleton chart */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Skeleton className="h-80 rounded-xl lg:col-span-2" />
+            <Skeleton className="h-80 rounded-xl" />
+          </div>
         </div>
       </div>
     );
@@ -588,20 +625,59 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AdminSidebar 
+      <AdminSidebar
         pendingCount={pendingProviders.length}
         activeTab={activeTab}
         onTabChange={setActiveTab}
       />
-      
+
       {/* Main Content */}
-      <main className="md:ml-64 p-6 pt-16 md:pt-6">
-        {renderContent()}
+      <main className="md:ml-64 min-h-screen">
+        {/* Top Header Bar */}
+        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-border/50 px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            {/* Breadcrumb */}
+            <div className="flex items-center gap-1.5 text-sm">
+              <span className="text-muted-foreground">Admin</span>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="font-medium">{tabLabels[activeTab] || 'Dashboard'}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Search */}
+              <div className="relative hidden md:block">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search..."
+                  value={headerSearch}
+                  onChange={(e) => setHeaderSearch(e.target.value)}
+                  className="h-8 w-48 pl-8 text-xs bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary/30"
+                />
+              </div>
+
+              {/* Dark Mode Toggle */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={toggleDarkMode}
+                aria-label="Toggle dark mode"
+              >
+                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <div className="p-6 animate-fade-in">
+          {renderContent()}
+        </div>
       </main>
 
       {/* Action Confirmation Dialog */}
-      <AlertDialog 
-        open={actionDialog.open} 
+      <AlertDialog
+        open={actionDialog.open}
         onOpenChange={(open) => setActionDialog({ ...actionDialog, open })}
       >
         <AlertDialogContent>
@@ -611,7 +687,7 @@ export default function AdminDashboard() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to {actionDialog.action} {actionDialog.provider?.first_name} {actionDialog.provider?.last_name}'s application?
-              {actionDialog.action === 'approve' 
+              {actionDialog.action === 'approve'
                 ? ' They will be able to access the provider dashboard.'
                 : ' They will be notified of the rejection.'}
             </AlertDialogDescription>
