@@ -1102,6 +1102,81 @@ const Index = () => {
 
       <HeartbeatDivider />
 
+      {/* Popular Symptoms & Conditions — SEO Internal Linking */}
+      <section className="py-16 px-4 section-animate">
+        <div className="container max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="section-box section-box-primary">
+              <div className="text-center mb-6">
+                <Badge className="bg-primary/20 text-primary mb-3">Popular Symptoms</Badge>
+                <h2 className="text-2xl lg:text-3xl font-bold mb-2">Check Common Symptoms</h2>
+                <p className="text-sm text-muted-foreground">Get quick guidance on the most-searched health symptoms.</p>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {[
+                  { slug: 'headache', name: 'Headache' },
+                  { slug: 'fever', name: 'Fever' },
+                  { slug: 'cough', name: 'Cough' },
+                  { slug: 'chest-pain', name: 'Chest Pain' },
+                  { slug: 'stomach-pain', name: 'Stomach Pain' },
+                  { slug: 'sore-throat', name: 'Sore Throat' },
+                  { slug: 'back-pain', name: 'Back Pain' },
+                  { slug: 'fatigue', name: 'Fatigue' },
+                  { slug: 'dizziness', name: 'Dizziness' },
+                  { slug: 'nausea', name: 'Nausea' },
+                  { slug: 'shortness-of-breath', name: 'Shortness of Breath' },
+                  { slug: 'insomnia', name: 'Insomnia' },
+                ].map((s) => (
+                  <Link key={s.slug} to={`/symptoms/${s.slug}`}>
+                    <Button variant="outline" size="sm" className="rounded-full">{s.name}</Button>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Link to="/symptoms" className="text-primary text-sm font-medium hover:underline">
+                  View all symptoms →
+                </Link>
+              </div>
+            </div>
+
+            <div className="section-box section-box-secondary">
+              <div className="text-center mb-6">
+                <Badge className="bg-secondary/20 text-secondary mb-3">Common Conditions</Badge>
+                <h2 className="text-2xl lg:text-3xl font-bold mb-2">Learn About Conditions</h2>
+                <p className="text-sm text-muted-foreground">Evidence-based guides on the most common health conditions.</p>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {[
+                  { slug: 'diabetes', name: 'Diabetes' },
+                  { slug: 'hypertension', name: 'Hypertension' },
+                  { slug: 'asthma', name: 'Asthma' },
+                  { slug: 'migraine', name: 'Migraine' },
+                  { slug: 'depression', name: 'Depression' },
+                  { slug: 'anxiety-disorders', name: 'Anxiety' },
+                  { slug: 'dengue', name: 'Dengue' },
+                  { slug: 'gerd', name: 'GERD' },
+                  { slug: 'pneumonia', name: 'Pneumonia' },
+                  { slug: 'osteoarthritis', name: 'Osteoarthritis' },
+                  { slug: 'hypothyroidism', name: 'Hypothyroidism' },
+                  { slug: 'urinary-tract-infection', name: 'UTI' },
+                ].map((c) => (
+                  <Link key={c.slug} to={`/conditions/${c.slug}`}>
+                    <Button variant="outline" size="sm" className="rounded-full">{c.name}</Button>
+                  </Link>
+                ))}
+              </div>
+              <div className="text-center mt-6">
+                <Link to="/conditions" className="text-secondary text-sm font-medium hover:underline">
+                  View all conditions →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <HeartbeatDivider />
+
       {/* Final CTA Section */}
       <section className="py-16 px-4 section-animate">
         <div className="container max-w-4xl mx-auto">
