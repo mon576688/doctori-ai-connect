@@ -187,6 +187,67 @@ export const Footer = () => {
           </div>
         </div>
 
+        {/* Browse Health Topics — SEO mini-sitemap */}
+        <Separator className="my-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-semibold text-sm mb-3">{t('footer.browseSymptoms', 'Browse Symptoms')}</h3>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5 items-center">
+              {[
+                ['headache', 'Headache'],
+                ['fever', 'Fever'],
+                ['cough', 'Cough'],
+                ['chest-pain', 'Chest Pain'],
+                ['stomach-pain', 'Stomach Pain'],
+                ['back-pain', 'Back Pain'],
+                ['fatigue', 'Fatigue'],
+                ['dizziness', 'Dizziness'],
+                ['nausea', 'Nausea'],
+                ['sore-throat', 'Sore Throat'],
+              ].map(([slug, name]) => (
+                <Link
+                  key={slug}
+                  to={`/symptoms/${slug}`}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {name}
+                </Link>
+              ))}
+              <Link to="/symptoms" className="text-xs text-primary font-medium hover:underline">
+                {t('footer.viewAll', 'View all')} →
+              </Link>
+            </div>
+          </div>
+          <div>
+            <h3 className="font-semibold text-sm mb-3">{t('footer.browseConditions', 'Browse Conditions')}</h3>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5 items-center">
+              {[
+                ['diabetes', 'Diabetes'],
+                ['hypertension', 'Hypertension'],
+                ['asthma', 'Asthma'],
+                ['migraine', 'Migraine'],
+                ['depression', 'Depression'],
+                ['anxiety-disorders', 'Anxiety'],
+                ['dengue', 'Dengue'],
+                ['gerd', 'GERD'],
+                ['pneumonia', 'Pneumonia'],
+                ['osteoarthritis', 'Osteoarthritis'],
+              ].map(([slug, name]) => (
+                <Link
+                  key={slug}
+                  to={`/conditions/${slug}`}
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  {name}
+                </Link>
+              ))}
+              <Link to="/conditions" className="text-xs text-primary font-medium hover:underline">
+                {t('footer.viewAll', 'View all')} →
+              </Link>
+            </div>
+          </div>
+        </div>
+
         <Separator className="my-8" />
 
         {/* Bottom Section */}
