@@ -11,7 +11,13 @@ const extractSlugs = (file) =>
 
 const symptoms = extractSlugs('src/data/symptoms.ts');
 const conditions = extractSlugs('src/data/conditions.ts');
-const blogs = extractSlugs('src/data/blogs.ts');
+
+// Blog slugs are computed: title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'') + '-' + id
+const blogFile = readFileSync('src/data/blogs.ts', 'utf8');
+const blogs = Array.from(blogFile.matchAll(/make\((\d+),\s*"([^"]+)"/g)).map(([, id, title]) => {
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + id;
+  return slug;
+});
 
 const staticPages = [
   ['/', '1.0', 'daily'],
