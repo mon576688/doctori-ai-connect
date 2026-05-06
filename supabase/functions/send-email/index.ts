@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,6 +14,16 @@ interface EmailRequest {
   template: 'appointment_confirmation' | 'appointment_reminder' | 'provider_approved' | 'provider_rejected' | 'welcome' | 'doctor_appointment_notification';
   data: Record<string, unknown>;
 }
+
+const VALID_TEMPLATES = new Set<string>([
+  'appointment_confirmation',
+  'appointment_reminder',
+  'provider_approved',
+  'provider_rejected',
+  'welcome',
+  'doctor_appointment_notification',
+]);
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const getEmailTemplate = (template: string, data: Record<string, unknown>): string => {
   switch (template) {
@@ -117,6 +128,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Require authenticated caller (verify_jwt=true also enforces this at gateway)
+    const authHeader = req.headers.get("Authorization") ?? "";
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: userData, error: authError } = await authClient.auth.getUser();
+    if (authError || !userData?.user) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     
     if (!resendApiKey) {
@@ -129,6 +155,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     const resend = new Resend(resendApiKey);
     const { to, subject, template, data }: EmailRequest = await req.json();
+
+    // Input validation
+    if (typeof to !== "string" || !EMAIL_REGEX.test(to) || to.length > 255) {
+      return new Response(JSON.stringify({ error: "Invalid recipient email" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    if (typeof subject !== "string" || subject.length === 0 || subject.length > 200) {
+      return new Response(JSON.stringify({ error: "Invalid subject (1-200 chars)" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    if (typeof template !== "string" || !VALID_TEMPLATES.has(template)) {
+      return new Response(JSON.stringify({ error: "Invalid template" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    if (data && (typeof data !== "object" || Array.isArray(data))) {
+      return new Response(JSON.stringify({ error: "Invalid data payload" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
 
     const html = getEmailTemplate(template, data);
 

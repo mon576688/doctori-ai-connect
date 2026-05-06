@@ -13,8 +13,15 @@ serve(async (req) => {
   try {
     const { medicineName } = await req.json();
 
-    if (!medicineName) {
+    if (!medicineName || typeof medicineName !== 'string') {
       return new Response(JSON.stringify({ error: 'Medicine name is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const trimmed = medicineName.trim();
+    if (trimmed.length < 2 || trimmed.length > 200) {
+      return new Response(JSON.stringify({ error: 'Medicine name must be 2-200 characters' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -51,7 +58,7 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Provide detailed medical information about: ${medicineName}`
+            content: `Provide detailed medical information about: ${trimmed}`
           }
         ],
         temperature: 0.3,

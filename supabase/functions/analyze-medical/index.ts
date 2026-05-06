@@ -60,6 +60,20 @@ serve(async (req) => {
       );
     }
 
+    // Input size limits to prevent abuse / memory exhaustion
+    if (text && (typeof text !== "string" || text.length > 10000)) {
+      return new Response(
+        JSON.stringify({ error: "Text too long (max 10000 characters)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    if (imageBase64 && (typeof imageBase64 !== "string" || imageBase64.length > 10 * 1024 * 1024)) {
+      return new Response(
+        JSON.stringify({ error: "Image too large (max ~10MB base64)" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
