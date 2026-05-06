@@ -58,7 +58,7 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Provide detailed medical information about: ${medicineName}`
+            content: `Provide detailed medical information about: ${trimmed}`
           }
         ],
         temperature: 0.3,
