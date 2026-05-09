@@ -26,9 +26,12 @@ export const SEO = ({
 }: SEOProps) => {
   const siteUrl = 'https://doctoriai.com';
   const fullTitle = title.includes('Doctori AI') ? title : `${title} | Doctori AI`;
-  const canonicalUrl = canonicalPath 
-    ? `${siteUrl}${canonicalPath}` 
-    : undefined;
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const canonicalUrl = canonicalPath
+    ? `${siteUrl}${canonicalPath}`
+    : currentPath
+      ? `${siteUrl}${currentPath}`
+      : undefined;
   const imageUrl = ogImage.startsWith('http') 
     ? ogImage 
     : `${siteUrl}${ogImage}`;
