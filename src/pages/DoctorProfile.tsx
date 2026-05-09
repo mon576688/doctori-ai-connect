@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
+import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -125,6 +126,7 @@ export default function DoctorProfile() {
   if (!doctor) {
     return (
       <div className="container py-8">
+        <SEO title="Doctor Profile | Doctori AI" description="View verified doctor profile, credentials, availability, and book an appointment online." />
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Doctor Not Found</h1>
           <Link to="/doctors">
@@ -137,6 +139,12 @@ export default function DoctorProfile() {
 
   return (
     <div className="container py-8">
+      <SEO
+        title={`${doctor.name} - ${doctor.specialty} | Doctori AI`}
+        description={`Book an appointment with ${doctor.name}, a ${doctor.specialty} at ${doctor.location}. ${doctor.experience} of experience. Consultation fee: ${doctor.consultationFee}.`}
+        canonicalPath={`/doctor/${doctor.id}`}
+        ogImage={doctor.image || '/og-image.png'}
+      />
       <div className="max-w-6xl mx-auto">
         {/* Back Button */}
         <Link to="/doctors" className="inline-flex items-center text-primary hover:text-primary/80 mb-6">
