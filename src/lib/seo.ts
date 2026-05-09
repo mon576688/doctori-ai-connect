@@ -10,19 +10,19 @@ export const SITE_CONFIG = {
 // Page-specific SEO metadata
 export const PAGE_SEO = {
   home: {
-    title: 'Doctori AI - Find Doctors Near You | AI Health Assistant',
-    description: 'Find nearby doctors, check symptoms with AI, read health blogs, locate blood banks & book appointments. Your trusted doctor AI assistant 24/7.',
+    title: 'Doctori AI - Your AI Health Assistant | Find Doctors 24/7',
+    description: 'Chat with AI to check symptoms, find verified doctors near you, locate blood banks, and book appointments online. Free & available 24/7.',
     canonicalPath: '/',
     keywords: 'doctor, doctor AI, find doctor near me, nearby doctor, health analysis, blood bank, health blogs, symptom checker, online doctor appointment',
   },
   chat: {
-    title: 'AI Symptom Checker - Free Health Chat',
-    description: 'Describe your symptoms and get instant AI-powered health guidance. Free 24/7 symptom checker with doctor recommendations.',
+    title: 'Free AI Health Chat - Talk to AI Doctor 24/7 | Doctori AI',
+    description: 'Describe your symptoms and get instant AI-powered health guidance. Free, private, and available 24/7.',
     canonicalPath: '/chat',
   },
   doctors: {
-    title: 'Find & Book Doctors Near You',
-    description: 'Search nearby doctors, compare ratings, and book appointments online. Find verified healthcare professionals for your needs.',
+    title: 'Find Verified Doctors Near You | Doctori AI',
+    description: 'Browse and book appointments with verified healthcare professionals near you. Filter by specialty, location, and availability.',
     canonicalPath: '/doctors',
     keywords: 'find doctor, nearby doctor, book doctor appointment, doctor near me, healthcare professionals',
   },
@@ -32,8 +32,8 @@ export const PAGE_SEO = {
     canonicalPath: '/booking',
   },
   blog: {
-    title: 'Health Blog - Expert Medical Articles',
-    description: 'Read expert health blogs on nutrition, fitness, symptoms, wellness & disease prevention. Evidence-based medical articles updated regularly.',
+    title: 'Health Blog, Tips & Medical Advice | Doctori AI',
+    description: 'Expert health articles, wellness tips, and medical guidance to help you live healthier.',
     canonicalPath: '/blog',
     keywords: 'health blogs, medical articles, health tips, wellness blog, disease prevention, nutrition tips',
   },
@@ -68,8 +68,8 @@ export const PAGE_SEO = {
     canonicalPath: '/doctor-verification',
   },
   medicine: {
-    title: 'Medicine Information Search',
-    description: 'Search for detailed medicine information including uses, dosage, side effects, and alternatives.',
+    title: 'Medicine Search & Drug Interaction Checker | Doctori AI',
+    description: 'Search medications, understand dosages, and check for drug-to-drug interactions in our comprehensive medicine database.',
     canonicalPath: '/medicine',
   },
   reminders: {
@@ -78,8 +78,8 @@ export const PAGE_SEO = {
     canonicalPath: '/reminders',
   },
   bloodDonation: {
-    title: 'Blood Donation & Blood Bank List',
-    description: 'Register as a blood donor, find blood banks near you, and help save lives. Join our blood donor community in Bangladesh.',
+    title: 'Find Blood Banks & Donate Blood Near You | Doctori AI',
+    description: 'Locate blood banks near you, register as a blood donor, and help save lives in your community.',
     canonicalPath: '/blood-donation',
     keywords: 'blood donation, blood bank, blood bank list, blood donor, donate blood, blood group',
   },
