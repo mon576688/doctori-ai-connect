@@ -541,6 +541,75 @@ export type Database = {
           },
         ]
       }
+      directory_doctors: {
+        Row: {
+          area: string | null
+          bio: string | null
+          chamber_address: string | null
+          city: string
+          consultation_fee: number | null
+          created_at: string
+          hospital_name: string | null
+          id: string
+          is_active: boolean
+          is_featured: boolean
+          name: string
+          office_hours: string | null
+          phone: string | null
+          photo_url: string | null
+          qualifications: string | null
+          slug: string
+          specialty: string
+          updated_at: string
+          whatsapp: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          area?: string | null
+          bio?: string | null
+          chamber_address?: string | null
+          city: string
+          consultation_fee?: number | null
+          created_at?: string
+          hospital_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name: string
+          office_hours?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          qualifications?: string | null
+          slug: string
+          specialty: string
+          updated_at?: string
+          whatsapp?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          area?: string | null
+          bio?: string | null
+          chamber_address?: string | null
+          city?: string
+          consultation_fee?: number | null
+          created_at?: string
+          hospital_name?: string | null
+          id?: string
+          is_active?: boolean
+          is_featured?: boolean
+          name?: string
+          office_hours?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          qualifications?: string | null
+          slug?: string
+          specialty?: string
+          updated_at?: string
+          whatsapp?: string | null
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       doctors: {
         Row: {
           approved: boolean | null
