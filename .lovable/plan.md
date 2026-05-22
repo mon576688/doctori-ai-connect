@@ -1,40 +1,80 @@
-## Context
+# Separate Doctor Directory from Find Doctors
 
-The project already has a working `SEO` component (`src/components/SEO.tsx`) using `react-helmet`, and a centralized `PAGE_SEO` map in `src/lib/seo.ts`. Almost every page already imports `<SEO />` with values from `PAGE_SEO`. So the duplicate-meta problem is **not** "no SEO component exists" — it's that:
+## Goal
 
-1. Some titles/descriptions don't match the new copy you provided.
-2. `og:url` falls back to a static `canonicalUrl` (and on pages without `canonicalPath`, no `og:url` is emitted at all), so it doesn't always reflect the current page.
-3. Routes in your spec (`/blood-bank`, `/medicines`, `/ai-chat`) don't match the actual routes in `App.tsx` (`/blood-donation`, `/medicine`, `/chat`). I'll apply the new copy to the existing routes — no route renames.
+- **Find Doctors (`/doctors`)** — only doctors who registered on Doctori AI (bookable, chat, prescriptions, etc.). Powered by `providers_public`.
+- **Doctor Directory (`/doctor-directory`)** — a curated public listing of reputed doctors from across Bangladesh (read-only info: name, specialty, qualifications, chamber/hospital, city, office hours, fees, phone). Not bookable on the platform.
 
-No need to install `react-helmet-async`; `react-helmet` is already wired and working.
+Today both pages read from `providers_public`, and the 20 seeded "Dhaka doctors" we just added live as fake registered providers. We will move that curated content into its own table so the two surfaces are truly separate.
 
 ## Changes
 
-### 1. `src/lib/seo.ts` — update copy for the 6 pages
+### 1. New table: `directory_doctors`
 
-| Key | New title | New description |
-|---|---|---|
-| `home` | `Doctori AI - Your AI Health Assistant \| Find Doctors 24/7` | `Chat with AI to check symptoms, find verified doctors near you, locate blood banks, and book appointments online. Free & available 24/7.` |
-| `doctors` | `Find Verified Doctors Near You \| Doctori AI` | `Browse and book appointments with verified healthcare professionals near you. Filter by specialty, location, and availability.` |
-| `blog` | `Health Blog, Tips & Medical Advice \| Doctori AI` | `Expert health articles, wellness tips, and medical guidance to help you live healthier.` |
-| `bloodDonation` | `Find Blood Banks & Donate Blood Near You \| Doctori AI` | `Locate blood banks near you, register as a blood donor, and help save lives in your community.` |
-| `medicine` | `Medicine Search & Drug Interaction Checker \| Doctori AI` | `Search medications, understand dosages, and check for drug-to-drug interactions in our comprehensive medicine database.` |
-| `chat` | `Free AI Health Chat - Talk to AI Doctor 24/7 \| Doctori AI` | `Describe your symptoms and get instant AI-powered health guidance. Free, private, and available 24/7.` |
+Public, read-only curated dataset. Fields:
+- name, slug
+- specialty, qualifications (text)
+- hospital / chamber name, address, city, area
+- office hours (text), consultation fee (int, BDT)
+- phone, whatsapp (optional)
+- photo_url (optional), bio
+- years_experience, is_featured, is_active
 
-### 2. `src/components/SEO.tsx` — make `og:url` dynamic
+RLS:
+- Anyone can SELECT where `is_active = true`
+- Only admins can INSERT / UPDATE / DELETE
 
-- Always emit `og:url` and `<link rel="canonical">` based on the current page URL.
-- Resolution order:
-  1. If `canonicalPath` is provided → `https://doctoriai.com{canonicalPath}` (preferred, normalized).
-  2. Else, fall back to `window.location.origin + window.location.pathname` (no query string, no hash) so dynamic routes (e.g. `/doctor/:id`, `/blog/:slug`) get a per-page URL instead of inheriting the home URL from `index.html`.
-- Guard `window` access for SSR safety.
+### 2. Remove the seeded fake providers
 
-### 3. `index.html` — neutralize stale defaults
+Delete the 20 `@doctoriai-seed.local` accounts from `auth.users` (cascades to profiles, user_roles, doctors) so Find Doctors is back to only real registrants. Re-insert the same 20 Dhaka doctors (plus room for more cities) into `directory_doctors`.
 
-The static `<title>`, `<meta name="description">`, `og:title`, `og:description`, and `og:url` in `index.html` are what crawlers see before React hydrates and what shows up if a page forgets to render `<SEO />`. I'll keep them generic (home-page values) so they're at least correct as a fallback, and leave per-page overrides to `<SEO />`. No structural change beyond updating those 5 tags to match the new home copy.
+### 3. Frontend
+
+- `src/pages/DoctorDirectory.tsx` — switch query from `providers_public` to `directory_doctors`. Keep current UI (search, city filter, specialty tabs). Remove hospitals/booking CTAs; show "View Profile" + "Call" actions only. Update copy: "Reputed doctors across Bangladesh — informational listing, not bookable on Doctori AI."
+- `src/pages/Doctors.tsx` — unchanged logic (still `providers_public`), update empty-state copy to clarify these are Doctori AI registered providers.
+- Navbar: keep "Find Doctors" → `/doctors`. Add "Doctor Directory" link under Resources/Explore (or footer) → `/doctor-directory`.
+- `DoctorDirectory` detail click → a lightweight modal/profile card (no `/doctor/:id` booking route). New `src/pages/DirectoryDoctorProfile.tsx` (optional, read-only) at `/doctor-directory/:slug`.
+
+### 4. Admin
+
+Add a simple admin screen `src/components/admin/DirectoryManagement.tsx` to add/edit/delete `directory_doctors` rows. Linked from AdminSidebar.
+
+### 5. SEO
+
+- DoctorDirectory: schema.org `MedicalBusiness` list, title "Doctor Directory Bangladesh — Reputed Doctors by Specialty & City".
+- Doctors: keep existing SEO.
+
+## Technical notes
+
+```text
+directory_doctors
+  id uuid pk
+  slug text unique
+  name text
+  specialty text
+  qualifications text
+  hospital_name text
+  chamber_address text
+  city text
+  area text
+  office_hours text
+  consultation_fee int
+  phone text
+  whatsapp text
+  photo_url text
+  bio text
+  years_experience int
+  is_featured bool default false
+  is_active bool default true
+  created_at, updated_at
+```
+
+Migration order:
+1. Create `directory_doctors` + RLS + updated_at trigger.
+2. Seed the 20 Dhaka doctors (and structure for more).
+3. Delete the seeded auth users (`email like '%@doctoriai-seed.local'`).
 
 ## Out of scope
 
-- No route renames (`/blood-donation`, `/medicine`, `/chat` stay as-is — they're linked from the navbar, footer, sitemap, and many internal links).
-- No switch to `react-helmet-async` (current `react-helmet` works; switching would require wrapping `App` in a provider and adds risk for zero benefit here).
-- No changes to pages that already have correct, page-specific SEO (About, Contact, Blog posts, etc.).
+- No changes to booking, appointments, prescriptions, or messaging flow.
+- No new auth roles.
