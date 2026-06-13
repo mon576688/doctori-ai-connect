@@ -1,80 +1,54 @@
-# Separate Doctor Directory from Find Doctors
-
 ## Goal
+Expand the Doctor Directory with more publicly available reputed doctors across Bangladesh, strengthen SEO for `/doctor-directory`, and remove consultation fee from the UI.
 
-- **Find Doctors (`/doctors`)** — only doctors who registered on Doctori AI (bookable, chat, prescriptions, etc.). Powered by `providers_public`.
-- **Doctor Directory (`/doctor-directory`)** — a curated public listing of reputed doctors from across Bangladesh (read-only info: name, specialty, qualifications, chamber/hospital, city, office hours, fees, phone). Not bookable on the platform.
+## 1. Seed more doctors (data migration)
+Insert ~40–50 additional reputed doctors into `directory_doctors` from publicly available chamber listings (hospital websites, public profiles). Coverage targets:
 
-Today both pages read from `providers_public`, and the 20 seeded "Dhaka doctors" we just added live as fake registered providers. We will move that curated content into its own table so the two surfaces are truly separate.
+- **Dhaka** (additional): Square, United, Evercare, Apollo/Evercare, BIRDEM, BSMMU, Labaid, Ibn Sina, Popular, Anwer Khan Modern
+- **Chittagong**: Chevron, Imperial, Chittagong Medical College, CSCR
+- **Sylhet**: Mount Adora, Park View, Sylhet MAG Osmani Medical
+- **Rajshahi**: Rajshahi Medical College Hospital, Popular Diagnostic Rajshahi
+- **Khulna**: Khulna Medical College, Gazi Medical
+- **Barisal**: Sher-e-Bangla Medical College
+- **Mymensingh**: Mymensingh Medical College
+- **Rangpur**: Rangpur Medical College, Prime Medical
+- **Comilla**: Comilla Medical College, Moon Hospital
 
-## Changes
+Specialties to broaden: Cardiology, Neurology, Neurosurgery, Oncology, Gastroenterology, Endocrinology, Nephrology, Urology, Orthopedics, ENT, Ophthalmology, Dermatology, Psychiatry, Pediatrics, Gynecology, Pulmonology, Rheumatology, General Surgery, Hematology.
 
-### 1. New table: `directory_doctors`
+Each row: name, specialty, qualifications, hospital_name, chamber_address, city, area, office_hours, phone (where publicly listed), bio, years_experience, is_featured (top 10 only), is_active=true. Slug auto-generated via `lower(regexp_replace(name,...))`. Use `ON CONFLICT (slug) DO NOTHING` so re-runs are safe.
 
-Public, read-only curated dataset. Fields:
-- name, slug
-- specialty, qualifications (text)
-- hospital / chamber name, address, city, area
-- office hours (text), consultation fee (int, BDT)
-- phone, whatsapp (optional)
-- photo_url (optional), bio
-- years_experience, is_featured, is_active
+No fee data is required (UI will hide it), but column stays nullable.
 
-RLS:
-- Anyone can SELECT where `is_active = true`
-- Only admins can INSERT / UPDATE / DELETE
+## 2. Hide consultation fee in the UI
+In `src/pages/DoctorDirectory.tsx`, remove the fee block from `DoctorCard`. The bottom row keeps only the "Call" link (right-aligned). Remove the unused `consultation_fee` field rendering; the field stays in the interface for type safety but is unused.
 
-### 2. Remove the seeded fake providers
+## 3. SEO improvements for `/doctor-directory`
+Update `<SEO>` usage on the page and register the route in `src/lib/seo.ts`:
 
-Delete the 20 `@doctoriai-seed.local` accounts from `auth.users` (cascades to profiles, user_roles, doctors) so Find Doctors is back to only real registrants. Re-insert the same 20 Dhaka doctors (plus room for more cities) into `directory_doctors`.
+- Add `doctorDirectory` entry in `PAGE_SEO` with:
+  - `title`: "Doctor Directory Bangladesh — Reputed Specialists by City | Doctori AI"
+  - `description`: "Browse a curated directory of reputed doctors across Bangladesh — Dhaka, Chittagong, Sylhet, Khulna and more. Filter by specialty and city."
+  - `canonicalPath`: "/doctor-directory"
+  - `keywords`: "doctor directory bangladesh, reputed doctors dhaka, chittagong specialists, bangladesh doctors list, doctor chamber address, find specialist bangladesh"
+- Pass `keywords` and `canonicalPath` to the `<SEO>` component on the page.
+- Add JSON-LD `MedicalBusiness`/`ItemList` schema inline in the page (via Helmet `<script type="application/ld+json">`) listing the top 20 featured doctors with `@type: Physician`, `name`, `medicalSpecialty`, `address`, `telephone`, `worksFor`. This dramatically improves rich-result eligibility.
+- Add a single `<h1>` (already present) and ensure each `DoctorCard` uses semantic `<article>` with `itemScope itemType="https://schema.org/Physician"` microdata as a fallback signal.
+- Add the route to `public/sitemap.xml` (and `scripts/generate-sitemap.mjs` if it drives the file) with priority 0.8.
 
-### 3. Frontend
+## 4. Robots / indexability
+No changes — page is already indexable.
 
-- `src/pages/DoctorDirectory.tsx` — switch query from `providers_public` to `directory_doctors`. Keep current UI (search, city filter, specialty tabs). Remove hospitals/booking CTAs; show "View Profile" + "Call" actions only. Update copy: "Reputed doctors across Bangladesh — informational listing, not bookable on Doctori AI."
-- `src/pages/Doctors.tsx` — unchanged logic (still `providers_public`), update empty-state copy to clarify these are Doctori AI registered providers.
-- Navbar: keep "Find Doctors" → `/doctors`. Add "Doctor Directory" link under Resources/Explore (or footer) → `/doctor-directory`.
-- `DoctorDirectory` detail click → a lightweight modal/profile card (no `/doctor/:id` booking route). New `src/pages/DirectoryDoctorProfile.tsx` (optional, read-only) at `/doctor-directory/:slug`.
-
-### 4. Admin
-
-Add a simple admin screen `src/components/admin/DirectoryManagement.tsx` to add/edit/delete `directory_doctors` rows. Linked from AdminSidebar.
-
-### 5. SEO
-
-- DoctorDirectory: schema.org `MedicalBusiness` list, title "Doctor Directory Bangladesh — Reputed Doctors by Specialty & City".
-- Doctors: keep existing SEO.
-
-## Technical notes
-
-```text
-directory_doctors
-  id uuid pk
-  slug text unique
-  name text
-  specialty text
-  qualifications text
-  hospital_name text
-  chamber_address text
-  city text
-  area text
-  office_hours text
-  consultation_fee int
-  phone text
-  whatsapp text
-  photo_url text
-  bio text
-  years_experience int
-  is_featured bool default false
-  is_active bool default true
-  created_at, updated_at
-```
-
-Migration order:
-1. Create `directory_doctors` + RLS + updated_at trigger.
-2. Seed the 20 Dhaka doctors (and structure for more).
-3. Delete the seeded auth users (`email like '%@doctoriai-seed.local'`).
+## Technical details
+- Migration file: `INSERT INTO public.directory_doctors (...) VALUES (...), (...), ... ON CONFLICT (slug) DO NOTHING;` — uses the data-insert tool (not a schema migration).
+- Slug generation: `lower(regexp_replace(name, '[^a-zA-Z0-9]+', '-', 'g'))` mirroring the existing seed.
+- No schema change needed; the table already supports all required fields.
+- TypeScript types in `src/integrations/supabase/types.ts` already match.
 
 ## Out of scope
+- No booking/CTAs added (directory remains informational).
+- No edits to `/doctors` (Find Doctors) page.
+- No change to admin tooling for directory_doctors (can be added later if needed).
 
-- No changes to booking, appointments, prescriptions, or messaging flow.
-- No new auth roles.
+## Open question
+Do you want me to also remove the `consultation_fee` **column** from the database, or just hide it in the UI for now? (Recommend: just hide — keeps data flexibility.)

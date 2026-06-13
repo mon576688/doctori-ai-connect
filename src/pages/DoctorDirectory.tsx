@@ -7,6 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SEO } from "@/components/SEO";
+import { Helmet } from "react-helmet";
+import { PAGE_SEO } from "@/lib/seo";
 import {
   Search,
   Stethoscope,
@@ -84,6 +86,7 @@ const DoctorDirectory = () => {
   }, [doctors, searchQuery, selectedCity, selectedSpecialty]);
 
   const DoctorCard = ({ d }: { d: DirectoryDoctor }) => (
+    <article itemScope itemType="https://schema.org/Physician" className="h-full">
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
       <CardContent className="p-4 flex flex-col flex-1">
         <div className="flex gap-3">
@@ -93,8 +96,8 @@ const DoctorDirectory = () => {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-foreground leading-tight">{d.name}</h3>
-            <div className="flex items-center gap-1 text-sm text-primary mt-0.5">
+            <h3 className="font-semibold text-foreground leading-tight" itemProp="name">{d.name}</h3>
+            <div className="flex items-center gap-1 text-sm text-primary mt-0.5" itemProp="medicalSpecialty">
               <Stethoscope className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">{d.specialty}</span>
             </div>
@@ -112,13 +115,13 @@ const DoctorDirectory = () => {
 
         <div className="mt-3 space-y-1.5 text-xs text-muted-foreground flex-1">
           {d.hospital_name && (
-            <div className="flex items-start gap-1.5">
+            <div className="flex items-start gap-1.5" itemProp="worksFor">
               <Building2 className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span>{d.hospital_name}</span>
             </div>
           )}
           {d.chamber_address && (
-            <div className="flex items-start gap-1.5">
+            <div className="flex items-start gap-1.5" itemProp="address">
               <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span>{d.chamber_address}</span>
             </div>
@@ -131,31 +134,54 @@ const DoctorDirectory = () => {
           )}
         </div>
 
-        <div className="mt-3 flex items-center justify-between gap-2 pt-3 border-t">
-          {d.consultation_fee != null ? (
-            <span className="text-sm font-medium text-foreground">৳{d.consultation_fee}</span>
-          ) : (
-            <span className="text-xs text-muted-foreground">Fee on inquiry</span>
-          )}
-          {d.phone && (
+        {d.phone && (
+          <div className="mt-3 flex items-center justify-end gap-2 pt-3 border-t">
             <a
               href={`tel:${d.phone}`}
               className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+              itemProp="telephone"
             >
               <Phone className="h-3 w-3" /> Call
             </a>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
+    </article>
   );
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Reputed Doctors Across Bangladesh",
+    itemListElement: doctors.slice(0, 25).map((d, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Physician",
+        name: d.name,
+        medicalSpecialty: d.specialty,
+        ...(d.hospital_name && { worksFor: { "@type": "Hospital", name: d.hospital_name } }),
+        ...(d.chamber_address && { address: d.chamber_address }),
+        ...(d.phone && { telephone: d.phone }),
+        areaServed: d.city,
+      },
+    })),
+  };
 
   return (
     <div className="min-h-screen">
       <SEO
-        title="Doctor Directory Bangladesh — Reputed Doctors by Specialty & City"
-        description="Browse a curated directory of reputed doctors across Bangladesh. Find specialists, qualifications, chamber addresses, office hours and consultation fees."
+        title={PAGE_SEO.doctorDirectory.title}
+        description={PAGE_SEO.doctorDirectory.description}
+        canonicalPath={PAGE_SEO.doctorDirectory.canonicalPath}
+        keywords={PAGE_SEO.doctorDirectory.keywords}
       />
+      {doctors.length > 0 && (
+        <Helmet>
+          <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        </Helmet>
+      )}
 
       {/* Hero */}
       <section className="bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12">
