@@ -26,6 +26,12 @@ export const PAGE_SEO = {
     canonicalPath: '/doctors',
     keywords: 'find doctor, nearby doctor, book doctor appointment, doctor near me, healthcare professionals',
   },
+  doctorDirectory: {
+    title: 'Doctor Directory Bangladesh — Reputed Specialists by City | Doctori AI',
+    description: 'Browse a curated directory of reputed doctors across Bangladesh — Dhaka, Chittagong, Sylhet, Khulna and more. Filter by specialty and city, find chamber address and contact.',
+    canonicalPath: '/doctor-directory',
+    keywords: 'doctor directory bangladesh, reputed doctors dhaka, chittagong specialists, sylhet doctors, bangladesh doctors list, doctor chamber address, find specialist bangladesh, best doctors in bd',
+  },
   booking: {
     title: 'Book Doctor Appointment Online',
     description: 'Schedule appointments with verified doctors in your area. Easy online booking with instant confirmation.',
