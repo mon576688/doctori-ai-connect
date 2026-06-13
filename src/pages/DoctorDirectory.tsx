@@ -86,8 +86,8 @@ const DoctorDirectory = () => {
   }, [doctors, searchQuery, selectedCity, selectedSpecialty]);
 
   const DoctorCard = ({ d }: { d: DirectoryDoctor }) => (
-    <Card asChild className="hover:shadow-md transition-shadow h-full flex flex-col">
-      <article itemScope itemType="https://schema.org/Physician">
+    <article itemScope itemType="https://schema.org/Physician" className="h-full">
+    <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
       <CardContent className="p-4 flex flex-col flex-1">
         <div className="flex gap-3">
           <Avatar className="h-14 w-14 shrink-0">
@@ -146,8 +146,8 @@ const DoctorDirectory = () => {
           </div>
         )}
       </CardContent>
-      </article>
     </Card>
+    </article>
   );
 
   const jsonLd = {
