@@ -1,54 +1,58 @@
 ## Goal
-Expand the Doctor Directory with more publicly available reputed doctors across Bangladesh, strengthen SEO for `/doctor-directory`, and remove consultation fee from the UI.
 
-## 1. Seed more doctors (data migration)
-Insert ~40–50 additional reputed doctors into `directory_doctors` from publicly available chamber listings (hospital websites, public profiles). Coverage targets:
+Expand the public `/doctor-directory` with ~150 additional reputed, publicly-listed doctors from Bangladesh so the page ranks for many more long-tail "doctor + specialty + city/hospital" searches. This page stays purely informational (no booking, no fees) and is fully separate from `/doctors` (the bookable Doctori AI provider list).
 
-- **Dhaka** (additional): Square, United, Evercare, Apollo/Evercare, BIRDEM, BSMMU, Labaid, Ibn Sina, Popular, Anwer Khan Modern
-- **Chittagong**: Chevron, Imperial, Chittagong Medical College, CSCR
-- **Sylhet**: Mount Adora, Park View, Sylhet MAG Osmani Medical
-- **Rajshahi**: Rajshahi Medical College Hospital, Popular Diagnostic Rajshahi
-- **Khulna**: Khulna Medical College, Gazi Medical
-- **Barisal**: Sher-e-Bangla Medical College
-- **Mymensingh**: Mymensingh Medical College
-- **Rangpur**: Rangpur Medical College, Prime Medical
-- **Comilla**: Comilla Medical College, Moon Hospital
+## What I'll do
 
-Specialties to broaden: Cardiology, Neurology, Neurosurgery, Oncology, Gastroenterology, Endocrinology, Nephrology, Urology, Orthopedics, ENT, Ophthalmology, Dermatology, Psychiatry, Pediatrics, Gynecology, Pulmonology, Rheumatology, General Surgery, Hematology.
+A single `supabase--insert` data INSERT into `directory_doctors` — no schema changes, no frontend changes.
 
-Each row: name, specialty, qualifications, hospital_name, chamber_address, city, area, office_hours, phone (where publicly listed), bio, years_experience, is_featured (top 10 only), is_active=true. Slug auto-generated via `lower(regexp_replace(name,...))`. Use `ON CONFLICT (slug) DO NOTHING` so re-runs are safe.
+### Coverage targets (~150 rows)
 
-No fee data is required (UI will hide it), but column stays nullable.
+Spread across all 8 divisions and major hospitals, with broad specialty coverage:
 
-## 2. Hide consultation fee in the UI
-In `src/pages/DoctorDirectory.tsx`, remove the fee block from `DoctorCard`. The bottom row keeps only the "Call" link (right-aligned). Remove the unused `consultation_fee` field rendering; the field stays in the interface for type safety but is unused.
+**Dhaka (~55)**
+- Square Hospital, United Hospital, Evercare, Apollo Imperial, Labaid Specialized, Ibn Sina, Popular Diagnostic, Anwer Khan Modern, BIRDEM, BSMMU, Dhaka Medical College, Holy Family Red Crescent, Bangabandhu Sheikh Mujib Medical, Bangladesh Specialized Hospital, Asgar Ali Hospital, Green Life, City Hospital, Central Hospital
 
-## 3. SEO improvements for `/doctor-directory`
-Update `<SEO>` usage on the page and register the route in `src/lib/seo.ts`:
+**Chittagong (~25)**
+- Chevron, Imperial, CSCR, Parkview, Max Hospital, Metropolitan, Chattogram Medical College, Southern Medical, Royal Hospital
 
-- Add `doctorDirectory` entry in `PAGE_SEO` with:
-  - `title`: "Doctor Directory Bangladesh — Reputed Specialists by City | Doctori AI"
-  - `description`: "Browse a curated directory of reputed doctors across Bangladesh — Dhaka, Chittagong, Sylhet, Khulna and more. Filter by specialty and city."
-  - `canonicalPath`: "/doctor-directory"
-  - `keywords`: "doctor directory bangladesh, reputed doctors dhaka, chittagong specialists, bangladesh doctors list, doctor chamber address, find specialist bangladesh"
-- Pass `keywords` and `canonicalPath` to the `<SEO>` component on the page.
-- Add JSON-LD `MedicalBusiness`/`ItemList` schema inline in the page (via Helmet `<script type="application/ld+json">`) listing the top 20 featured doctors with `@type: Physician`, `name`, `medicalSpecialty`, `address`, `telephone`, `worksFor`. This dramatically improves rich-result eligibility.
-- Add a single `<h1>` (already present) and ensure each `DoctorCard` uses semantic `<article>` with `itemScope itemType="https://schema.org/Physician"` microdata as a fallback signal.
-- Add the route to `public/sitemap.xml` (and `scripts/generate-sitemap.mjs` if it drives the file) with priority 0.8.
+**Sylhet (~15)**
+- Mount Adora (Akhalia + Nayasarak), Park View Medical, North East Medical, Sylhet MAG Osmani Medical College, Ibn Sina Sylhet, Jalalabad Ragib-Rabeya Medical
 
-## 4. Robots / indexability
-No changes — page is already indexable.
+**Rajshahi (~12)**
+- Rajshahi Medical College, Popular Diagnostic Rajshahi, Islami Bank Hospital, Rajshahi Royal Hospital
 
-## Technical details
-- Migration file: `INSERT INTO public.directory_doctors (...) VALUES (...), (...), ... ON CONFLICT (slug) DO NOTHING;` — uses the data-insert tool (not a schema migration).
-- Slug generation: `lower(regexp_replace(name, '[^a-zA-Z0-9]+', '-', 'g'))` mirroring the existing seed.
-- No schema change needed; the table already supports all required fields.
-- TypeScript types in `src/integrations/supabase/types.ts` already match.
+**Khulna (~12)**
+- Khulna Medical College, Gazi Medical, Ad-din Akij Medical, City Medical, Khulna Shishu
 
-## Out of scope
-- No booking/CTAs added (directory remains informational).
-- No edits to `/doctors` (Find Doctors) page.
-- No change to admin tooling for directory_doctors (can be added later if needed).
+**Barisal (~8)**
+- Sher-e-Bangla Medical College, Barisal Sadar, Mukto Akash
 
-## Open question
-Do you want me to also remove the `consultation_fee` **column** from the database, or just hide it in the UI for now? (Recommend: just hide — keeps data flexibility.)
+**Mymensingh (~8)**
+- Mymensingh Medical College, Community Based Medical College, Swadesh Hospital
+
+**Rangpur (~8)**
+- Rangpur Medical College, Prime Medical, Rangpur Community Medical
+
+**Comilla / others (~7)**
+- Comilla Medical College, Moon Hospital, Trust Medical Cumilla, Bogura Mohammad Ali Hospital, Jashore Sadar, Faridpur Medical College
+
+### Specialty breadth
+
+Cardiology, Cardiac Surgery, Neurology, Neurosurgery, Oncology, Hematology, Gastroenterology, Hepatology, Endocrinology, Nephrology, Urology, Orthopedics, Rheumatology, ENT, Ophthalmology, Dermatology, Plastic Surgery, Psychiatry, Pediatrics, Neonatology, Gynecology & Obstetrics, Pulmonology, General Surgery, General Medicine, Vascular Surgery, Colorectal Surgery, Dentistry.
+
+### Row content (per doctor)
+
+`name`, `specialty`, `qualifications`, `hospital_name`, `chamber_address`, `city`, `area`, `office_hours`, `phone`, `bio` (2–3 lines), `years_experience`, `slug` (auto via `lower(regexp_replace(name,...))`), `is_featured = false` (we already featured top 10), `is_active = true`. `consultation_fee` left NULL (UI hides it anyway).
+
+### Safety
+
+- Uses `ON CONFLICT (slug) DO NOTHING` so re-runs are idempotent and won't duplicate previously seeded doctors.
+- All data is from publicly listed chamber directories (hospital websites, public listings). No private contact info beyond publicly advertised chamber numbers.
+
+## What I'm NOT doing in this step
+
+- No per-doctor profile pages (`/doctor-directory/[slug]`) — happy to do that as a follow-up; it would give the biggest additional SEO lift.
+- No schema changes.
+- No edits to `DoctorDirectory.tsx`, `seo.ts`, or `sitemap.xml`.
+- No changes to `/doctors` (bookable providers).
