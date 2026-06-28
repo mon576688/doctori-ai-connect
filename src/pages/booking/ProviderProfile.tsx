@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { ReviewsList } from '@/components/reviews/ReviewsList';
 import { ReviewForm } from '@/components/reviews/ReviewForm';
 import { useAuth } from '@/hooks/useAuth';
+import { SimilarDoctors } from '@/components/booking/SimilarDoctors';
 
 export default function ProviderProfile() {
   const { id } = useParams<{ id: string }>();
@@ -476,6 +477,14 @@ export default function ProviderProfile() {
             </Card>
           </div>
         </div>
+
+        {provider && (
+          <SimilarDoctors
+            currentDoctorId={provider.id}
+            specialty={provider.specialty}
+            city={provider.city}
+          />
+        )}
       </div>
     </div>
   );
