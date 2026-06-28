@@ -1,58 +1,73 @@
 ## Goal
 
-Expand the public `/doctor-directory` with ~150 additional reputed, publicly-listed doctors from Bangladesh so the page ranks for many more long-tail "doctor + specialty + city/hospital" searches. This page stays purely informational (no booking, no fees) and is fully separate from `/doctors` (the bookable Doctori AI provider list).
+On the provider booking page (`/booking/provider/:id`), add a **Similar Doctors** section that helps users find an alternative when the current doctor's schedule doesn't fit. Each suggested card shows the doctor's next available appointment slot so users can quickly pick someone else.
 
-## What I'll do
+## Scope
 
-A single `supabase--insert` data INSERT into `directory_doctors` — no schema changes, no frontend changes.
+- Source: **bookable providers only** (live `providers_public` view / `doctors` + `profiles` data already used in booking).
+- Match: **same specialty** + **same city** as the current doctor (area preferred when available, otherwise city-wide).
+- Exclude the currently viewed doctor.
+- Limit: up to **6 similar doctors**, ordered by soonest next-available slot, then rating, then experience.
+- Card shows: photo, name, specialty, city/area, rating, and **"Next available: <day, date, time>"** badge.
+- Clicking a card navigates to that doctor's booking provider profile (same route, new id) and resets the relevant booking context to that doctor.
 
-### Coverage targets (~150 rows)
+## UX
 
-Spread across all 8 divisions and major hospitals, with broad specialty coverage:
+```text
+┌──────────────────────────────────────────────────────────────┐
+│ Current Doctor Profile (existing content)                    │
+│ ... bio, schedule, Book Appointment CTA ...                  │
+└──────────────────────────────────────────────────────────────┘
 
-**Dhaka (~55)**
-- Square Hospital, United Hospital, Evercare, Apollo Imperial, Labaid Specialized, Ibn Sina, Popular Diagnostic, Anwer Khan Modern, BIRDEM, BSMMU, Dhaka Medical College, Holy Family Red Crescent, Bangabandhu Sheikh Mujib Medical, Bangladesh Specialized Hospital, Asgar Ali Hospital, Green Life, City Hospital, Central Hospital
+── Similar Doctors ─────────────────────────────────────────────
+Same specialty in <City>. Different schedules so you can find a
+time that works.
 
-**Chittagong (~25)**
-- Chevron, Imperial, CSCR, Parkview, Max Hospital, Metropolitan, Chattogram Medical College, Southern Medical, Royal Hospital
+┌────────────┐ ┌────────────┐ ┌────────────┐
+│  [photo]   │ │  [photo]   │ │  [photo]   │
+│ Dr. Name   │ │ Dr. Name   │ │ Dr. Name   │
+│ Cardiology │ │ Cardiology │ │ Cardiology │
+│ Dhaka·Gulshan│ │ Dhaka·Banani│ │ Dhaka·Uttara│
+│ ★ 4.8 · 12y│ │ ★ 4.6 · 9y │ │ ★ 4.9 · 18y│
+│ ─────────  │ │ ─────────  │ │ ─────────  │
+│ Next: Tue, │ │ Next: Wed, │ │ Next:      │
+│ 3:00 PM    │ │ 10:30 AM   │ │ Today 6 PM │
+│ [View →]   │ │ [View →]   │ │ [View →]   │
+└────────────┘ └────────────┘ └────────────┘
+```
 
-**Sylhet (~15)**
-- Mount Adora (Akhalia + Nayasarak), Park View Medical, North East Medical, Sylhet MAG Osmani Medical College, Ibn Sina Sylhet, Jalalabad Ragib-Rabeya Medical
+- Horizontal scroll on mobile; 3-up grid on desktop.
+- If no similar doctors found, hide the section entirely (no empty state).
+- If a similar doctor has no future availability in the next 30 days, show **"Schedule on request"** instead of a date.
 
-**Rajshahi (~12)**
-- Rajshahi Medical College, Popular Diagnostic Rajshahi, Islami Bank Hospital, Rajshahi Royal Hospital
+## Technical Implementation
 
-**Khulna (~12)**
-- Khulna Medical College, Gazi Medical, Ad-din Akij Medical, City Medical, Khulna Shishu
+1. **New component** `src/components/booking/SimilarDoctors.tsx`
+   - Props: `currentDoctorId`, `specialty`, `city`, `area?`.
+   - Fetches similar providers from `providers_public` (same source used in `ProviderList`) filtered by specialty + city, excluding `currentDoctorId`, limit 12 (oversample so we can rank by next slot).
+   - For each candidate, compute next available slot by querying:
+     - `availability_dates` for the next 30 days where `is_available = true AND is_booked = false`, take earliest.
+     - Fallback to `availability_slots` (recurring weekly) → derive the next matching weekday + earliest hour, then exclude already-booked `appointments` on that date.
+   - Sort candidates by next-slot timestamp ascending; secondary sort by rating desc, then experience desc.
+   - Slice to top 6.
+   - Renders a horizontally scrollable list of cards using existing shadcn `Card` + `Badge` components and the project's medical-blue accent.
 
-**Barisal (~8)**
-- Sher-e-Bangla Medical College, Barisal Sadar, Mukto Akash
+2. **Wire into `src/pages/booking/ProviderProfile.tsx`**
+   - Render `<SimilarDoctors />` below the existing profile content, above the footer area.
+   - Pass `providerData.specialty`, `providerData.city/area`, and the route `id`.
 
-**Mymensingh (~8)**
-- Mymensingh Medical College, Community Based Medical College, Swadesh Hospital
+3. **Navigation behavior**
+   - Card "View →" / whole-card click calls `setProvider(newId, newProviderData)` from `BookingContext` and `navigate(\`/booking/provider/\${newId}\`)`.
+   - `useEffect` in `ProviderProfile` already refetches on `id` change, so the page swaps cleanly.
 
-**Rangpur (~8)**
-- Rangpur Medical College, Prime Medical, Rangpur Community Medical
+4. **Performance**
+   - Single query for candidate doctors, then a batched query for `availability_dates` across all candidate ids (`provider_id IN (...)`) for the next 30 days — avoids N+1.
+   - Memoize the computed "next slot" map.
 
-**Comilla / others (~7)**
-- Comilla Medical College, Moon Hospital, Trust Medical Cumilla, Bogura Mohammad Ali Hospital, Jashore Sadar, Faridpur Medical College
+5. **No DB schema changes** — uses existing `providers_public`, `availability_dates`, `availability_slots`, and `appointments` tables.
 
-### Specialty breadth
+## Out of Scope
 
-Cardiology, Cardiac Surgery, Neurology, Neurosurgery, Oncology, Hematology, Gastroenterology, Hepatology, Endocrinology, Nephrology, Urology, Orthopedics, Rheumatology, ENT, Ophthalmology, Dermatology, Plastic Surgery, Psychiatry, Pediatrics, Neonatology, Gynecology & Obstetrics, Pulmonology, General Surgery, General Medicine, Vascular Surgery, Colorectal Surgery, Dentistry.
-
-### Row content (per doctor)
-
-`name`, `specialty`, `qualifications`, `hospital_name`, `chamber_address`, `city`, `area`, `office_hours`, `phone`, `bio` (2–3 lines), `years_experience`, `slug` (auto via `lower(regexp_replace(name,...))`), `is_featured = false` (we already featured top 10), `is_active = true`. `consultation_fee` left NULL (UI hides it anyway).
-
-### Safety
-
-- Uses `ON CONFLICT (slug) DO NOTHING` so re-runs are idempotent and won't duplicate previously seeded doctors.
-- All data is from publicly listed chamber directories (hospital websites, public listings). No private contact info beyond publicly advertised chamber numbers.
-
-## What I'm NOT doing in this step
-
-- No per-doctor profile pages (`/doctor-directory/[slug]`) — happy to do that as a follow-up; it would give the biggest additional SEO lift.
-- No schema changes.
-- No edits to `DoctorDirectory.tsx`, `seo.ts`, or `sitemap.xml`.
-- No changes to `/doctors` (bookable providers).
+- Adding directory_doctors (info-only) to suggestions.
+- Filter UI (specialty/city pickers) on the similar list.
+- Showing similar doctors anywhere other than the provider profile page.
