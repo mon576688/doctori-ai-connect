@@ -9,6 +9,7 @@ import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { calculateDistance, formatPrice } from '@/lib/bookingUtils';
 import { BookingProgress } from '@/components/booking/BookingProgress';
+import { SimilarDoctors } from '@/components/booking/SimilarDoctors';
 import { toast } from 'sonner';
 import { SEO } from '@/components/SEO';
 import { PAGE_SEO } from '@/lib/seo';
@@ -368,6 +369,16 @@ export default function ProviderList() {
                 </CardFooter>
               </Card>
             ))}
+          </div>
+        )}
+
+        {providerType !== 'hospital' && providers.length > 0 && (
+          <div className="mt-12">
+            <SimilarDoctors
+              currentDoctorId={providers[0].id}
+              specialty={providers[0].specialty}
+              city={city}
+            />
           </div>
         )}
       </div>
