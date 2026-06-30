@@ -1,73 +1,28 @@
 ## Goal
 
-On the provider booking page (`/booking/provider/:id`), add a **Similar Doctors** section that helps users find an alternative when the current doctor's schedule doesn't fit. Each suggested card shows the doctor's next available appointment slot so users can quickly pick someone else.
+Surface the existing `SimilarDoctors` component in two more places in the booking flow, in addition to where it already lives.
 
-## Scope
+## Where it will appear
 
-- Source: **bookable providers only** (live `providers_public` view / `doctors` + `profiles` data already used in booking).
-- Match: **same specialty** + **same city** as the current doctor (area preferred when available, otherwise city-wide).
-- Exclude the currently viewed doctor.
-- Limit: up to **6 similar doctors**, ordered by soonest next-available slot, then rating, then experience.
-- Card shows: photo, name, specialty, city/area, rating, and **"Next available: <day, date, time>"** badge.
-- Clicking a card navigates to that doctor's booking provider profile (same route, new id) and resets the relevant booking context to that doctor.
+1. **Provider Profile** (`/booking/provider/:id`) — already in place, no change.
+2. **Time Select** (`/booking/time/:id`) — new. Rendered below the time-slot grid so users who can't find a suitable time can switch to a similar doctor.
+3. **Doctor List** (`/booking/providers`) — new. Rendered at the bottom of the list, only when the user has at least one provider in view (uses the first/top provider as the reference for "similar to").
 
-## UX
+## Behavior per page
 
-```text
-┌──────────────────────────────────────────────────────────────┐
-│ Current Doctor Profile (existing content)                    │
-│ ... bio, schedule, Book Appointment CTA ...                  │
-└──────────────────────────────────────────────────────────────┘
+- **Time Select**: pass `currentDoctorId`, `specialty`, and `city` from the currently selected provider (already loaded in `BookingContext` / page state). Heading: "Other doctors you can book".
+- **Doctor List**: pass the top-listed provider's `id`, `specialty`, and the selected `city` from `BookingContext`. Heading: "Similar doctors nearby". Hidden when the list is empty or still loading.
+- Clicking a card uses the existing `setProvider()` + `navigate('/booking/provider/:id')` behavior already implemented inside `SimilarDoctors`.
 
-── Similar Doctors ─────────────────────────────────────────────
-Same specialty in <City>. Different schedules so you can find a
-time that works.
+## Technical notes
 
-┌────────────┐ ┌────────────┐ ┌────────────┐
-│  [photo]   │ │  [photo]   │ │  [photo]   │
-│ Dr. Name   │ │ Dr. Name   │ │ Dr. Name   │
-│ Cardiology │ │ Cardiology │ │ Cardiology │
-│ Dhaka·Gulshan│ │ Dhaka·Banani│ │ Dhaka·Uttara│
-│ ★ 4.8 · 12y│ │ ★ 4.6 · 9y │ │ ★ 4.9 · 18y│
-│ ─────────  │ │ ─────────  │ │ ─────────  │
-│ Next: Tue, │ │ Next: Wed, │ │ Next:      │
-│ 3:00 PM    │ │ 10:30 AM   │ │ Today 6 PM │
-│ [View →]   │ │ [View →]   │ │ [View →]   │
-└────────────┘ └────────────┘ └────────────┘
-```
+- No new component or DB work — reuse `src/components/booking/SimilarDoctors.tsx` as-is.
+- Edit `src/pages/booking/TimeSelect.tsx`: import `SimilarDoctors`, render it after the time-slot section using the page's existing provider data.
+- Edit `src/pages/booking/ProviderList.tsx`: import `SimilarDoctors`, render it after the provider grid using the first provider in the result set as the reference.
+- No changes to `BookingContext`, routes, or the component's props/queries.
 
-- Horizontal scroll on mobile; 3-up grid on desktop.
-- If no similar doctors found, hide the section entirely (no empty state).
-- If a similar doctor has no future availability in the next 30 days, show **"Schedule on request"** instead of a date.
+## Out of scope
 
-## Technical Implementation
-
-1. **New component** `src/components/booking/SimilarDoctors.tsx`
-   - Props: `currentDoctorId`, `specialty`, `city`, `area?`.
-   - Fetches similar providers from `providers_public` (same source used in `ProviderList`) filtered by specialty + city, excluding `currentDoctorId`, limit 12 (oversample so we can rank by next slot).
-   - For each candidate, compute next available slot by querying:
-     - `availability_dates` for the next 30 days where `is_available = true AND is_booked = false`, take earliest.
-     - Fallback to `availability_slots` (recurring weekly) → derive the next matching weekday + earliest hour, then exclude already-booked `appointments` on that date.
-   - Sort candidates by next-slot timestamp ascending; secondary sort by rating desc, then experience desc.
-   - Slice to top 6.
-   - Renders a horizontally scrollable list of cards using existing shadcn `Card` + `Badge` components and the project's medical-blue accent.
-
-2. **Wire into `src/pages/booking/ProviderProfile.tsx`**
-   - Render `<SimilarDoctors />` below the existing profile content, above the footer area.
-   - Pass `providerData.specialty`, `providerData.city/area`, and the route `id`.
-
-3. **Navigation behavior**
-   - Card "View →" / whole-card click calls `setProvider(newId, newProviderData)` from `BookingContext` and `navigate(\`/booking/provider/\${newId}\`)`.
-   - `useEffect` in `ProviderProfile` already refetches on `id` change, so the page swaps cleanly.
-
-4. **Performance**
-   - Single query for candidate doctors, then a batched query for `availability_dates` across all candidate ids (`provider_id IN (...)`) for the next 30 days — avoids N+1.
-   - Memoize the computed "next slot" map.
-
-5. **No DB schema changes** — uses existing `providers_public`, `availability_dates`, `availability_slots`, and `appointments` tables.
-
-## Out of Scope
-
-- Adding directory_doctors (info-only) to suggestions.
-- Filter UI (specialty/city pickers) on the similar list.
-- Showing similar doctors anywhere other than the provider profile page.
+- Date Select page (not requested).
+- Filter UI or new matching criteria.
+- Any styling changes to the `SimilarDoctors` card itself.
