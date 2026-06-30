@@ -7,6 +7,7 @@ import { useBooking } from '@/contexts/BookingContext';
 import { supabase } from '@/integrations/supabase/client';
 import { groupTimeSlots } from '@/lib/bookingUtils';
 import { BookingProgress } from '@/components/booking/BookingProgress';
+import { SimilarDoctors } from '@/components/booking/SimilarDoctors';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -252,6 +253,15 @@ export default function TimeSelect() {
             )}
           </CardContent>
         </Card>
+        {providerData && (
+          <div className="mt-8">
+            <SimilarDoctors
+              currentDoctorId={id!}
+              specialty={(providerData as any).specialty}
+              city={(providerData as any).city}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
