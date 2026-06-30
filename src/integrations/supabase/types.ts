@@ -748,6 +748,7 @@ export type Database = {
           session_id: string | null
           symptoms: Json
           urgency_score: number | null
+          user_id: string | null
         }
         Insert: {
           assessment_data?: Json | null
@@ -757,6 +758,7 @@ export type Database = {
           session_id?: string | null
           symptoms: Json
           urgency_score?: number | null
+          user_id?: string | null
         }
         Update: {
           assessment_data?: Json | null
@@ -766,6 +768,7 @@ export type Database = {
           session_id?: string | null
           symptoms?: Json
           urgency_score?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {
