@@ -1,28 +1,45 @@
-## Goal
+# Harden Doctori AI Security
 
-Surface the existing `SimilarDoctors` component in two more places in the booking flow, in addition to where it already lives.
+Goal: close remaining gaps beyond the last scan fixes, without changing product behavior.
 
-## Where it will appear
+## 1. Supabase Auth dashboard (user action — I'll link)
+- Enable **leaked password protection**
+- Shorten **OTP expiry** to 10 min
+- Schedule **Postgres upgrade** to latest
+- Enforce **min password length 10** + require mixed chars
+- Restrict **Site URL + Redirect URLs** to `doctoriai.com`, `www.doctoriai.com`, `doctoriai.lovable.app` only
 
-1. **Provider Profile** (`/booking/provider/:id`) — already in place, no change.
-2. **Time Select** (`/booking/time/:id`) — new. Rendered below the time-slot grid so users who can't find a suitable time can switch to a similar doctor.
-3. **Doctor List** (`/booking/providers`) — new. Rendered at the bottom of the list, only when the user has at least one provider in view (uses the first/top provider as the reference for "similar to").
+## 2. Edge functions
+- Add per-IP rate limiting (reuse `check_rate_limit` RPC) to: `ai-chat-assistant`, `send-email`, `analyze-medical`, `medicine-lookup`, `drug-interaction-checker`, `search-providers`
+- Enforce max body size (reject >100 KB) on all functions
+- Ensure every function returns `corsHeaders` on error paths (audit pass)
+- Log auth failures to `audit_logs` via a helper
 
-## Behavior per page
+## 3. Database / RLS audit
+- Re-run linter and confirm no `USING (true)` policies remain
+- Add explicit `REVOKE ALL ... FROM anon` on any table without public read
+- Add trigger to block privilege escalation on `user_roles` (already partially covered — verify)
+- Tighten `activity_logs` / `audit_logs` so only admins can SELECT
 
-- **Time Select**: pass `currentDoctorId`, `specialty`, and `city` from the currently selected provider (already loaded in `BookingContext` / page state). Heading: "Other doctors you can book".
-- **Doctor List**: pass the top-listed provider's `id`, `specialty`, and the selected `city` from `BookingContext`. Heading: "Similar doctors nearby". Hidden when the list is empty or still loading.
-- Clicking a card uses the existing `setProvider()` + `navigate('/booking/provider/:id')` behavior already implemented inside `SimilarDoctors`.
+## 4. Frontend hardening
+- Add **Content Security Policy** meta tag in `index.html` (script-src self + Supabase + Lovable AI + Jitsi; frame-src Jitsi; connect-src Supabase)
+- Add `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` via meta where supported
+- Sanitize any `dangerouslySetInnerHTML` usage (audit — likely none)
+- Ensure Zod validation on every public form (contact, newsletter, register, blood donor, review)
 
-## Technical notes
+## 5. Storage buckets
+- Confirm `medical-records`, `chat-pdfs`, `provider-docs` have signed-URL-only access, no public listing
+- Add file-type + size validation on upload paths (10 MB, PDF/JPG/PNG/DOCX only)
 
-- No new component or DB work — reuse `src/components/booking/SimilarDoctors.tsx` as-is.
-- Edit `src/pages/booking/TimeSelect.tsx`: import `SimilarDoctors`, render it after the time-slot section using the page's existing provider data.
-- Edit `src/pages/booking/ProviderList.tsx`: import `SimilarDoctors`, render it after the provider grid using the first provider in the result set as the reference.
-- No changes to `BookingContext`, routes, or the component's props/queries.
+## 6. Monitoring
+- Add a simple `security_events` table + trigger to record failed admin RPC calls and role changes
+- Surface recent security events in Admin Dashboard
 
 ## Out of scope
+- WAF/CDN-level protection (Lovable hosting-managed)
+- 2FA (separate feature request — ask if wanted)
 
-- Date Select page (not requested).
-- Filter UI or new matching criteria.
-- Any styling changes to the `SimilarDoctors` card itself.
+## Technical notes
+- Rate limit: wrap each edge function entry with `check_rate_limit(ip, 'fn-name', 30, 15)` returning 429 on false
+- CSP: start report-only via meta, tighten after 1 week of console review
+- Migrations gated on user approval per platform rules
