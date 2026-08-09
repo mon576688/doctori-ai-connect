@@ -1234,6 +1234,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Government Hospital Ambulance Services — information directory only */}
+      <GovernmentAmbulanceSection />
       </div>
     </div>
   );
