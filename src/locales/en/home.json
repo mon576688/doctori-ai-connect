@@ -199,5 +199,18 @@
     "noCreditCard": "No credit card required",
     "medicalGradeSecurity": "Medical-Grade Security",
     "available247": "24/7 available"
+  },
+  "ambulance": {
+    "badge": "Information Directory",
+    "title": "Government Hospital Ambulance Services",
+    "subtitle": "Find ambulance contact information for government hospitals and healthcare facilities. Contact the hospital directly to check ambulance availability and service details.",
+    "disclaimer": "DoctoriAI does not provide or dispatch ambulances. The information shown here is provided for informational purposes. Ambulance availability, fees, and response times may vary. Please contact the hospital directly for assistance.",
+    "empty": "Verified government ambulance contacts are being added.",
+    "facilityLabel": "Government Healthcare Facility",
+    "contactLabel": "Ambulance Contact:",
+    "call": "Call Ambulance",
+    "callAria": "Call ambulance at {{hospital}}",
+    "emergencyTitle": "Emergency Notice",
+    "emergencyNotice": "For a medical emergency, contact the appropriate emergency service or the hospital directly. DoctoriAI does not dispatch ambulances or provide emergency transportation."
   }
 }
