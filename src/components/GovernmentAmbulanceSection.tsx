@@ -27,12 +27,14 @@ export const GovernmentAmbulanceSection = () => {
             id="government-ambulance-heading"
             className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4"
           >
-            {t("ambulance.title", { defaultValue: "Government Hospital Ambulance Services" })}
+            {t("ambulance.title", {
+              defaultValue: "Government Hospital Emergency & Ambulance Contacts",
+            })}
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground">
             {t("ambulance.subtitle", {
               defaultValue:
-                "Find ambulance contact information for government hospitals and healthcare facilities. Contact the hospital directly to check ambulance availability and service details.",
+                "Contact the hospital directly to ask about ambulance availability. DoctoriAI does not operate or dispatch ambulances. Contact information may change, so please verify availability with the hospital.",
             })}
           </p>
         </div>
@@ -44,7 +46,7 @@ export const GovernmentAmbulanceSection = () => {
             <span>
               {t("ambulance.disclaimer", {
                 defaultValue:
-                  "DoctoriAI does not provide or dispatch ambulances. The information shown here is provided for informational purposes. Ambulance availability, fees, and response times may vary. Please contact the hospital directly for assistance.",
+                  "DoctoriAI does not provide or dispatch ambulances. The information shown here is publicly available government hospital contact information, provided for informational purposes only. Numbers are general hospital, emergency or help desk lines and are not guaranteed to be dedicated ambulance lines. Availability, fees, and response times may vary. Please contact the hospital directly for assistance.",
               })}
             </span>
           </p>
@@ -59,7 +61,7 @@ export const GovernmentAmbulanceSection = () => {
         ) : (
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto list-none">
             {governmentAmbulances.map((item) => (
-              <li key={`${item.hospitalName}-${item.ambulanceContact}`}>
+              <li key={item.hospitalName}>
                 <Card className="h-full border-border bg-card shadow-card">
                   <CardContent className="p-5 flex flex-col h-full">
                     <div className="inline-flex items-center gap-1.5 self-start rounded-md bg-primary/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary mb-3">
@@ -83,23 +85,43 @@ export const GovernmentAmbulanceSection = () => {
                     )}
 
                     <div className="mt-auto">
-                      <p className="text-xs font-medium text-muted-foreground mb-1">
-                        {t("ambulance.contactLabel", { defaultValue: "Ambulance Contact:" })}
-                      </p>
-                      <p className="text-xl font-bold tracking-tight mb-4 break-words">
-                        {item.ambulanceContact}
-                      </p>
+                      <ul className="space-y-2 mb-4 list-none">
+                        {item.contacts.map((contact) => (
+                          <li key={contact.number} className="flex items-start gap-2">
+                            {contact.label.toLowerCase().includes("emergency") ? (
+                              <Ambulance
+                                className="h-4 w-4 mt-1 shrink-0 text-primary"
+                                aria-hidden="true"
+                              />
+                            ) : (
+                              <Phone
+                                className="h-4 w-4 mt-1 shrink-0 text-muted-foreground"
+                                aria-hidden="true"
+                              />
+                            )}
+                            <span className="text-sm">
+                              <span className="text-muted-foreground">{contact.label}: </span>
+                              <a
+                                href={toTelHref(contact.number)}
+                                className="font-semibold tracking-tight break-words hover:underline"
+                              >
+                                {contact.number}
+                              </a>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
 
                       <Button asChild variant="medical" className="w-full h-12 text-base">
                         <a
-                          href={toTelHref(item.ambulanceContact)}
+                          href={toTelHref(item.contacts[0].number)}
                           aria-label={t("ambulance.callAria", {
-                            defaultValue: `Call ambulance at ${item.hospitalName}`,
+                            defaultValue: `Call ${item.hospitalName}`,
                             hospital: item.hospitalName,
                           })}
                         >
                           <Phone className="mr-2 h-5 w-5" aria-hidden="true" />
-                          {t("ambulance.call", { defaultValue: "Call Ambulance" })}
+                          {t("ambulance.call", { defaultValue: "Call Hospital" })}
                         </a>
                       </Button>
                     </div>

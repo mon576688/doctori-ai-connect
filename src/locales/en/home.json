@@ -202,14 +202,13 @@
   },
   "ambulance": {
     "badge": "Information Directory",
-    "title": "Government Hospital Ambulance Services",
-    "subtitle": "Find ambulance contact information for government hospitals and healthcare facilities. Contact the hospital directly to check ambulance availability and service details.",
-    "disclaimer": "DoctoriAI does not provide or dispatch ambulances. The information shown here is provided for informational purposes. Ambulance availability, fees, and response times may vary. Please contact the hospital directly for assistance.",
-    "empty": "Verified government ambulance contacts are being added.",
+    "title": "Government Hospital Emergency & Ambulance Contacts",
+    "subtitle": "Contact the hospital directly to ask about ambulance availability. DoctoriAI does not operate or dispatch ambulances. Contact information may change, so please verify availability with the hospital.",
+    "disclaimer": "DoctoriAI does not provide or dispatch ambulances. The information shown here is publicly available government hospital contact information, provided for informational purposes only. Numbers are general hospital, emergency or help desk lines and are not guaranteed to be dedicated ambulance lines. Availability, fees, and response times may vary. Please contact the hospital directly for assistance.",
     "facilityLabel": "Government Healthcare Facility",
-    "contactLabel": "Ambulance Contact:",
-    "call": "Call Ambulance",
-    "callAria": "Call ambulance at {{hospital}}",
+    "call": "Call Hospital",
+    "callAria": "Call {{hospital}}",
+    "empty": "Verified government hospital contacts are being added.",
     "emergencyTitle": "Emergency Notice",
     "emergencyNotice": "For a medical emergency, contact the appropriate emergency service or the hospital directly. DoctoriAI does not dispatch ambulances or provide emergency transportation."
   }
