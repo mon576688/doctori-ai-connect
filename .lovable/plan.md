@@ -1,45 +1,48 @@
-# Harden Doctori AI Security
+# Government Hospital Ambulance Information Section
 
-Goal: close remaining gaps beyond the last scan fixes, without changing product behavior.
+Add an information-only ambulance contact directory at the very end of the homepage, directly above the footer. DoctoriAI is presented purely as the information platform — no booking, no dispatch, no operating claims.
 
-## 1. Supabase Auth dashboard (user action — I'll link)
-- Enable **leaked password protection**
-- Shorten **OTP expiry** to 10 min
-- Schedule **Postgres upgrade** to latest
-- Enforce **min password length 10** + require mixed chars
-- Restrict **Site URL + Redirect URLs** to `doctoriai.com`, `www.doctoriai.com`, `doctoriai.lovable.app` only
+## What gets built
 
-## 2. Edge functions
-- Add per-IP rate limiting (reuse `check_rate_limit` RPC) to: `ai-chat-assistant`, `send-email`, `analyze-medical`, `medicine-lookup`, `drug-interaction-checker`, `search-providers`
-- Enforce max body size (reject >100 KB) on all functions
-- Ensure every function returns `corsHeaders` on error paths (audit pass)
-- Log auth failures to `audit_logs` via a helper
+**1. Reusable data file** — `src/data/governmentAmbulances.ts`
 
-## 3. Database / RLS audit
-- Re-run linter and confirm no `USING (true)` policies remain
-- Add explicit `REVOKE ALL ... FROM anon` on any table without public read
-- Add trigger to block privilege escalation on `user_roles` (already partially covered — verify)
-- Tighten `activity_logs` / `audit_logs` so only admins can SELECT
+A typed array so more facilities can be added later:
 
-## 4. Frontend hardening
-- Add **Content Security Policy** meta tag in `index.html` (script-src self + Supabase + Lovable AI + Jitsi; frame-src Jitsi; connect-src Supabase)
-- Add `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` via meta where supported
-- Sanitize any `dangerouslySetInnerHTML` usage (audit — likely none)
-- Ensure Zod validation on every public form (contact, newsletter, register, blood donor, review)
+```text
+hospitalName | facilityType | location | ambulanceContact
+availability | source | lastVerified
+```
 
-## 5. Storage buckets
-- Confirm `medical-records`, `chat-pdfs`, `provider-docs` have signed-URL-only access, no public listing
-- Add file-type + size validation on upload paths (10 MB, PDF/JPG/PNG/DOCX only)
+- `source` and `lastVerified` are stored but not rendered publicly (source stays internal).
+- Any field that is unknown is omitted from the card rather than guessed — no invented names, numbers, availability, response times, fees, or services.
+- Only government hospitals / government healthcare facilities. No private or third-party ambulance companies.
+- The file ships with only the entries you provide. Until you paste the verified list, it stays empty and the section renders a short neutral line ("Verified government ambulance contacts are being added.") instead of fake cards.
 
-## 6. Monitoring
-- Add a simple `security_events` table + trigger to record failed admin RPC calls and role changes
-- Surface recent security events in Admin Dashboard
+**2. Section component** — `src/components/GovernmentAmbulanceSection.tsx`
 
-## Out of scope
-- WAF/CDN-level protection (Lovable hosting-managed)
-- 2FA (separate feature request — ask if wanted)
+- Heading: Government Hospital Ambulance Services
+- Supporting text: "Find ambulance contact information for government hospitals and healthcare facilities. Contact the hospital directly to check ambulance availability and service details."
+- Disclaimer block (existing standardized highlighter style): "DoctoriAI does not provide or dispatch ambulances..."
+- Cards, each with: "Government Healthcare Facility" label chip, hospital name, location with pin icon, ambulance contact number shown prominently, availability line when known, and a large **Call Ambulance** button wired to `tel:`.
+- Bottom **Emergency Notice**: "For a medical emergency, contact the appropriate emergency service or the hospital directly. DoctoriAI does not dispatch ambulances or provide emergency transportation." Clear and calm, not alarming.
+
+**3. Homepage placement** — `src/pages/Index.tsx`
+
+Inserted after the final CTA section, immediately before the footer. No other homepage section is touched.
+
+## Design
+
+- Semantic design tokens only (no hardcoded colors), matching the clean white / medical-blue system and card + subtle border treatment already used on the homepage.
+- Lucide `Ambulance`, `MapPin`, `Phone`, `ShieldAlert` icons.
+- Mobile-first: single stacked column on small screens, 2–3 columns from `md` up; phone number in a large tap-friendly row; full-width `Call Ambulance` button with a comfortable touch target; disclaimer stays visible above the cards.
+- Accessible contrast, `aria-label` on each call link naming the hospital.
 
 ## Technical notes
-- Rate limit: wrap each edge function entry with `check_rate_limit(ip, 'fn-name', 30, 15)` returning 429 on false
-- CSP: start report-only via meta, tighten after 1 week of console review
-- Migrations gated on user approval per platform rules
+
+- Pure frontend and presentation: one new data file, one new component, one insertion line in `Index.tsx`. No database, no edge function, no booking logic.
+- Phone links normalized to digits/`+` for the `tel:` href while the display string stays as written.
+- English/Bengali: the section uses the existing `home` namespace keys added for headings and notices, so it follows the current language switch.
+
+## What I need from you
+
+Paste the verified list of government hospitals with name, location, ambulance contact number, and (optionally) availability wording. I will seed exactly those entries and nothing more.
