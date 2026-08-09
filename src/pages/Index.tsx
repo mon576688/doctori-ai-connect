@@ -46,6 +46,7 @@ import { SEO } from "@/components/SEO";
 import { PAGE_SEO } from "@/lib/seo";
 import { useTranslation } from "react-i18next";
 import DailyWellnessPractice from "@/components/DailyWellnessPractice";
+import { GovernmentAmbulanceSection } from "@/components/GovernmentAmbulanceSection";
 
 const HeartbeatDivider = () => {
   const filterId = useId();
