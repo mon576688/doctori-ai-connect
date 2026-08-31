@@ -1908,8 +1908,6 @@ export type Database = {
             }
             Returns: string
           }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       verify_admin_access: { Args: never; Returns: boolean }
     }
     Enums: {
