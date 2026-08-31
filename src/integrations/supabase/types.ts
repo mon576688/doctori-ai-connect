@@ -846,6 +846,84 @@ export type Database = {
         }
         Relationships: []
       }
+      medicine_interactions: {
+        Row: {
+          created_at: string
+          generic_a: string
+          generic_b: string
+          id: string
+          note: string
+          severity: string
+        }
+        Insert: {
+          created_at?: string
+          generic_a: string
+          generic_b: string
+          id?: string
+          note: string
+          severity?: string
+        }
+        Update: {
+          created_at?: string
+          generic_a?: string
+          generic_b?: string
+          id?: string
+          note?: string
+          severity?: string
+        }
+        Relationships: []
+      }
+      medicines: {
+        Row: {
+          adult_dose: string | null
+          brand_name: string
+          created_at: string
+          dosage_form: string | null
+          generic_name: string
+          id: string
+          indications: string | null
+          is_active: boolean
+          manufacturer: string | null
+          requires_prescription: boolean
+          side_effects: string | null
+          strength: string | null
+          updated_at: string
+          warnings: string | null
+        }
+        Insert: {
+          adult_dose?: string | null
+          brand_name: string
+          created_at?: string
+          dosage_form?: string | null
+          generic_name: string
+          id?: string
+          indications?: string | null
+          is_active?: boolean
+          manufacturer?: string | null
+          requires_prescription?: boolean
+          side_effects?: string | null
+          strength?: string | null
+          updated_at?: string
+          warnings?: string | null
+        }
+        Update: {
+          adult_dose?: string | null
+          brand_name?: string
+          created_at?: string
+          dosage_form?: string | null
+          generic_name?: string
+          id?: string
+          indications?: string | null
+          is_active?: boolean
+          manufacturer?: string | null
+          requires_prescription?: boolean
+          side_effects?: string | null
+          strength?: string | null
+          updated_at?: string
+          warnings?: string | null
+        }
+        Relationships: []
+      }
       newsletter_subscribers: {
         Row: {
           email: string
@@ -918,6 +996,42 @@ export type Database = {
           },
         ]
       }
+      prescription_templates: {
+        Row: {
+          created_at: string
+          diagnosis: string | null
+          doctor_id: string
+          doctor_notes: string | null
+          id: string
+          medicines: Json
+          name: string
+          specialty_label: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id: string
+          doctor_notes?: string | null
+          id?: string
+          medicines?: Json
+          name: string
+          specialty_label?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          diagnosis?: string | null
+          doctor_id?: string
+          doctor_notes?: string | null
+          id?: string
+          medicines?: Json
+          name?: string
+          specialty_label?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       prescriptions: {
         Row: {
           appointment_id: string | null
@@ -927,12 +1041,14 @@ export type Database = {
           doctor_notes: string | null
           id: string
           image_url: string | null
+          interaction_ack: Json | null
           medicines: Json | null
           patient_id: string
           prescription_type: string
           shared_on_platform: boolean | null
           shared_via_email: boolean | null
           shared_via_whatsapp: boolean | null
+          template_id: string | null
           updated_at: string
         }
         Insert: {
@@ -943,12 +1059,14 @@ export type Database = {
           doctor_notes?: string | null
           id?: string
           image_url?: string | null
+          interaction_ack?: Json | null
           medicines?: Json | null
           patient_id: string
           prescription_type?: string
           shared_on_platform?: boolean | null
           shared_via_email?: boolean | null
           shared_via_whatsapp?: boolean | null
+          template_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -959,12 +1077,14 @@ export type Database = {
           doctor_notes?: string | null
           id?: string
           image_url?: string | null
+          interaction_ack?: Json | null
           medicines?: Json | null
           patient_id?: string
           prescription_type?: string
           shared_on_platform?: boolean | null
           shared_via_email?: boolean | null
           shared_via_whatsapp?: boolean | null
+          template_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1751,6 +1871,21 @@ export type Database = {
         Args: { _action: string; _metadata?: Json }
         Returns: undefined
       }
+      search_medicines: {
+        Args: { _q: string }
+        Returns: {
+          adult_dose: string
+          brand_name: string
+          dosage_form: string
+          generic_name: string
+          id: string
+          indications: string
+          manufacturer: string
+          side_effects: string
+          strength: string
+          warnings: string
+        }[]
+      }
       send_notification:
         | {
             Args: {
@@ -1773,6 +1908,8 @@ export type Database = {
             }
             Returns: string
           }
+      show_limit: { Args: never; Returns: number }
+      show_trgm: { Args: { "": string }; Returns: string[] }
       verify_admin_access: { Args: never; Returns: boolean }
     }
     Enums: {
